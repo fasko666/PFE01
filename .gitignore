@@ -1,0 +1,27 @@
+# WhatsApp images and other media
+*.jpeg
+*.jpg
+*.png
+*.gif
+*.mp4
+
+# Demo files
+freenest-demo.html
+
+# Sensitive / local files
+.env
+.env.*
+!.env.example
+!frontend-react/.env.example
+!backend-laravel/.env.example
+
+# History files (VS Code extension)
+.history/
+
+# Claude Code config
+.claude/
+
+# Misc
+panda
+.DS_Store
+Thumbs.db

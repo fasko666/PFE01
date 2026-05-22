@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────
+   DARK-* PALETTE  (CSS variables — inverted per theme)
+
+   Dark mode  →  dark-950 = near-black,  dark-100 = near-white
+   Light mode →  dark-950 = white,       dark-100 = near-black
+
+   Every component that uses bg-dark-*, text-dark-*, border-dark-*
+   automatically switches — no per-component changes needed.
+   ───────────────────────────────────────────────────────── */
+
+/* ── DARK MODE  (html.dark) ── */
+html.dark {
+  --c-dark-50:  248 249 250;   /* near white  */
+  --c-dark-100: 241 243 244;
+  --c-dark-200: 232 234 237;
+  --c-dark-300: 218 220 224;
+  --c-dark-400: 189 193 198;
+  --c-dark-500: 128 134 139;   /* mid grey    */
+  --c-dark-600: 95  99  104;
+  --c-dark-700: 60  64  67;
+  --c-dark-800: 32  33  36;
+  --c-dark-900: 23  23  23;
+  --c-dark-950: 10  10  10;    /* near black  */
+
+  color-scheme: dark;
+}
+
+/* ── LIGHT MODE  (:root / no .dark class) ── */
+:root {
+  --c-dark-50:  15  23  42;    /* near black  */
+  --c-dark-100: 30  41  59;
+  --c-dark-200: 51  65  85;
+  --c-dark-300: 71  85  105;
+  --c-dark-400: 100 116 139;
+  --c-dark-500: 148 163 184;   /* mid grey    */
+  --c-dark-600: 203 213 225;
+  --c-dark-700: 226 232 240;
+  --c-dark-800: 241 245 249;
+  --c-dark-900: 248 250 252;
+  --c-dark-950: 255 255 255;   /* white       */
+
+  color-scheme: light;
+}
+
+/* ─────────────────────────────────────────────────────────
+   BASE LAYER
+   ───────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply font-sans overflow-x-hidden;
+    background-color: rgb(var(--c-dark-950));
+    color: rgb(var(--c-dark-100));
+  }
+
+  /* White text becomes near-black in light mode so it stays readable */
+  html:not(.dark) .text-white { color: rgb(var(--c-dark-100)) !important; }
+
+  /* Cards get a subtle shadow in light mode for visual separation */
+  html:not(.dark) .card, html:not(.dark) .card-hover { box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04); }
+
+  ::-webkit-scrollbar       { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background-color: rgb(var(--c-dark-900)); }
+  ::-webkit-scrollbar-thumb { background-color: rgb(var(--c-dark-700)); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background-color: rgb(var(--c-dark-500)); }
+
+  ::selection { @apply bg-primary-500/30 text-primary-200; }
+}
+
+/* ─────────────────────────────────────────────────────────
+   COMPONENT LAYER  (all use dark-* tokens → auto-themed)
+   ───────────────────────────────────────────────────────── */
+@layer components {
+
+  /* ── Buttons ── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm
+           transition-all duration-200 cursor-pointer whitespace-nowrap select-none
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary   { @apply btn bg-primary-500 text-white hover:bg-primary-600 active:scale-[0.98]; }
+  .btn-secondary { @apply btn bg-dark-800 text-dark-100 border border-dark-700 hover:bg-dark-700; }
+  .btn-ghost     { @apply btn bg-transparent text-dark-400 hover:bg-dark-800 hover:text-dark-100; }
+  .btn-danger    { @apply btn bg-red-500 text-white hover:bg-red-600; }
+  .btn-success   { @apply btn bg-green-600 text-white hover:bg-green-700; }
+  .btn-sm        { @apply px-3 py-1.5 text-xs rounded-lg; }
+  .btn-lg        { @apply px-7 py-3.5 text-base rounded-2xl; }
+  .btn-xl        { @apply px-8 py-4 text-lg rounded-2xl; }
+  .btn-icon      { @apply p-2.5 rounded-xl; }
+
+  /* ── Cards ── */
+  .card         { @apply bg-dark-900 border border-dark-700 rounded-2xl overflow-hidden; }
+  .card-hover   {
+    @apply card transition-all duration-300;
+    &:hover { @apply border-dark-500 -translate-y-px shadow-card-hover; }
+  }
+  .card-glass   { @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden; }
+
+  /* ── Inputs ── */
+  .input {
+    @apply w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl
+           text-dark-100 placeholder:text-dark-500 text-sm
+           transition-all duration-200 focus:outline-none
+           focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30;
+  }
+  .input-label { @apply block text-sm font-medium text-dark-300 mb-1.5; }
+  .input-error { @apply text-xs text-red-400 mt-1; }
+
+  /* ── Badges ── */
+  .badge         { @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium; }
+  .badge-primary { @apply badge bg-primary-500/15 text-primary-400 border border-primary-500/20; }
+  .badge-success { @apply badge bg-green-500/15 text-green-400 border border-green-500/20; }
+  .badge-warning { @apply badge bg-yellow-500/15 text-yellow-400 border border-yellow-500/20; }
+  .badge-danger  { @apply badge bg-red-500/15 text-red-400 border border-red-500/20; }
+  .badge-ghost   { @apply badge bg-dark-800 text-dark-400 border border-dark-700; }
+
+  /* ── Nav ── */
+  .nav-link        { @apply flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-medium text-dark-400 transition-all hover:bg-dark-800 hover:text-dark-100; }
+  .nav-link-active { @apply bg-primary-500/10 text-primary-400 border border-primary-500/20; }
+
+  /* ── Misc ── */
+  .gradient-text    { @apply bg-gradient-to-r from-primary-400 via-purple-400 to-primary-300 bg-clip-text text-transparent; }
+  .glass            { @apply bg-white/5 backdrop-blur-2xl border border-white/10; }
+  .section          { @apply py-20 px-4; }
+  .container-custom { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
+  .page-title       { @apply text-2xl font-bold text-dark-100; }
+  .skeleton         {
+    @apply rounded-lg animate-pulse;
+    background: linear-gradient(90deg, rgb(var(--c-dark-800)), rgb(var(--c-dark-700)), rgb(var(--c-dark-800)));
+    background-size: 200% 100%;
+  }
+  .online-dot { @apply w-2.5 h-2.5 bg-green-400 rounded-full ring-2 ring-dark-900; }
+}
+
+/* ─────────────────────────────────────────────────────────
+   UTILITIES
+   ───────────────────────────────────────────────────────── */
+@layer utilities {
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(128,134,139,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(128,134,139,0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .text-balance { text-wrap: balance; }
+
+  /* Kept for GlobalNavbar / components that still use CSS-var helpers */
+  .theme-bg      { background-color: rgb(var(--c-dark-950)); }
+  .theme-surface { background-color: rgb(var(--c-dark-900)); }
+  .theme-text    { color: rgb(var(--c-dark-100)); }
+  .theme-muted   { color: rgb(var(--c-dark-400)); }
+}
