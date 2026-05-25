@@ -1,5 +1,5 @@
-# Database — allow panda.sqlite at root
-!panda.sqlite
+# Database — allow panda.sql at root
+!panda.sql
 
 # WhatsApp images and other media
 *.jpeg
