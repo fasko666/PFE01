@@ -47,7 +47,7 @@ export default function MyProposals() {
       {/* Header */}
       <motion.div {...fadeUp(0)} className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold font-display text-white tracking-tight">My Proposals</h1>
+          <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">My Proposals</h1>
           <p className="text-sm text-dark-500 mt-1">{proposals.length} proposals submitted</p>
         </div>
         <Link to="/jobs" className="btn btn-primary btn-sm gap-1.5">
@@ -57,13 +57,13 @@ export default function MyProposals() {
       </motion.div>
 
       {/* Filter tabs */}
-      <motion.div {...fadeUp(0.05)} className="flex gap-1 p-1 bg-dark-900 border border-dark-800 rounded-xl w-fit">
+      <motion.div {...fadeUp(0.05)} className="flex gap-1 p-1 card rounded-xl w-fit shadow-sm">
         {TABS.map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
             className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${
-              filter === f ? 'bg-dark-700 text-white shadow-sm' : 'text-dark-400 hover:text-white'
+              filter === f ? 'bg-dark-700 text-dark-100 shadow-sm' : 'text-dark-400 hover:text-dark-100'
             }`}
           >
             {f}

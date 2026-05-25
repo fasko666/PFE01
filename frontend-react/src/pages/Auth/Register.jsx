@@ -13,10 +13,9 @@ import toast from 'react-hot-toast';
 const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace('/api', '');
 
 const inputCls = (err) =>
-  `w-full px-4 py-3.5 rounded-xl text-sm text-gray-900 placeholder-gray-400 transition-all outline-none ${
-    err
-      ? 'bg-red-50 border border-red-300 focus:border-red-400 focus:ring-2 focus:ring-red-100'
-      : 'bg-gray-100 border border-transparent focus:bg-white focus:border-gray-800 focus:ring-2 focus:ring-gray-900/8'
+  `input ${err
+    ? 'border-red-500/60 bg-red-500/5 focus:border-red-400 focus:ring-red-500/20'
+    : ''
   }`;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -184,8 +183,8 @@ export default function Register() {
         {step === 1 && (
           <motion.div key="role" {...slideProps(1)} className="space-y-6">
             <div className="text-center">
-              <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Join PANDA</h1>
-              <p className="text-gray-500 text-sm mt-1">Choose how you want to get started</p>
+              <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">Join PANDA</h1>
+              <p className="text-dark-500 text-sm mt-1">Choose how you want to get started</p>
             </div>
 
             {/* Google sign-up */}
@@ -199,13 +198,10 @@ export default function Register() {
               Sign up with Google
             </motion.button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-dark-700" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-white px-3 text-xs text-dark-400 font-medium">or choose your role</span>
-              </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-dark-700/60" />
+              <span className="text-xs text-dark-500 font-medium">or choose your role</span>
+              <div className="flex-1 h-px bg-dark-700/60" />
             </div>
 
             <div className="space-y-3">
@@ -215,23 +211,23 @@ export default function Register() {
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => { update('role', r.value); setStep(2); }}
-                  className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-gray-200 bg-white hover:border-gray-900 hover:bg-gray-50 text-left transition-all group"
+                  className="w-full flex items-center gap-4 p-5 rounded-2xl border border-dark-700 bg-dark-900 hover:border-primary-500/40 hover:bg-dark-800 text-left transition-all group"
                 >
-                  <div className="shrink-0 p-2.5 rounded-xl bg-gray-100 group-hover:bg-gray-900 text-gray-500 group-hover:text-white transition-all">
+                  <div className="shrink-0 p-2.5 rounded-xl bg-dark-800 group-hover:bg-primary-500/15 text-dark-400 group-hover:text-primary-400 transition-all border border-dark-700 group-hover:border-primary-500/30">
                     {r.icon}
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900 text-sm">{r.title}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{r.sub}</p>
+                    <p className="font-semibold text-dark-100 text-sm">{r.title}</p>
+                    <p className="text-xs text-dark-500 mt-0.5">{r.sub}</p>
                   </div>
-                  <div className="w-5 h-5 rounded-full border-2 border-gray-300 group-hover:border-gray-900 shrink-0 transition-all flex items-center justify-center" />
+                  <div className="w-5 h-5 rounded-full border-2 border-dark-600 group-hover:border-primary-400 shrink-0 transition-all flex items-center justify-center" />
                 </motion.button>
               ))}
             </div>
 
-            <p className="text-center text-sm text-gray-500">
+            <p className="text-center text-sm text-dark-500">
               Already have an account?{' '}
-              <Link to="/login" className="text-gray-900 font-bold hover:underline">Log in</Link>
+              <Link to="/login" className="text-dark-200 font-bold hover:text-dark-100 transition-colors">Log in</Link>
             </p>
           </motion.div>
         )}
@@ -249,12 +245,12 @@ export default function Register() {
                 <ArrowLeft className="w-4 h-4" strokeWidth={2} />
               </button>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">
+                <h1 className="text-xl font-bold font-display text-dark-100">
                   {form.role === 'client' ? 'Hire great talent' : 'Start earning today'}
                 </h1>
-                <p className="text-gray-400 text-xs mt-0.5">
+                <p className="text-dark-500 text-xs mt-0.5">
                   Create your PANDA account as{' '}
-                  <span className="font-semibold text-gray-700 capitalize">{form.role}</span>
+                  <span className="font-semibold text-dark-300 capitalize">{form.role}</span>
                 </p>
               </div>
             </div>

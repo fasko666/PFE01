@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../api';
 import useAuthStore from '../../store/authStore';
+import UserAvatar from '../../components/ui/UserAvatar';
 import toast from 'react-hot-toast';
 
 const getNav = (role) => [
@@ -57,7 +58,7 @@ function Toggle({ checked, onChange }) {
 function SectionHeader({ title, desc }) {
   return (
     <div className="pb-4 border-b border-dark-800">
-      <h2 className="font-semibold text-white text-base">{title}</h2>
+      <h2 className="font-semibold text-dark-100 text-base">{title}</h2>
       {desc && <p className="text-sm text-dark-500 mt-0.5">{desc}</p>}
     </div>
   );
@@ -236,7 +237,7 @@ export default function FreelancerSettings() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-display text-white tracking-tight">Settings</h1>
+        <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">Settings</h1>
         <p className="text-sm text-dark-500 mt-1">Manage your account preferences</p>
       </div>
 
@@ -257,8 +258,8 @@ export default function FreelancerSettings() {
                       onClick={() => setActiveKey(item.key)}
                       className={`w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                         activeKey === item.key
-                          ? 'bg-dark-800 text-white'
-                          : 'text-dark-400 hover:text-dark-200 hover:bg-dark-800/50'
+                          ? 'bg-primary-500/10 text-primary-400 border border-primary-500/20'
+                          : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/50 border border-transparent'
                       }`}
                     >
                       <Icon className={`w-3.5 h-3.5 shrink-0 ${activeKey === item.key ? 'text-primary-400' : 'text-dark-600'}`} strokeWidth={activeKey === item.key ? 2 : 1.75} />
@@ -280,7 +281,7 @@ export default function FreelancerSettings() {
               <div className="card p-6 space-y-5">
                 <SectionHeader title="Contact Info" desc="Update your personal contact information" />
                 <div className="flex items-center gap-4">
-                  <img src={avatar} alt={user?.name} className="w-14 h-14 rounded-2xl ring-2 ring-dark-700 object-cover" />
+                  <UserAvatar user={user} size={56} className="!rounded-2xl ring-2 ring-dark-700" />
                   <div>
                     <p className="font-semibold text-white">{user?.name}</p>
                     <p className="text-sm text-dark-500 capitalize">{user?.role} Â· {user?.email}</p>

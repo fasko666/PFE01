@@ -288,12 +288,18 @@ class AuthController extends Controller
     private function highResGoogleAvatar(?string $url): ?string
     {
         if (!$url) return null;
-        // Replace sz=XX or =sXX-c with =s200-c for a 200px high-res version
+
+        // Strip ?sz= / &sz= query suffixes (Google's CDN ignores them anyway).
         $url = preg_replace('/[?&]sz=\d+/', '', $url);
-        $url = preg_replace('/=s\d+-c/', '=s200-c', $url);
-        if (!str_contains($url, '=s200-c')) {
-            $url .= (str_contains($url, '?') ? '&' : '?') . 'sz=200';
+
+        // If URL already has =sN-c (or =sN), normalize it to =s200-c.
+        if (preg_match('/=s\d+(-c)?$/', $url)) {
+            $url = preg_replace('/=s\d+(-c)?$/', '=s200-c', $url);
+        } else {
+            // Otherwise append the path-style size suffix Google actually respects.
+            $url .= '=s200-c';
         }
+
         return $url;
     }
 

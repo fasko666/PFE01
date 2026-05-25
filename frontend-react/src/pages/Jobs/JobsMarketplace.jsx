@@ -113,7 +113,7 @@ export default function JobsMarketplace() {
     <div className="max-w-6xl mx-auto space-y-5">
       {/* Header */}
       <motion.div {...fadeUp(0)}>
-        <h1 className="text-2xl font-bold font-display text-white tracking-tight">Find Work</h1>
+        <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">Find Work</h1>
         <p className="text-sm text-dark-500 mt-1">Browse {meta.total || 0} available opportunities</p>
       </motion.div>
 
@@ -142,7 +142,7 @@ export default function JobsMarketplace() {
             <p className="text-2xs font-semibold text-dark-500 uppercase tracking-widest mb-2 px-1">Category</p>
             <button
               onClick={() => updateFilter('category_id', '')}
-              className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${!filters.category_id ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-white hover:bg-dark-800'}`}
+              className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${!filters.category_id ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'}`}
             >
               All Categories
             </button>
@@ -150,7 +150,7 @@ export default function JobsMarketplace() {
               <button
                 key={c.id}
                 onClick={() => updateFilter('category_id', c.id)}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${filters.category_id == c.id ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-white hover:bg-dark-800'}`}
+                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${filters.category_id == c.id ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'}`}
               >
                 {c.name}
               </button>
@@ -164,7 +164,7 @@ export default function JobsMarketplace() {
               <button
                 key={o.v}
                 onClick={() => updateFilter('job_type', o.v)}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${filters.job_type === o.v ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-white hover:bg-dark-800'}`}
+                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${filters.job_type === o.v ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'}`}
               >
                 {o.l}
               </button>
@@ -178,7 +178,7 @@ export default function JobsMarketplace() {
               <button
                 key={o.v}
                 onClick={() => updateFilter('experience_level', o.v)}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${filters.experience_level === o.v ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-white hover:bg-dark-800'}`}
+                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${filters.experience_level === o.v ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'}`}
               >
                 {o.l}
               </button>
@@ -221,7 +221,7 @@ export default function JobsMarketplace() {
             <div className="relative">
               <button
                 onClick={() => setSortOpen((v) => !v)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-dark-800 border border-dark-700 rounded-xl text-sm text-dark-300 hover:border-dark-600 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 bg-dark-900 border border-dark-700 rounded-xl text-sm text-dark-300 hover:border-dark-600 hover:bg-dark-800/70 transition-colors"
               >
                 {selectedSort?.label}
                 <ChevronDown className={`w-3 h-3 text-dark-500 transition-transform ${sortOpen ? 'rotate-180' : ''}`} />
@@ -233,7 +233,7 @@ export default function JobsMarketplace() {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -4 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute right-0 top-full mt-1 w-44 bg-dark-900 border border-dark-800 rounded-xl shadow-float z-10 overflow-hidden"
+                    className="absolute right-0 top-full mt-1 w-44 card shadow-float z-10 overflow-hidden"
                   >
                     {SORT_OPTIONS.map((o) => (
                       <button

@@ -79,7 +79,7 @@ export default function FreelancerMarketplace() {
     <div className="max-w-6xl mx-auto space-y-5">
       {/* Header */}
       <motion.div {...fadeUp(0)}>
-        <h1 className="text-2xl font-bold font-display text-white tracking-tight">Find Talent</h1>
+        <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">Find Talent</h1>
         <p className="text-sm text-dark-500 mt-1">Discover {meta.total || 0}+ skilled freelancers</p>
       </motion.div>
 
@@ -115,7 +115,7 @@ export default function FreelancerMarketplace() {
         <select
           value={filters.experience_level}
           onChange={(e) => update('experience_level', e.target.value)}
-          className="input input-sm w-auto text-sm"
+          className="input input-sm w-auto"
         >
           <option value="">All Levels</option>
           <option value="entry">Entry</option>
@@ -128,7 +128,7 @@ export default function FreelancerMarketplace() {
             type="number"
             value={filters.min_rate}
             onChange={(e) => update('min_rate', e.target.value)}
-            className="input input-sm w-24 text-sm pl-6"
+            className="input input-sm w-24 pl-6"
             placeholder="Min/hr"
           />
         </div>
@@ -138,7 +138,7 @@ export default function FreelancerMarketplace() {
             type="number"
             value={filters.max_rate}
             onChange={(e) => update('max_rate', e.target.value)}
-            className="input input-sm w-24 text-sm pl-6"
+            className="input input-sm w-24 pl-6"
             placeholder="Max/hr"
           />
         </div>
@@ -147,7 +147,7 @@ export default function FreelancerMarketplace() {
           <input
             value={filters.country}
             onChange={(e) => update('country', e.target.value)}
-            className="input input-sm w-32 text-sm pl-7"
+            className="input input-sm w-32 pl-7"
             placeholder="Country"
           />
         </div>
@@ -194,7 +194,7 @@ export default function FreelancerMarketplace() {
           <div className="w-16 h-16 rounded-2xl bg-dark-800 border border-dark-700/50 flex items-center justify-center mx-auto mb-5">
             <Users className="w-7 h-7 text-dark-600" strokeWidth={1.5} />
           </div>
-          <h3 className="text-base font-semibold text-white mb-2">No freelancers found</h3>
+          <h3 className="text-base font-semibold text-dark-100 mb-2">No freelancers found</h3>
           <p className="text-sm text-dark-500">Try adjusting your search filters</p>
         </motion.div>
       ) : (
@@ -223,7 +223,7 @@ export default function FreelancerMarketplace() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <h3 className="font-semibold text-white text-sm truncate group-hover:text-primary-300 transition-colors">{f.name}</h3>
+                      <h3 className="font-semibold text-dark-100 text-sm truncate group-hover:text-primary-400 transition-colors">{f.name}</h3>
                       {f.is_verified && (
                         <span className="w-4 h-4 rounded-full bg-primary-500 flex items-center justify-center shrink-0">
                           <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">

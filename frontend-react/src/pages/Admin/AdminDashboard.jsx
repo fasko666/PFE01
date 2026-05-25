@@ -86,18 +86,18 @@ export default function AdminDashboard() {
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <motion.div {...fadeUp(0)}>
-        <h1 className="text-2xl font-bold font-display text-white tracking-tight">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">Admin Dashboard</h1>
         <p className="text-sm text-dark-500 mt-1">Platform management and analytics</p>
       </motion.div>
 
       {/* Tabs */}
-      <motion.div {...fadeUp(0.05)} className="flex gap-1 p-1 bg-dark-900 border border-dark-800 rounded-xl w-fit">
+      <motion.div {...fadeUp(0.05)} className="flex gap-1 p-1 card rounded-xl w-fit shadow-sm">
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setActiveTab(t)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${
-              activeTab === t ? 'bg-dark-700 text-white shadow-sm' : 'text-dark-400 hover:text-white'
+              activeTab === t ? 'bg-dark-700 text-dark-100 shadow-sm' : 'text-dark-400 hover:text-dark-100'
             }`}
           >
             {t}

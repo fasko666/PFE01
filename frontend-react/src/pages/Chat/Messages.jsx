@@ -4,6 +4,7 @@ import { Search, MoreHorizontal, MessageSquare, Send, ArrowRight } from 'lucide-
 import { Link } from 'react-router-dom';
 import { api } from '../../api';
 import useAuthStore from '../../store/authStore';
+import UserAvatar from '../../components/ui/UserAvatar';
 import toast from 'react-hot-toast';
 
 const TABS = ['All', 'Unread', 'Starred'];
@@ -128,7 +129,7 @@ export default function Messages() {
                   value={searchQ}
                   onChange={(e) => setSearchQ(e.target.value)}
                   placeholder="Search conversations…"
-                  className="w-full px-3 py-1.5 bg-dark-800 border border-dark-700 rounded-lg text-xs text-dark-200 placeholder-dark-600 focus:outline-none focus:border-dark-600 transition-all"
+                  className="input input-sm w-full"
                 />
               </motion.div>
             )}
@@ -141,7 +142,7 @@ export default function Messages() {
                 key={t}
                 onClick={() => setTab(t)}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  tab === t ? 'bg-dark-800 text-white' : 'text-dark-500 hover:text-dark-300'
+                  tab === t ? 'bg-dark-800 text-dark-100' : 'text-dark-500 hover:text-dark-300'
                 }`}
               >
                 {t}
@@ -182,11 +183,7 @@ export default function Messages() {
                     }`}
                   >
                     <div className="relative shrink-0">
-                      <img
-                        src={other.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(other.name || 'U')}&background=4361ff&color=fff&size=64`}
-                        alt={other.name}
-                        className="w-9 h-9 rounded-full object-cover"
-                      />
+                      <UserAvatar user={other} size={36} ring={false} />
                       {other.is_online && (
                         <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-dark-900" />
                       )}
@@ -221,11 +218,7 @@ export default function Messages() {
           {/* Chat header */}
           <div className="h-14 px-5 flex items-center gap-3 border-b border-dark-800 shrink-0 bg-dark-950">
             <div className="relative">
-              <img
-                src={otherUser(active).avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUser(active).name || 'U')}&background=4361ff&color=fff&size=64`}
-                alt={otherUser(active).name}
-                className="w-8 h-8 rounded-full object-cover"
-              />
+              <UserAvatar user={otherUser(active)} size={32} ring={false} />
               {otherUser(active).is_online && (
                 <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 rounded-full border border-dark-950" />
               )}
@@ -266,11 +259,7 @@ export default function Messages() {
                       {!isMine && (
                         <div className="w-6 h-6 shrink-0 mb-0.5">
                           {showAvatar && (
-                            <img
-                              src={otherUser(active).avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUser(active).name || 'U')}&background=4361ff&color=fff&size=32`}
-                              alt=""
-                              className="w-6 h-6 rounded-full object-cover"
-                            />
+                            <UserAvatar user={otherUser(active)} size={24} ring={false} />
                           )}
                         </div>
                       )}

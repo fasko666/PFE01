@@ -10,11 +10,11 @@ import toast from 'react-hot-toast';
 
 /* ── Status config ── */
 const STATUS_BADGE = {
-  open:        { label: 'Open',        cls: 'bg-green-100 text-green-700 border-green-200' },
-  in_progress: { label: 'In Progress', cls: 'bg-blue-100 text-blue-700 border-blue-200' },
-  completed:   { label: 'Completed',   cls: 'bg-gray-100 text-gray-600 border-gray-200' },
-  cancelled:   { label: 'Cancelled',   cls: 'bg-red-100 text-red-600 border-red-200' },
-  paused:      { label: 'Paused',      cls: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+  open:        { label: 'Open',        cls: 'bg-green-500/10 text-green-400 border border-green-500/20' },
+  in_progress: { label: 'In Progress', cls: 'bg-primary-500/10 text-primary-400 border border-primary-500/20' },
+  completed:   { label: 'Completed',   cls: 'bg-dark-700/50 text-dark-400 border border-dark-600' },
+  cancelled:   { label: 'Cancelled',   cls: 'bg-red-500/10 text-red-400 border border-red-500/20' },
+  paused:      { label: 'Paused',      cls: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' },
 };
 
 const STATUS_FILTERS = ['open', 'in_progress', 'completed', 'paused'];
@@ -81,7 +81,7 @@ export default function MyJobs() {
             onClick={() => setTab(key)}
             className={`px-4 py-3.5 text-sm font-medium transition-all border-b-2 -mb-px ${
               tab === key
-                ? 'border-white text-white'
+                ? 'border-dark-100 text-dark-100'
                 : 'border-transparent text-dark-500 hover:text-dark-300'
             }`}
           >
@@ -114,7 +114,7 @@ export default function MyJobs() {
                 onChange={(e) => setSearch(e.target.value)}
                 type="text"
                 placeholder="Search job postings"
-                className="w-full pl-11 pr-4 py-2.5 bg-dark-950 border border-dark-700 rounded-full text-sm text-dark-200 placeholder:text-dark-500 focus:outline-none focus:border-dark-500 focus:ring-2 focus:ring-primary-500/15 transition-all"
+                className="input pl-11 rounded-full"
               />
             </div>
 
@@ -144,7 +144,7 @@ export default function MyJobs() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 6, scale: 0.97 }}
                     transition={{ duration: 0.13 }}
-                    className="absolute right-0 top-full mt-2 w-52 bg-dark-900 border border-dark-700 rounded-2xl shadow-float overflow-hidden z-20"
+                    className="absolute right-0 top-full mt-2 w-52 card shadow-float overflow-hidden z-20"
                   >
                     <div className="p-3">
                       <p className="text-xs font-semibold text-dark-500 uppercase tracking-wider px-1 mb-2">Status</p>

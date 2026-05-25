@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../api';
 import useAuthStore from '../../store/authStore';
+import UserAvatar from '../../components/ui/UserAvatar';
 import toast from 'react-hot-toast';
 
 const AVAIL_CONFIG = {
@@ -123,11 +124,11 @@ function ReviewModal({ freelancer, onClose, onSuccess }) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 16 }}
           transition={{ duration: 0.2 }}
-          className="bg-dark-900 border border-dark-700 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+          className="card p-6 w-full max-w-md shadow-dialog"
         >
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-base font-semibold text-white">Write a Review</h2>
+              <h2 className="text-base font-semibold text-dark-100">Write a Review</h2>
               <p className="text-xs text-dark-500 mt-0.5">for {freelancer.name}</p>
             </div>
             <button onClick={onClose} className="p-1.5 rounded-lg text-dark-500 hover:text-white hover:bg-dark-800 transition-colors">
@@ -360,11 +361,7 @@ export default function FreelancerProfile() {
       <motion.div {...fadeUp(0)} className="card p-6">
         <div className="flex items-start gap-5 flex-wrap">
           <div className="relative shrink-0">
-            <img
-              src={profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=4361ff&color=fff&size=80`}
-              alt={profile.name}
-              className="w-20 h-20 rounded-2xl ring-2 ring-dark-700 object-cover"
-            />
+            <UserAvatar user={profile} size={80} className="!rounded-2xl ring-2 ring-dark-700" />
             {profile.is_online && (
               <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-dark-950" />
             )}
@@ -425,7 +422,7 @@ export default function FreelancerProfile() {
             ) : (
               <>
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h1 className="text-xl font-bold text-white">{profile.name}</h1>
+                  <h1 className="text-xl font-bold text-dark-100">{profile.name}</h1>
                   {profile.is_verified && (
                     <BadgeCheck className="w-5 h-5 text-primary-400 shrink-0" strokeWidth={2} />
                   )}
@@ -508,7 +505,7 @@ export default function FreelancerProfile() {
               <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mx-auto mb-3`}>
                 <Icon className={`w-4 h-4 ${s.color}`} strokeWidth={2} />
               </div>
-              <div className="text-xl font-bold text-white">{s.value}</div>
+              <div className="text-xl font-bold text-dark-100">{s.value}</div>
               <div className="text-xs text-dark-500 mt-0.5">{s.label}</div>
             </div>
           );
@@ -516,13 +513,13 @@ export default function FreelancerProfile() {
       </motion.div>
 
       {/* Tabs */}
-      <motion.div {...fadeUp(0.08)} className="flex gap-1 p-1 bg-dark-900 border border-dark-800 rounded-xl w-fit">
+      <motion.div {...fadeUp(0.08)} className="flex gap-1 p-1 card rounded-xl w-fit shadow-sm">
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setActiveTab(t)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${
-              activeTab === t ? 'bg-dark-700 text-white shadow-sm' : 'text-dark-400 hover:text-white'
+              activeTab === t ? 'bg-dark-700 text-dark-100 shadow-sm' : 'text-dark-400 hover:text-dark-100'
             }`}
           >
             {t}
@@ -544,7 +541,7 @@ export default function FreelancerProfile() {
             transition={{ duration: 0.2 }}
             className="card p-5 space-y-3"
           >
-            <h3 className="font-semibold text-white text-sm">Skills</h3>
+            <h3 className="font-semibold text-dark-100 text-sm">Skills</h3>
             <div className="flex flex-wrap gap-2">
               {profile.skills?.map((s) => (
                 <span key={s.id} className="badge badge-primary">{s.name}</span>
@@ -574,7 +571,7 @@ export default function FreelancerProfile() {
             transition={{ duration: 0.2 }}
             className="card p-5"
           >
-            <h3 className="font-semibold text-white text-sm mb-4">Portfolio</h3>
+            <h3 className="font-semibold text-dark-100 text-sm mb-4">Portfolio</h3>
             {profile.portfolios?.length > 0 ? (
               <div className="grid sm:grid-cols-2 gap-4">
                 {profile.portfolios.map((p) => (
@@ -583,7 +580,7 @@ export default function FreelancerProfile() {
                       <img src={p.image_url} alt={p.title} className="w-full h-32 object-cover" />
                     )}
                     <div className="p-3.5">
-                      <h4 className="font-medium text-white text-sm">{p.title}</h4>
+                      <h4 className="font-medium text-dark-100 text-sm">{p.title}</h4>
                       {p.description && <p className="text-xs text-dark-400 mt-1 line-clamp-2 leading-relaxed">{p.description}</p>}
                       <div className="flex items-center gap-3 mt-2">
                         {p.url && (
@@ -633,7 +630,7 @@ export default function FreelancerProfile() {
             {/* Reviews header */}
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-semibold text-white text-sm">
+                <h3 className="font-semibold text-dark-100 text-sm">
                   Reviews
                   <span className="text-dark-500 font-normal ml-1">({profile.reviews_count || 0})</span>
                 </h3>
@@ -681,7 +678,7 @@ export default function FreelancerProfile() {
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <span className="text-sm font-medium text-white">{r.reviewer?.name}</span>
+                          <span className="text-sm font-medium text-dark-100">{r.reviewer?.name}</span>
                           <div className="flex items-center gap-2">
                             <StarDisplay rating={r.rating} />
                             {user?.id === r.reviewer?.id && (

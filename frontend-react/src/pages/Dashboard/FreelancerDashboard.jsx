@@ -97,7 +97,7 @@ export default function FreelancerDashboard() {
       {/* Header */}
       <motion.div {...fadeUp(0)} className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold font-display text-white tracking-tight">
+          <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">
             Good to see you, {user?.name?.split(' ')[0]}
           </h1>
           <p className="text-sm text-dark-500 mt-1">Here's your freelance overview</p>
@@ -116,7 +116,7 @@ export default function FreelancerDashboard() {
 
       {/* Connects banner */}
       {stats?.connects_remaining != null && (
-        <motion.div {...fadeUp(0.05)} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-dark-900 border border-dark-800">
+        <motion.div {...fadeUp(0.05)} className="flex items-center gap-3 px-4 py-3 rounded-xl card">
           <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center shrink-0">
             <Zap className="w-4 h-4 text-primary-400" strokeWidth={2} />
           </div>
@@ -234,7 +234,7 @@ export default function FreelancerDashboard() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-medium text-dark-100 group-hover:text-white transition-colors line-clamp-1">{job.title}</p>
+                          <p className="text-sm font-medium text-dark-100 group-hover:text-dark-100 transition-colors line-clamp-1">{job.title}</p>
                           <span className="badge badge-ghost text-2xs shrink-0">{job.job_type?.replace('_', ' ')}</span>
                         </div>
                         <p className="text-xs text-dark-500 line-clamp-1 mt-0.5">{job.description}</p>
@@ -309,7 +309,7 @@ export default function FreelancerDashboard() {
                   <Link
                     key={a.to}
                     to={a.to}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-dark-800/60 text-dark-400 hover:text-white transition-all text-sm group"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-dark-800/60 text-dark-400 hover:text-dark-100 transition-all text-sm group"
                   >
                     <Icon className="w-4 h-4 text-dark-600 group-hover:text-primary-400 transition-colors" strokeWidth={1.75} />
                     {a.label}

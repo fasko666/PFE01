@@ -111,7 +111,7 @@ export default function JobDetail() {
                 {job.status}
               </span>
             </div>
-            <h1 className="text-xl font-bold text-white leading-tight">{job.title}</h1>
+            <h1 className="text-xl font-bold text-dark-100 leading-tight">{job.title}</h1>
             <p className="text-xs text-dark-500 mt-1.5">
               Posted by <span className="text-dark-300">{job.client?.name}</span> · {new Date(job.created_at).toLocaleDateString()}
             </p>
@@ -144,7 +144,7 @@ export default function JobDetail() {
                   <Icon className={`w-4 h-4 ${s.color}`} strokeWidth={2} />
                 </div>
                 <div className="text-xs text-dark-500">{s.label}</div>
-                <div className="text-sm font-semibold text-white mt-0.5 capitalize">{s.value}</div>
+                <div className="text-sm font-semibold text-dark-100 mt-0.5 capitalize">{s.value}</div>
               </div>
             );
           })}
@@ -152,14 +152,14 @@ export default function JobDetail() {
 
         {/* Description */}
         <div>
-          <h3 className="text-sm font-semibold text-white mb-2.5">Job Description</h3>
+          <h3 className="text-sm font-semibold text-dark-100 mb-2.5">Job Description</h3>
           <div className="text-sm text-dark-300 leading-relaxed whitespace-pre-wrap">{job.description}</div>
         </div>
 
         {/* Skills */}
         {job.skills_required?.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold text-white mb-2.5">Required Skills</h3>
+            <h3 className="text-sm font-semibold text-dark-100 mb-2.5">Required Skills</h3>
             <div className="flex flex-wrap gap-2">
               {job.skills_required.map((s) => (
                 <span key={s} className="badge badge-primary">{s}</span>
@@ -193,7 +193,7 @@ export default function JobDetail() {
 
       {/* Client info */}
       <motion.div {...fadeUp(0.1)} className="card p-5">
-        <h3 className="text-sm font-semibold text-white mb-3">About the Client</h3>
+        <h3 className="text-sm font-semibold text-dark-100 mb-3">About the Client</h3>
         <div className="flex items-center gap-3">
           <img
             src={job.client?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(job.client?.name || 'C')}&background=4361ff&color=fff`}
@@ -201,7 +201,7 @@ export default function JobDetail() {
             className="w-10 h-10 rounded-full object-cover ring-1 ring-dark-700"
           />
           <div>
-            <p className="text-sm font-semibold text-white">{job.client?.name}</p>
+            <p className="text-sm font-semibold text-dark-100">{job.client?.name}</p>
             <p className="text-xs text-dark-500">Client</p>
           </div>
           {isFreelancer && (
@@ -239,7 +239,7 @@ export default function JobDetail() {
               className="card w-full max-w-lg p-6 space-y-5 max-h-[90vh] overflow-y-auto scrollbar-none"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-white">Submit Proposal</h2>
+                <h2 className="text-lg font-bold text-dark-100">Submit Proposal</h2>
                 <button
                   onClick={() => setShowModal(false)}
                   className="w-8 h-8 flex items-center justify-center rounded-lg text-dark-400 hover:text-white hover:bg-dark-800 transition-all"
@@ -249,7 +249,7 @@ export default function JobDetail() {
               </div>
 
               <div className="p-3.5 rounded-xl bg-dark-800/50 border border-dark-700">
-                <p className="text-sm font-medium text-white truncate">{job.title}</p>
+                <p className="text-sm font-medium text-dark-100 truncate">{job.title}</p>
                 <p className="text-xs text-dark-500 mt-0.5">Budget: {budgetLabel}</p>
               </div>
 

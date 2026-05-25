@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Send, Plus, MessageSquare, Trash2, ChevronRight } from 'lucide-react';
 import { api } from '../../api';
 import useAuthStore from '../../store/authStore';
+import UserAvatar from '../../components/ui/UserAvatar';
 
 const SUGGESTIONS = [
   { label: 'Write a proposal',        prompt: 'Write a winning proposal for a React development job' },
@@ -102,17 +103,17 @@ export default function AIAssistant() {
   };
 
   return (
-    <div className="h-[calc(100vh-7.5rem)] flex rounded-2xl overflow-hidden border border-dark-800 bg-dark-950">
+    <div className="h-[calc(100vh-7.5rem)] flex rounded-2xl overflow-hidden border border-dark-700/60 bg-dark-950">
 
       {/* â”€â”€ Left sidebar â”€â”€ */}
-      <div className="w-60 shrink-0 border-r border-dark-800 flex flex-col bg-dark-900">
+      <div className="w-60 shrink-0 border-r border-dark-700/50 flex flex-col bg-dark-800/40">
         {/* Header */}
-        <div className="px-3 pt-4 pb-3 border-b border-dark-800 shrink-0">
+        <div className="px-3 pt-4 pb-3 border-b border-dark-700/50 shrink-0">
           <div className="flex items-center gap-2 mb-3 px-1">
             <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shrink-0">
               <Sparkles className="w-3.5 h-3.5 text-white" strokeWidth={2} />
             </div>
-            <span className="text-xs font-semibold text-white">AI Assistant</span>
+            <span className="text-xs font-semibold text-dark-100">AI Assistant</span>
           </div>
           <button
             onClick={newChat}
@@ -133,11 +134,11 @@ export default function AIAssistant() {
                 key={chat.id}
                 onClick={() => setActiveChatId(chat.id)}
                 className={`group flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer transition-colors ${
-                  chat.id === activeChatId ? 'bg-dark-800' : 'hover:bg-dark-800/50'
+                  chat.id === activeChatId ? 'bg-primary-500/10 border border-primary-500/20' : 'hover:bg-dark-800/50 border border-transparent'
                 }`}
               >
                 <MessageSquare className="w-3.5 h-3.5 text-dark-600 shrink-0" strokeWidth={1.75} />
-                <span className={`flex-1 text-xs truncate ${chat.id === activeChatId ? 'text-white' : 'text-dark-400'}`}>
+                <span className={`flex-1 text-xs truncate ${chat.id === activeChatId ? 'text-primary-400' : 'text-dark-400'}`}>
                   {chat.title}
                 </span>
                 <button
@@ -152,7 +153,7 @@ export default function AIAssistant() {
         </div>
 
         {/* Model info */}
-        <div className="px-3 py-3 border-t border-dark-800 shrink-0">
+        <div className="px-3 py-3 border-t border-dark-700/50 shrink-0">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse shrink-0" />
             <span className="text-2xs text-dark-600">Mistral via Ollama</span>
@@ -164,12 +165,12 @@ export default function AIAssistant() {
       <div className="flex-1 flex flex-col min-w-0">
 
         {/* Chat header */}
-        <div className="h-14 px-5 flex items-center gap-3 border-b border-dark-800 shrink-0">
+        <div className="h-14 px-5 flex items-center gap-3 border-b border-dark-700/50 shrink-0">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
             <Sparkles className="w-3.5 h-3.5 text-white" strokeWidth={2} />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white leading-tight">PANDA AI</p>
+            <p className="text-sm font-semibold text-dark-100 leading-tight">PANDA AI</p>
             <p className="text-2xs text-dark-500">Your freelancing intelligence layer</p>
           </div>
         </div>
@@ -198,11 +199,7 @@ export default function AIAssistant() {
                   {msg.content}
                 </div>
                 {msg.role === 'user' && (
-                  <img
-                    src={user?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'U')}&background=4361ff&color=fff&size=64`}
-                    alt=""
-                    className="w-7 h-7 rounded-full object-cover shrink-0 mt-0.5"
-                  />
+                  <UserAvatar user={user} size={28} ring={false} className="shrink-0 mt-0.5" />
                 )}
               </motion.div>
             ))}
@@ -233,7 +230,7 @@ export default function AIAssistant() {
               <button
                 key={s.label}
                 onClick={() => send(s.prompt)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-dark-800 border border-dark-700 text-dark-300 hover:border-primary-500/40 hover:text-white hover:bg-dark-700 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-dark-800 border border-dark-700 text-dark-300 hover:border-primary-500/40 hover:text-dark-100 hover:bg-dark-700 transition-all"
               >
                 {s.label}
                 <ChevronRight className="w-3 h-3 text-dark-600" />
@@ -243,7 +240,7 @@ export default function AIAssistant() {
         )}
 
         {/* Input */}
-        <form onSubmit={(e) => { e.preventDefault(); send(); }} className="px-4 py-3 border-t border-dark-800 flex gap-2.5 shrink-0">
+        <form onSubmit={(e) => { e.preventDefault(); send(); }} className="px-4 py-3 border-t border-dark-700/50 flex gap-2.5 shrink-0">
           <input
             ref={inputRef}
             value={input}

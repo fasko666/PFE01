@@ -9,13 +9,13 @@ import useNotificationStore from '../../store/notificationStore';
 import { formatDistanceToNow } from 'date-fns';
 
 const TYPE_META = {
-  proposal: { icon: FileText,       bg: 'bg-blue-100',   color: 'text-blue-600'   },
-  message:  { icon: MessageSquare,  bg: 'bg-indigo-100', color: 'text-indigo-600' },
-  payment:  { icon: CreditCard,     bg: 'bg-emerald-100',color: 'text-emerald-600'},
-  review:   { icon: Star,           bg: 'bg-amber-100',  color: 'text-amber-600'  },
-  shield:   { icon: Shield,         bg: 'bg-red-100',    color: 'text-red-600'    },
-  system:   { icon: Bell,           bg: 'bg-dark-100',   color: 'text-dark-500'   },
-  default:  { icon: AlertCircle,    bg: 'bg-dark-100',   color: 'text-dark-500'   },
+  proposal: { icon: FileText,       bg: 'bg-blue-500/10',    color: 'text-blue-400'    },
+  message:  { icon: MessageSquare,  bg: 'bg-indigo-500/10',  color: 'text-indigo-400'  },
+  payment:  { icon: CreditCard,     bg: 'bg-emerald-500/10', color: 'text-emerald-400' },
+  review:   { icon: Star,           bg: 'bg-amber-500/10',   color: 'text-amber-400'   },
+  shield:   { icon: Shield,         bg: 'bg-red-500/10',     color: 'text-red-400'     },
+  system:   { icon: Bell,           bg: 'bg-dark-800',       color: 'text-dark-400'    },
+  default:  { icon: AlertCircle,    bg: 'bg-dark-800',       color: 'text-dark-400'    },
 };
 
 function timeAgo(ts) {
@@ -50,7 +50,7 @@ export default function NotificationPanel({ onClose }) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{   opacity: 0, y: 8, scale: 0.97 }}
       transition={{ duration: 0.15 }}
-      className="absolute right-0 top-full mt-2 w-[380px] bg-dark-900 rounded-2xl shadow-float border border-dark-700 overflow-hidden z-50"
+      className="absolute right-0 top-full mt-2 w-[380px] card shadow-float z-50"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3.5 border-b border-dark-700">

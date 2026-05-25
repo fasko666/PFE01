@@ -15,19 +15,24 @@ export default function AppLayout() {
 
   return (
     <div className="theme-bg" style={{ minHeight: 'calc(100vh - 60px)', marginTop: 60 }}>
-      <main className="overflow-y-auto p-6 max-w-7xl mx-auto scrollbar-none">
-        {showBack && (
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-4 flex items-center gap-2 theme-muted transition-colors text-sm group"
-          >
-            <span className="w-8 h-8 rounded-xl border border-dark-700 flex items-center justify-center group-hover:opacity-80 transition-opacity bg-dark-800">
-              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
-            </span>
-            Back
-          </button>
-        )}
-        <Outlet />
+      <main
+        className="overflow-y-auto scrollbar-none"
+        style={{ minHeight: 'calc(100vh - 60px)' }}
+      >
+        <div className="p-6 max-w-7xl mx-auto">
+          {showBack && (
+            <button
+              onClick={() => navigate(-1)}
+              className="mb-5 flex items-center gap-2 text-dark-500 hover:text-dark-200 transition-colors text-sm group"
+            >
+              <span className="w-8 h-8 rounded-xl border border-dark-700 flex items-center justify-center group-hover:border-dark-600 group-hover:bg-dark-800 transition-all bg-dark-900">
+                <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2} />
+              </span>
+              Back
+            </button>
+          )}
+          <Outlet />
+        </div>
       </main>
     </div>
   );

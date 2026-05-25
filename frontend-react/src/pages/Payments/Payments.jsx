@@ -79,7 +79,7 @@ export default function Payments() {
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold font-display text-white tracking-tight">Transactions</h1>
+          <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">Transactions</h1>
           <p className="text-sm text-dark-500 mt-1">
             {isFreelancer ? 'Track your earnings, escrow, and withdrawals' : 'Manage payments and project expenses'}
           </p>
@@ -99,9 +99,9 @@ export default function Payments() {
       </div>
 
       {/* 3-column summary row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-px rounded-2xl overflow-hidden border border-dark-800 bg-dark-800/40">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-px rounded-2xl overflow-hidden border border-dark-700/60 bg-dark-700/30">
         {/* Pending / In Escrow */}
-        <div className="bg-dark-950 p-5">
+        <div className="bg-dark-900 p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-lg bg-yellow-500/10 flex items-center justify-center">
               <Clock className="w-3.5 h-3.5 text-yellow-400" strokeWidth={2} />
@@ -118,7 +118,7 @@ export default function Payments() {
         </div>
 
         {/* Withdrawal Schedule */}
-        <div className="bg-dark-950 p-5 border-l border-dark-800/50">
+        <div className="bg-dark-900 p-5 border-l border-dark-700/30">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-lg bg-dark-800 flex items-center justify-center">
               <RotateCcw className="w-3.5 h-3.5 text-dark-500" strokeWidth={2} />
@@ -132,7 +132,7 @@ export default function Payments() {
         </div>
 
         {/* Available Balance */}
-        <div className="bg-dark-950 p-5 border-l border-dark-800/50">
+        <div className="bg-dark-900 p-5 border-l border-dark-700/30">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
               <DollarSign className="w-3.5 h-3.5 text-green-400" strokeWidth={2} />
@@ -162,7 +162,7 @@ export default function Payments() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-dark-900 border border-dark-800"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl card"
         >
           <div className="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center shrink-0">
             <TrendingUp className="w-4 h-4 text-primary-400" strokeWidth={2} />
@@ -193,7 +193,7 @@ export default function Payments() {
               <ChevronDown className={`w-3 h-3 transition-transform ${showDate ? 'rotate-180' : ''}`} />
             </button>
             {showDate && (
-              <div className="absolute top-full mt-1 left-0 w-36 bg-dark-900 border border-dark-800 rounded-xl shadow-float z-10 overflow-hidden animate-scale-in">
+              <div className="absolute top-full mt-1 left-0 w-36 card shadow-float z-10 overflow-hidden animate-scale-in">
                 {DATE_RANGES.map((d) => (
                   <button
                     key={d}
@@ -217,7 +217,7 @@ export default function Payments() {
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
                   filter === f
-                    ? 'bg-dark-700 text-white border-dark-600'
+                    ? 'bg-dark-700 text-dark-100 border-dark-600'
                     : 'bg-transparent text-dark-500 border-dark-800 hover:border-dark-700 hover:text-dark-300'
                 }`}
               >

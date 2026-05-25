@@ -37,13 +37,13 @@ function Select({ options, value, onChange, label }) {
       <div className="relative">
         <button
           onClick={() => setOpen((v) => !v)}
-          className="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-sm text-dark-100 hover:border-dark-600 transition-colors"
+          className="input w-full flex items-center justify-between gap-2"
         >
           {selected?.label}
           <ChevronDown className={`w-3.5 h-3.5 text-dark-500 transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
         {open && (
-          <div className="absolute top-full mt-1 left-0 right-0 bg-dark-900 border border-dark-800 rounded-xl shadow-float z-10 overflow-hidden animate-scale-in">
+          <div className="absolute top-full mt-1 left-0 right-0 card shadow-float z-10 overflow-hidden animate-scale-in">
             {options.map((o) => (
               <button
                 key={o.value}
@@ -89,7 +89,7 @@ export default function Reports() {
       {/* Header */}
       <motion.div {...fadeUp(0)} className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold font-display text-white tracking-tight">My Reports</h1>
+          <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">My Reports</h1>
           <p className="text-sm text-dark-500 mt-1">Track your performance and financial activity</p>
         </div>
         <button className="btn btn-ghost btn-sm gap-1.5">

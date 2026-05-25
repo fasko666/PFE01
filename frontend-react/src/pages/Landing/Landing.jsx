@@ -119,10 +119,10 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-950" style={{ paddingTop: 64 }}>
+    <div className="min-h-screen theme-bg" style={{ paddingTop: 64 }}>
 
       {/* ── HERO with full 3D scene ── */}
-      <section className="relative pt-10 pb-24 overflow-hidden bg-dark-950 min-h-[760px]">
+      <section className="relative pt-10 pb-24 overflow-hidden theme-bg min-h-[760px]">
         {/* Full-bleed 3D backdrop visible behind everything */}
         <div className="absolute inset-0">
           <Suspense fallback={null}>
@@ -131,9 +131,9 @@ export default function Landing() {
             </div>
           </Suspense>
           {/* Gradient masks so text stays readable on the left */}
-          <div className="absolute inset-0 bg-gradient-to-r from-dark-950 via-dark-950/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-dark-950/40 via-transparent to-dark-950" />
-          <div className="absolute inset-0 bg-grid opacity-10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-dark-950 via-dark-950/85 to-transparent hero-mask-lr" />
+          <div className="absolute inset-0 bg-gradient-to-b from-dark-950/60 via-transparent to-dark-950 hero-mask-tb" />
+          <div className="absolute inset-0 bg-grid opacity-[0.06] pointer-events-none" />
         </div>
 
         <div className="container-custom relative z-10">
@@ -152,7 +152,7 @@ export default function Landing() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.05 }}
-                className="text-5xl md:text-6xl font-bold font-display text-white leading-[1.07] tracking-tight mb-5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.6)]"
+                className="text-5xl md:text-6xl font-bold font-display text-dark-50 leading-[1.07] tracking-tight mb-5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.6)]"
               >
                 Hire world-class<br />talent.{' '}
                 <span className="gradient-text">Land great work.</span>
@@ -194,7 +194,7 @@ export default function Landing() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                         type="text"
                         placeholder={activeTab === 'hire' ? 'React developer, UI designer…' : 'Find jobs by skill, category…'}
-                        className="w-full pl-9 pr-3 py-2.5 bg-dark-800/80 rounded-xl text-sm text-white placeholder-dark-500 focus:outline-none focus:ring-1 focus:ring-primary-500/30 border border-dark-700 transition-all"
+                        className="w-full pl-9 pr-3 py-2.5 bg-dark-800/80 rounded-xl text-sm text-dark-100 placeholder-dark-500 focus:outline-none focus:ring-1 focus:ring-primary-500/30 border border-dark-700 transition-all"
                       />
                     </div>
                     <button type="submit" className="btn-primary btn px-5 text-sm rounded-xl">Search</button>
@@ -223,7 +223,7 @@ export default function Landing() {
               >
                 {STATS.map((s) => (
                   <div key={s.label} className="bg-dark-950/70 px-4 py-3.5 text-center">
-                    <div className="text-lg font-bold font-display text-white">{s.value}</div>
+                    <div className="text-lg font-bold font-display text-dark-50">{s.value}</div>
                     <div className="text-2xs text-dark-400 mt-0.5">{s.label}</div>
                   </div>
                 ))}
@@ -247,11 +247,11 @@ export default function Landing() {
       </section>
 
       {/* ── Categories with 3D icons ── */}
-      <section className="relative py-20 bg-dark-950 overflow-hidden">
+      <section className="relative py-20 theme-bg overflow-hidden">
         <div className="container-custom relative z-10">
           <motion.div {...fadeUp(0)} className="mb-12 text-center">
             <p className="text-xs font-semibold text-primary-400 uppercase tracking-widest mb-3">Categories</p>
-            <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-3">Browse in 3D</h2>
+            <h2 className="text-3xl md:text-4xl font-bold font-display text-dark-50 mb-3">Browse in 3D</h2>
             <p className="text-dark-400 text-sm max-w-lg mx-auto">Thousands of verified specialists across every discipline, ready to start</p>
           </motion.div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -259,12 +259,12 @@ export default function Landing() {
               <motion.div key={cat.name} {...fadeUp(i * 0.05)}>
                 <Link
                   to={`/freelancers?category=${encodeURIComponent(cat.name)}`}
-                  className="flex flex-col items-center p-5 rounded-2xl border border-dark-800 bg-dark-900/40 backdrop-blur-sm hover:bg-dark-900/80 hover:border-primary-500/30 hover:scale-[1.04] hover:shadow-[0_20px_60px_-15px_rgba(67,97,255,0.3)] transition-all duration-300 cursor-pointer group text-center"
+                  className="category-card flex flex-col items-center p-5 rounded-2xl border border-dark-800 bg-dark-900/40 backdrop-blur-sm hover:bg-dark-900/80 hover:border-primary-500/30 hover:scale-[1.04] hover:shadow-[0_20px_60px_-15px_rgba(67,97,255,0.3)] transition-all duration-300 cursor-pointer group text-center"
                 >
                   <Suspense fallback={<div className="w-16 h-16" />}>
                     <CategoryIcon3D kind={cat.kind} />
                   </Suspense>
-                  <div className="text-xs font-semibold text-white group-hover:text-primary-300 leading-tight mt-2">{cat.name}</div>
+                  <div className="text-xs font-semibold text-dark-100 group-hover:text-primary-300 leading-tight mt-2">{cat.name}</div>
                   <div className="text-2xs text-dark-500 mt-1.5">{cat.count} freelancers</div>
                 </Link>
               </motion.div>
@@ -274,7 +274,7 @@ export default function Landing() {
       </section>
 
       {/* ── Features with 3D backdrop ── */}
-      <section className="relative py-24 border-y border-dark-800 bg-dark-900 overflow-hidden" id="how">
+      <section className="relative py-24 border-y border-dark-700/60 bg-dark-900 overflow-hidden" id="how">
         <Suspense fallback={null}>
           <div className="opacity-50">
             <Scene3DBackdrop preset="features" />
@@ -285,7 +285,7 @@ export default function Landing() {
         <div className="container-custom relative z-10">
           <motion.div {...fadeUp(0)} className="mb-16 text-center">
             <p className="text-xs font-semibold text-primary-400 uppercase tracking-widest mb-3">Features</p>
-            <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-3">Everything you need to succeed</h2>
+            <h2 className="text-3xl md:text-4xl font-bold font-display text-dark-50 mb-3">Everything you need to succeed</h2>
             <p className="text-dark-400 text-sm max-w-lg mx-auto">Built for modern freelancers and forward-thinking businesses</p>
           </motion.div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -297,12 +297,12 @@ export default function Landing() {
                   {...fadeUp(i * 0.07)}
                   whileHover={{ y: -6, rotateX: 4, rotateY: -4 }}
                   style={{ transformStyle: 'preserve-3d' }}
-                  className="relative bg-dark-950/70 backdrop-blur-xl border border-dark-800 rounded-2xl p-6 shadow-xl hover:border-primary-500/30 hover:shadow-[0_25px_60px_-15px_rgba(67,97,255,0.35)] transition-all duration-300 group"
+                  className="relative card p-6 shadow-xl hover:border-primary-500/30 hover:shadow-[0_25px_60px_-15px_rgba(67,97,255,0.35)] transition-all duration-300 group"
                 >
                   <div className={`w-11 h-11 rounded-xl border ${f.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                     <Icon className={`w-5 h-5 ${f.color}`} strokeWidth={1.75} />
                   </div>
-                  <h3 className="text-sm font-bold text-white mb-2">{f.title}</h3>
+                  <h3 className="text-sm font-bold text-dark-100 mb-2">{f.title}</h3>
                   <p className="text-xs text-dark-400 leading-relaxed">{f.desc}</p>
                 </motion.div>
               );
@@ -312,7 +312,7 @@ export default function Landing() {
       </section>
 
       {/* ── How it works with 3D backdrop ── */}
-      <section className="relative py-24 bg-dark-950 overflow-hidden" id="pricing">
+      <section className="relative py-24 bg-dark-950 border-y border-dark-700/50 overflow-hidden" id="pricing">
         <Suspense fallback={null}>
           <div className="opacity-60">
             <Scene3DBackdrop preset="how" />
@@ -324,7 +324,7 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div {...fadeUp(0)}>
               <p className="text-xs font-semibold text-primary-400 uppercase tracking-widest mb-4">How it works</p>
-              <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-8 leading-tight">
+              <h2 className="text-3xl md:text-4xl font-bold font-display text-dark-50 mb-8 leading-tight">
                 Hiring made<br /><span className="gradient-text">brilliantly simple</span>
               </h2>
               <div className="space-y-6">
@@ -337,7 +337,7 @@ export default function Landing() {
                   <motion.div key={step.num} {...fadeUp(i * 0.08)} className="flex gap-4 items-start">
                     <div className="w-9 h-9 shrink-0 bg-primary-500/15 border border-primary-500/30 rounded-lg flex items-center justify-center text-xs font-bold text-primary-300 font-mono backdrop-blur-md">{step.num}</div>
                     <div>
-                      <div className="text-sm font-semibold text-white mb-1">{step.title}</div>
+                      <div className="text-sm font-semibold text-dark-100 mb-1">{step.title}</div>
                       <div className="text-xs text-dark-400 leading-relaxed">{step.desc}</div>
                     </div>
                   </motion.div>
@@ -361,7 +361,7 @@ export default function Landing() {
                     <Sparkles className="w-4 h-4 text-primary-300" />
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-white">AI Match Found</div>
+                    <div className="text-sm font-semibold text-dark-100">AI Match Found</div>
                     <div className="text-xs text-dark-400">3 top candidates · 98% match</div>
                   </div>
                   <span className="ml-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-green-500/10 border border-green-500/30 text-green-300 text-2xs font-semibold">
@@ -381,7 +381,7 @@ export default function Landing() {
                         alt={c.role}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-medium text-white">{c.role}</div>
+                        <div className="text-xs font-medium text-dark-100">{c.role}</div>
                         <div className="text-2xs text-dark-400">{c.rate}</div>
                       </div>
                       <span className="text-2xs text-green-400 font-semibold">{c.score}</span>
@@ -399,7 +399,7 @@ export default function Landing() {
       </section>
 
       {/* ── Testimonials with 3D backdrop ── */}
-      <section className="relative py-24 bg-dark-900 border-y border-dark-800 overflow-hidden">
+      <section className="relative py-24 bg-dark-900 border-y border-dark-700/60 overflow-hidden">
         <Suspense fallback={null}>
           <div className="opacity-40">
             <Scene3DBackdrop preset="testimonials" />
@@ -408,7 +408,7 @@ export default function Landing() {
         <div className="container-custom relative z-10">
           <motion.div {...fadeUp(0)} className="text-center mb-14">
             <p className="text-xs font-semibold text-primary-400 uppercase tracking-widest mb-3">Testimonials</p>
-            <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-3">Loved by creators worldwide</h2>
+            <h2 className="text-3xl md:text-4xl font-bold font-display text-dark-50 mb-3">Loved by creators worldwide</h2>
             <p className="text-dark-400 text-sm">Join 500,000+ professionals who trust PANDA for their most important work</p>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-4">
@@ -417,7 +417,7 @@ export default function Landing() {
                 key={t.name}
                 {...fadeUp(i * 0.1)}
                 whileHover={{ y: -6 }}
-                className="bg-dark-950/70 backdrop-blur-xl border border-dark-800 rounded-2xl p-6 shadow-xl space-y-4 hover:border-primary-500/30 transition-all"
+                className="card p-6 shadow-xl space-y-4 hover:border-primary-500/30 transition-all hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-0.5">
                   {[...Array(t.rating)].map((_, j) => (
@@ -428,7 +428,7 @@ export default function Landing() {
                 <div className="flex items-center gap-3 pt-2 border-t border-dark-800">
                   <img src={t.avatar} alt={t.name} className="w-9 h-9 rounded-full" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-white">{t.name}</div>
+                    <div className="text-xs font-semibold text-dark-100">{t.name}</div>
                     <div className="text-2xs text-dark-400">{t.role}</div>
                   </div>
                   <span className={`px-2 py-0.5 rounded-md text-2xs font-semibold border ${t.badgeColor}`}>{t.badge}</span>
@@ -440,7 +440,7 @@ export default function Landing() {
       </section>
 
       {/* ── CTA with full 3D backdrop ── */}
-      <section className="relative py-32 overflow-hidden bg-dark-950">
+      <section className="relative py-32 overflow-hidden theme-bg">
         <Suspense fallback={null}>
           <Scene3DBackdrop preset="cta" />
         </Suspense>
@@ -449,7 +449,7 @@ export default function Landing() {
 
         <div className="container-custom relative z-10 text-center max-w-3xl mx-auto">
           <motion.div {...fadeUp(0)}>
-            <h2 className="text-4xl md:text-6xl font-bold font-display text-white mb-5 leading-tight tracking-tight drop-shadow-2xl">
+            <h2 className="text-4xl md:text-6xl font-bold font-display text-dark-50 mb-5 leading-tight tracking-tight drop-shadow-2xl">
               Ready to build something<br /><span className="gradient-text">extraordinary?</span>
             </h2>
             <p className="text-dark-300 text-base mb-10 max-w-xl mx-auto leading-relaxed">
@@ -476,7 +476,7 @@ export default function Landing() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-dark-900 border-t border-dark-800/60 py-14">
+      <footer className="bg-dark-900 border-t border-dark-700/60 py-14">
         <div className="container-custom">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-10">
             <div className="col-span-2">
@@ -484,7 +484,7 @@ export default function Landing() {
                 <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center ring-1 ring-white/10">
                   <PandaLogo className="w-5 h-5" invert />
                 </div>
-                <span className="font-black font-display text-white text-base tracking-widest uppercase">PANDA</span>
+                <span className="font-black font-display text-dark-100 text-base tracking-widest uppercase">PANDA</span>
               </div>
               <p className="text-xs text-dark-400 max-w-xs leading-relaxed">
                 The AI-powered freelance marketplace that matches world-class talent with innovative businesses globally — now in immersive 3D.
@@ -496,7 +496,7 @@ export default function Landing() {
               { title: 'Company',         links: ['About', 'Blog', 'Careers', 'Trust & Safety'] },
             ].map((col) => (
               <div key={col.title}>
-                <h4 className="text-xs font-semibold text-white mb-4 tracking-wide">{col.title}</h4>
+                <h4 className="text-xs font-semibold text-dark-200 mb-4 tracking-wide">{col.title}</h4>
                 <ul className="space-y-2.5">
                   {col.links.map((l) => (
                     <li key={l}>
@@ -507,7 +507,7 @@ export default function Landing() {
               </div>
             ))}
           </div>
-          <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-dark-800/60 gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-dark-700/60 gap-4">
             <p className="text-xs text-dark-500">© 2026 PANDA. All rights reserved.</p>
             <div className="flex gap-5">
               {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((l) => (

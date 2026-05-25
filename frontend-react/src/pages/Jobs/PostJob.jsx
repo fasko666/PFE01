@@ -101,7 +101,7 @@ export default function PostJob() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <motion.div {...fadeUp(0)}>
-        <h1 className="text-2xl font-bold font-display text-white tracking-tight">Post a Job</h1>
+        <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">Post a Job</h1>
         <p className="text-sm text-dark-500 mt-1">Reach 500K+ skilled freelancers on PANDA</p>
       </motion.div>
 
@@ -141,7 +141,7 @@ export default function PostJob() {
         {/* Step 0: Basics */}
         {step === 0 && (
           <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="space-y-4">
-            <h2 className="font-semibold text-white text-base">Job Basics</h2>
+            <h2 className="font-semibold text-dark-100 text-base">Job Basics</h2>
             <div>
               <label className="input-label">Job Title *</label>
               <input
@@ -172,7 +172,7 @@ export default function PostJob() {
         {/* Step 1: Details */}
         {step === 1 && (
           <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="space-y-4">
-            <h2 className="font-semibold text-white text-base">Project Details</h2>
+            <h2 className="font-semibold text-dark-100 text-base">Project Details</h2>
             <div>
               <label className="input-label">Category *</label>
               <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto pr-1">
@@ -243,7 +243,7 @@ export default function PostJob() {
         {/* Step 2: Skills & Budget */}
         {step === 2 && (
           <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="space-y-4">
-            <h2 className="font-semibold text-white text-base">Skills & Budget</h2>
+            <h2 className="font-semibold text-dark-100 text-base">Skills & Budget</h2>
             <div>
               <label className="input-label">Required Skills</label>
               <input
@@ -327,7 +327,7 @@ export default function PostJob() {
         {/* Step 3: Review */}
         {step === 3 && (
           <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="space-y-4">
-            <h2 className="font-semibold text-white text-base">Review & Post</h2>
+            <h2 className="font-semibold text-dark-100 text-base">Review & Post</h2>
             <div className="space-y-4 p-4 rounded-xl bg-dark-800/50 border border-dark-700">
               <div>
                 <span className="text-xs text-dark-500 font-medium uppercase tracking-wide">Title</span>

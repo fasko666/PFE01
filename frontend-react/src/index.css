@@ -1,169 +1,486 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ─────────────────────────────────────────────────────────
-   DARK-* PALETTE  (CSS variables — inverted per theme)
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKEN SYSTEM
 
-   Dark mode  →  dark-950 = near-black,  dark-100 = near-white
-   Light mode →  dark-950 = white,       dark-100 = near-black
+   The dark-* palette is the single source of truth for theme-aware
+   colors. It auto-inverts between dark and light mode so every
+   component that uses bg-dark-*, text-dark-*, border-dark-* gets
+   both modes for free.
 
-   Every component that uses bg-dark-*, text-dark-*, border-dark-*
-   automatically switches — no per-component changes needed.
-   ───────────────────────────────────────────────────────── */
+   Naming convention (dark mode perspective):
+     dark-950  page background      (#0f0f11)
+     dark-900  card / surface       (#18181b)
+     dark-800  input / raised       (#27272a)
+     dark-700  strong border        (#3f3f46)
+     dark-600  subtle border        (#52525b)
+     dark-500  muted / placeholder  (#71717a)
+     dark-400  secondary text       (#a1a1aa)
+     dark-300  body text            (#d4d4d8)
+     dark-200  primary text light   (#e4e4e7)
+     dark-100  primary text         (#f4f4f5)
+     dark-50   emphasis text        (#fafafa)
+   ═══════════════════════════════════════════════════════════════ */
 
-/* ── DARK MODE  (html.dark) ── */
+/* ── DARK MODE (html.dark) ───────────────────────────────────── */
 html.dark {
-  --c-dark-50:  248 249 250;   /* near white  */
-  --c-dark-100: 241 243 244;
-  --c-dark-200: 232 234 237;
-  --c-dark-300: 218 220 224;
-  --c-dark-400: 189 193 198;
-  --c-dark-500: 128 134 139;   /* mid grey    */
-  --c-dark-600: 95  99  104;
-  --c-dark-700: 60  64  67;
-  --c-dark-800: 32  33  36;
-  --c-dark-900: 23  23  23;
-  --c-dark-950: 10  10  10;    /* near black  */
+  /* Zinc-based scale — warm, premium, never pure black */
+  --c-dark-50:  250 250 250;   /* zinc-50  — emphasis white       */
+  --c-dark-100: 244 244 245;   /* zinc-100 — primary text         */
+  --c-dark-200: 228 228 231;   /* zinc-200 — body text            */
+  --c-dark-300: 212 212 216;   /* zinc-300 — secondary text light */
+  --c-dark-400: 161 161 170;   /* zinc-400 — secondary text       */
+  --c-dark-500: 113 113 122;   /* zinc-500 — muted / placeholder  */
+  --c-dark-600: 82  82  91;    /* zinc-600 — subtle border        */
+  --c-dark-700: 63  63  70;    /* zinc-700 — strong border        */
+  --c-dark-800: 39  39  42;    /* zinc-800 — input / raised       */
+  --c-dark-900: 24  24  27;    /* zinc-900 — card / surface       */
+  --c-dark-950: 9   9   11;    /* ~zinc-950 — page background     */
+
+  /* Semantic aliases used by legacy inline-style components */
+  --border:   63 63 70;        /* maps to dark-700 */
+  --text-400: 161 161 170;     /* maps to dark-400 */
+  --text-500: 113 113 122;     /* maps to dark-500 */
 
   color-scheme: dark;
 }
 
-/* ── LIGHT MODE  (:root / no .dark class) ── */
+/* ── LIGHT MODE (:root / no .dark class) ─────────────────────── */
 :root {
-  --c-dark-50:  15  23  42;    /* near black  */
-  --c-dark-100: 30  41  59;
-  --c-dark-200: 51  65  85;
-  --c-dark-300: 71  85  105;
-  --c-dark-400: 100 116 139;
-  --c-dark-500: 148 163 184;   /* mid grey    */
-  --c-dark-600: 203 213 225;
-  --c-dark-700: 226 232 240;
-  --c-dark-800: 241 245 249;
-  --c-dark-900: 248 250 252;
-  --c-dark-950: 255 255 255;   /* white       */
+  /* Inverted zinc scale */
+  --c-dark-50:  9   9   11;    /* ~zinc-950 — emphasis black      */
+  --c-dark-100: 24  24  27;    /* zinc-900  — primary text        */
+  --c-dark-200: 39  39  42;    /* zinc-800  — body text           */
+  --c-dark-300: 63  63  70;    /* zinc-700  — secondary text      */
+  --c-dark-400: 82  82  91;    /* zinc-600  — muted text          */
+  --c-dark-500: 113 113 122;   /* zinc-500  — placeholder         */
+  --c-dark-600: 161 161 170;   /* zinc-400  — subtle border       */
+  --c-dark-700: 212 212 216;   /* zinc-300  — strong border       */
+  --c-dark-800: 228 228 231;   /* zinc-200  — input bg            */
+  --c-dark-900: 244 244 245;   /* zinc-100  — card bg             */
+  --c-dark-950: 250 250 250;   /* zinc-50   — page background     */
+
+  /* Semantic aliases */
+  --border:   212 212 216;     /* maps to dark-700 (light border) */
+  --text-400: 82  82  91;      /* maps to dark-400 */
+  --text-500: 113 113 122;     /* maps to dark-500 */
 
   color-scheme: light;
 }
 
-/* ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════
    BASE LAYER
-   ───────────────────────────────────────────────────────── */
+   ═══════════════════════════════════════════════════════════════ */
 @layer base {
-  *, *::before, *::after { box-sizing: border-box; }
+  *, *::before, *::after {
+    box-sizing: border-box;
+    border-color: rgb(var(--border) / 1);
+  }
 
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   body {
     @apply font-sans overflow-x-hidden;
     background-color: rgb(var(--c-dark-950));
-    color: rgb(var(--c-dark-100));
+    color: rgb(var(--c-dark-200));
   }
 
-  /* White text becomes near-black in light mode so it stays readable */
-  html:not(.dark) .text-white { color: rgb(var(--c-dark-100)) !important; }
+  /* Smooth background/color transition only on the page root when theme changes */
+  html {
+    transition: background-color 0.2s ease;
+  }
 
-  /* Cards get a subtle shadow in light mode for visual separation */
-  html:not(.dark) .card, html:not(.dark) .card-hover { box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04); }
+  /* Scrollbar — premium thin style */
+  ::-webkit-scrollbar       { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--c-dark-700) / 0.6);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--c-dark-600) / 0.8);
+  }
 
-  ::-webkit-scrollbar       { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background-color: rgb(var(--c-dark-900)); }
-  ::-webkit-scrollbar-thumb { background-color: rgb(var(--c-dark-700)); border-radius: 9999px; }
-  ::-webkit-scrollbar-thumb:hover { background-color: rgb(var(--c-dark-500)); }
+  /* Text selection */
+  ::selection {
+    @apply bg-primary-500/20 text-primary-200;
+  }
 
-  ::selection { @apply bg-primary-500/30 text-primary-200; }
+  /* Focus visible — globally consistent */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary-500/50 ring-offset-1 ring-offset-transparent;
+  }
+
+  /* Heading defaults */
+  h1, h2, h3, h4, h5, h6 {
+    color: rgb(var(--c-dark-100));
+    font-family: theme('fontFamily.display');
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* Link defaults */
+  a { color: inherit; text-decoration: none; }
+
+  /*
+   * Auto-invert text-white / hover:text-white on NEUTRAL surfaces in light mode.
+   * Elements on explicitly colored backgrounds (bg-primary-*, bg-green-*…) keep
+   * white text — they are excluded by the more-specific rule that follows.
+   * Dark mode: unchanged (white stays white).
+   */
+  html:not(.dark) .text-white {
+    color: rgb(var(--c-dark-100)) !important;
+  }
+  html:not(.dark) .hover\:text-white:hover {
+    color: rgb(var(--c-dark-100)) !important;
+  }
+  /* Keep white on saturated / brand-color backgrounds */
+  html:not(.dark) .bg-primary-500 .text-white,
+  html:not(.dark) .bg-primary-500.text-white,
+  html:not(.dark) .bg-primary-600 .text-white,
+  html:not(.dark) .bg-primary-600.text-white,
+  html:not(.dark) .bg-accent-500 .text-white,
+  html:not(.dark) .bg-accent-500.text-white,
+  html:not(.dark) .bg-green-500 .text-white,
+  html:not(.dark) .bg-green-500.text-white,
+  html:not(.dark) .bg-red-500 .text-white,
+  html:not(.dark) .bg-red-500.text-white,
+  /* Keep white on gradient backgrounds (e.g. from-primary-500 to-accent-500 icons) */
+  html:not(.dark) [class*="from-primary"] .text-white,
+  html:not(.dark) [class*="from-primary"].text-white {
+    color: white !important;
+  }
+
 }
 
-/* ─────────────────────────────────────────────────────────
-   COMPONENT LAYER  (all use dark-* tokens → auto-themed)
-   ───────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   COMPONENT LAYER
+   ═══════════════════════════════════════════════════════════════ */
 @layer components {
 
-  /* ── Buttons ── */
+  /* ─── BUTTONS ────────────────────────────────────────────── */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm
-           transition-all duration-200 cursor-pointer whitespace-nowrap select-none
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500
-           disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2
+           px-4 py-2.5 rounded-xl font-semibold text-sm
+           transition-all duration-150 cursor-pointer whitespace-nowrap select-none
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
   }
-  .btn-primary   { @apply btn bg-primary-500 text-white hover:bg-primary-600 active:scale-[0.98]; }
-  .btn-secondary { @apply btn bg-dark-800 text-dark-100 border border-dark-700 hover:bg-dark-700; }
-  .btn-ghost     { @apply btn bg-transparent text-dark-400 hover:bg-dark-800 hover:text-dark-100; }
-  .btn-danger    { @apply btn bg-red-500 text-white hover:bg-red-600; }
-  .btn-success   { @apply btn bg-green-600 text-white hover:bg-green-700; }
-  .btn-sm        { @apply px-3 py-1.5 text-xs rounded-lg; }
-  .btn-lg        { @apply px-7 py-3.5 text-base rounded-2xl; }
-  .btn-xl        { @apply px-8 py-4 text-lg rounded-2xl; }
-  .btn-icon      { @apply p-2.5 rounded-xl; }
 
-  /* ── Cards ── */
-  .card         { @apply bg-dark-900 border border-dark-700 rounded-2xl overflow-hidden; }
-  .card-hover   {
-    @apply card transition-all duration-300;
-    &:hover { @apply border-dark-500 -translate-y-px shadow-card-hover; }
+  .btn-primary {
+    @apply btn bg-primary-500 text-white
+           hover:bg-primary-600 hover:shadow-glow
+           active:scale-[0.97] active:bg-primary-700;
   }
-  .card-glass   { @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden; }
 
-  /* ── Inputs ── */
+  .btn-secondary {
+    @apply btn bg-dark-900 text-dark-200 border border-dark-700
+           hover:bg-dark-800 hover:border-dark-600 hover:text-dark-100
+           active:scale-[0.97];
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-dark-400
+           hover:bg-dark-800/70 hover:text-dark-100
+           active:scale-[0.97];
+  }
+
+  .btn-outline {
+    @apply btn bg-transparent text-dark-200 border border-dark-600
+           hover:border-dark-400 hover:text-dark-100 hover:bg-dark-800/50
+           active:scale-[0.97];
+  }
+
+  .btn-danger {
+    @apply btn bg-red-500/10 text-red-400 border border-red-500/20
+           hover:bg-red-500 hover:text-white hover:border-transparent
+           active:scale-[0.97];
+  }
+
+  .btn-success {
+    @apply btn bg-green-600/10 text-green-400 border border-green-500/20
+           hover:bg-green-600 hover:text-white hover:border-transparent
+           active:scale-[0.97];
+  }
+
+  /* Sizes */
+  .btn-xs  { @apply px-2.5 py-1 text-xs rounded-lg gap-1.5; }
+  .btn-sm  { @apply px-3.5 py-1.5 text-xs rounded-lg; }
+  .btn-lg  { @apply px-6 py-3 text-base rounded-2xl; }
+  .btn-xl  { @apply px-8 py-4 text-lg rounded-2xl; }
+  .btn-icon { @apply p-2.5 rounded-xl aspect-square; }
+  .btn-icon-sm { @apply p-1.5 rounded-lg aspect-square; }
+
+  /* ─── CARDS ──────────────────────────────────────────────── */
+  .card {
+    @apply bg-dark-900 border border-dark-700/80 rounded-2xl overflow-hidden;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200;
+    &:hover {
+      @apply border-dark-600 shadow-card-hover -translate-y-0.5;
+    }
+  }
+
+  /* Light mode: cards get white bg + visible shadow for proper depth */
+  html:not(.dark) .card,
+  html:not(.dark) .card-hover {
+    background-color: #ffffff;
+    border-color: rgb(var(--c-dark-700) / 0.6);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+  }
+  html:not(.dark) .card-hover:hover {
+    background-color: #ffffff;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .card-glass {
+    @apply bg-dark-900/60 backdrop-blur-xl border border-dark-700/50 rounded-2xl overflow-hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .card-elevated {
+    @apply bg-dark-800 border border-dark-700/50 rounded-2xl overflow-hidden;
+  }
+
+  /* ─── INPUTS ─────────────────────────────────────────────── */
   .input {
-    @apply w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl
-           text-dark-100 placeholder:text-dark-500 text-sm
-           transition-all duration-200 focus:outline-none
-           focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30;
+    @apply w-full px-4 py-3 bg-dark-800 border border-dark-700
+           rounded-xl text-dark-100 placeholder:text-dark-500 text-sm
+           transition-colors duration-150
+           focus:outline-none focus:border-primary-500/60
+           focus:ring-1 focus:ring-primary-500/20
+           focus:bg-dark-800;
   }
-  .input-label { @apply block text-sm font-medium text-dark-300 mb-1.5; }
-  .input-error { @apply text-xs text-red-400 mt-1; }
 
-  /* ── Badges ── */
-  .badge         { @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium; }
-  .badge-primary { @apply badge bg-primary-500/15 text-primary-400 border border-primary-500/20; }
-  .badge-success { @apply badge bg-green-500/15 text-green-400 border border-green-500/20; }
-  .badge-warning { @apply badge bg-yellow-500/15 text-yellow-400 border border-yellow-500/20; }
-  .badge-danger  { @apply badge bg-red-500/15 text-red-400 border border-red-500/20; }
+  .input-label {
+    @apply block text-xs font-medium text-dark-400 mb-1.5 tracking-wide uppercase;
+  }
+
+  .input-error {
+    @apply text-xs text-red-400 mt-1.5 flex items-center gap-1;
+  }
+
+  .input-hint {
+    @apply text-xs text-dark-500 mt-1.5;
+  }
+
+  /* Input size variants */
+  .input-sm { @apply py-1.5 px-3 text-xs rounded-lg; }
+  .input-lg { @apply py-4 px-5 text-base rounded-2xl; }
+
+  /* Light mode inputs: slightly recessed (zinc-100) on white card surface */
+  html:not(.dark) .input {
+    background-color: rgb(var(--c-dark-900));  /* zinc-100 = #f4f4f5 */
+    border-color: rgb(var(--c-dark-700) / 0.8);
+  }
+
+  html:not(.dark) .input:focus {
+    background-color: #ffffff;
+    border-color: rgb(67 97 255 / 0.5);
+    box-shadow: 0 0 0 3px rgba(67,97,255,0.08);
+  }
+
+  /* ─── BADGES ─────────────────────────────────────────────── */
+  .badge         { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium; }
+  .badge-primary { @apply badge bg-primary-500/10 text-primary-400 border border-primary-500/20; }
+  .badge-accent  { @apply badge bg-accent-500/10 text-accent-400 border border-accent-500/20; }
+  .badge-success { @apply badge bg-green-500/10 text-green-400 border border-green-500/20; }
+  .badge-warning { @apply badge bg-yellow-500/10 text-yellow-400 border border-yellow-500/20; }
+  .badge-danger  { @apply badge bg-red-500/10 text-red-400 border border-red-500/20; }
   .badge-ghost   { @apply badge bg-dark-800 text-dark-400 border border-dark-700; }
+  .badge-outline { @apply badge bg-transparent text-dark-400 border border-dark-600; }
 
-  /* ── Nav ── */
-  .nav-link        { @apply flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-medium text-dark-400 transition-all hover:bg-dark-800 hover:text-dark-100; }
-  .nav-link-active { @apply bg-primary-500/10 text-primary-400 border border-primary-500/20; }
+  /* ─── NAVIGATION ─────────────────────────────────────────── */
+  .nav-link {
+    @apply flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl
+           text-sm font-medium text-dark-400
+           transition-all duration-150
+           hover:bg-dark-800/70 hover:text-dark-100;
+  }
 
-  /* ── Misc ── */
-  .gradient-text    { @apply bg-gradient-to-r from-primary-400 via-purple-400 to-primary-300 bg-clip-text text-transparent; }
-  .glass            { @apply bg-white/5 backdrop-blur-2xl border border-white/10; }
+  .nav-link-active {
+    @apply bg-primary-500/10 text-primary-400 border border-primary-500/20;
+  }
+
+  /* ─── DIVIDERS ───────────────────────────────────────────── */
+  .divider {
+    @apply flex items-center gap-3 my-1;
+  }
+  .divider::before,
+  .divider::after {
+    content: '';
+    @apply flex-1 h-px bg-dark-700;
+  }
+  .divider-text {
+    @apply text-xs text-dark-500 font-medium;
+  }
+
+  /* ─── MISC ───────────────────────────────────────────────── */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 via-violet-400 to-primary-300 bg-clip-text text-transparent;
+  }
+
+  .glass {
+    @apply bg-dark-900/70 backdrop-blur-2xl border border-dark-700/60;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .glass-light {
+    @apply bg-white/80 backdrop-blur-2xl border border-dark-700;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  html:not(.dark) .glass {
+    @apply bg-white/80 border-dark-700;
+  }
+
   .section          { @apply py-20 px-4; }
   .container-custom { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
-  .page-title       { @apply text-2xl font-bold text-dark-100; }
-  .skeleton         {
-    @apply rounded-lg animate-pulse;
-    background: linear-gradient(90deg, rgb(var(--c-dark-800)), rgb(var(--c-dark-700)), rgb(var(--c-dark-800)));
+  .page-title       { @apply text-2xl font-bold font-display text-dark-100 tracking-tight; }
+  .page-subtitle    { @apply text-sm text-dark-400 mt-1; }
+
+  /* Skeleton loader */
+  .skeleton {
+    @apply rounded-lg;
+    background: linear-gradient(
+      90deg,
+      rgb(var(--c-dark-800)) 0%,
+      rgb(var(--c-dark-700)) 50%,
+      rgb(var(--c-dark-800)) 100%
+    );
     background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
   }
-  .online-dot { @apply w-2.5 h-2.5 bg-green-400 rounded-full ring-2 ring-dark-900; }
+
+  /* Online indicator */
+  .online-dot {
+    @apply w-2.5 h-2.5 bg-green-400 rounded-full;
+    box-shadow: 0 0 0 2px rgb(var(--c-dark-900));
+  }
+
+  /* ─── FORM GROUPS ────────────────────────────────────────── */
+  .form-group { @apply space-y-1.5; }
+
+  /* ─── STAT CARD ──────────────────────────────────────────── */
+  .stat-card { @apply card p-5 card-hover; }
+
+  /* ─── SECTION HEADER ─────────────────────────────────────── */
+  .section-header {
+    @apply flex items-center justify-between px-5 py-4 border-b border-dark-700/60;
+  }
+  .section-title { @apply text-sm font-semibold text-dark-100; }
 }
 
-/* ─────────────────────────────────────────────────────────
-   UTILITIES
-   ───────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   UTILITY LAYER
+   ═══════════════════════════════════════════════════════════════ */
 @layer utilities {
-  .scrollbar-none { scrollbar-width: none; }
-  .scrollbar-none::-webkit-scrollbar { display: none; }
 
+  /* ── Scrollbar ── */
+  .scrollbar-none                       { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar    { display: none; }
+  .scrollbar-thin                       { scrollbar-width: thin; }
+
+  /* ── Background grid (subtle dot/line pattern) ── */
   .bg-grid {
     background-image:
-      linear-gradient(rgba(128,134,139,0.07) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(128,134,139,0.07) 1px, transparent 1px);
+      linear-gradient(rgb(var(--c-dark-700) / 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--c-dark-700) / 0.08) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 
-  .text-balance { text-wrap: balance; }
+  .bg-dot-grid {
+    background-image: radial-gradient(rgb(var(--c-dark-600) / 0.3) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
 
-  /* Kept for GlobalNavbar / components that still use CSS-var helpers */
+  /* ── Typography ── */
+  .text-balance     { text-wrap: balance; }
+  .text-gradient    { @apply gradient-text; }
+
+  /* ── Theme convenience aliases ── */
   .theme-bg      { background-color: rgb(var(--c-dark-950)); }
   .theme-surface { background-color: rgb(var(--c-dark-900)); }
+  .theme-card    { background-color: rgb(var(--c-dark-900)); }
+  .theme-input   { background-color: rgb(var(--c-dark-800)); }
   .theme-text    { color: rgb(var(--c-dark-100)); }
+  .theme-body    { color: rgb(var(--c-dark-200)); }
   .theme-muted   { color: rgb(var(--c-dark-400)); }
+  .theme-subtle  { color: rgb(var(--c-dark-500)); }
+  .theme-border  { border-color: rgb(var(--border)); }
+
+  /* ── Noise texture overlay ── */
+  .noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.03;
+  }
+
+  /* ── Premium hover lift ── */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1;
+  }
+
+  /* ── Focus ring preset ── */
+  .ring-focus {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50;
+  }
+}
+
+/* ─── Light-mode structural overrides (outside @layer to beat utilities) ───
+   These run after all Tailwind layers so they take precedence over utility classes
+   that would otherwise win against @layer components rules.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* TopBar: pure white bg so it's clearly separate from zinc-50 page bg */
+html:not(.dark) header[class*="backdrop-blur"] {
+  background-color: #ffffff !important;
+  border-bottom-color: rgba(212,212,216,0.9) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.08), 0 2px 12px rgba(0,0,0,0.05) !important;
+}
+
+/* GlobalNavbar (landing page) */
+html:not(.dark) nav[class*="backdrop-blur"] {
+  background-color: rgba(255,255,255,0.96) !important;
+  border-bottom-color: rgba(212,212,216,0.8) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+
+/* Sidebar: clear gray tone so it's distinct from the white content area */
+html:not(.dark) aside.fixed {
+  background-color: #eeeef0 !important;
+  border-right-color: rgba(200,200,206,0.9) !important;
+}
+
+/* Landing hero overlay: reduce white wash so 3D scene stays visible */
+html:not(.dark) .hero-mask-lr {
+  background: linear-gradient(to right, rgba(250,250,250,0.82) 28%, transparent) !important;
+}
+html:not(.dark) .hero-mask-tb {
+  background: linear-gradient(to bottom, rgba(250,250,250,0.25), transparent 40%, rgba(250,250,250,0.55)) !important;
+}
+
+/* Landing category cards: white surface + shadow in light mode */
+html:not(.dark) .category-card {
+  background-color: #ffffff !important;
+  border-color: rgba(212,212,216,0.7) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04) !important;
+}
+html:not(.dark) .category-card:hover {
+  box-shadow: 0 8px 28px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06) !important;
+  border-color: rgba(67,97,255,0.3) !important;
 }
