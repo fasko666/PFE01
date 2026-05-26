@@ -10,8 +10,21 @@ import AuthLayout   from './components/layout/AuthLayout';
 import GlobalNavbar from './components/layout/GlobalNavbar';
 
 // Lazy pages
-const Landing       = lazy(() => import('./pages/Landing/Landing'));
-const Pricing       = lazy(() => import('./pages/Pricing/Pricing'));
+const Landing         = lazy(() => import('./pages/Landing/Landing'));
+const Pricing         = lazy(() => import('./pages/Pricing/Pricing'));
+const SuccessStories  = lazy(() => import('./pages/Resources/SuccessStories'));
+const HowItWorks      = lazy(() => import('./pages/Resources/HowItWorks'));
+const Reviews         = lazy(() => import('./pages/Resources/Reviews'));
+const Updates         = lazy(() => import('./pages/Resources/Updates'));
+const Blog            = lazy(() => import('./pages/Resources/Blog'));
+const Research        = lazy(() => import('./pages/Resources/Research'));
+const GetOutcomes     = lazy(() => import('./pages/GetOutcomes/GetOutcomes'));
+const BuildWebsite    = lazy(() => import('./pages/GetOutcomes/BuildWebsite'));
+const ScalePaidAds    = lazy(() => import('./pages/GetOutcomes/ScalePaidAds'));
+const HandleSupport   = lazy(() => import('./pages/GetOutcomes/HandleSupport'));
+const Agencies        = lazy(() => import('./pages/Agencies/Agencies'));
+const Search          = lazy(() => import('./pages/Search/Search'));
+const FindTalent      = lazy(() => import('./pages/FindTalent/FindTalent'));
 const Login           = lazy(() => import('./pages/Auth/Login'));
 const Register        = lazy(() => import('./pages/Auth/Register'));
 const Onboarding      = lazy(() => import('./pages/Auth/Onboarding'));
@@ -82,6 +95,20 @@ function AppRoot() {
           {/* Public */}
           <Route path="/" element={<Landing />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/success-stories" element={<SuccessStories />} />
+          <Route path="/how-it-works"    element={<HowItWorks />} />
+          <Route path="/reviews"         element={<Reviews />} />
+          <Route path="/updates"         element={<Updates />} />
+          <Route path="/blog"            element={<Blog />} />
+          <Route path="/research"        element={<Research />} />
+          <Route path="/get-outcomes"               element={<GetOutcomes />} />
+          <Route path="/get-outcomes/build-website" element={<BuildWebsite />} />
+          <Route path="/get-outcomes/scale-paid-ads"   element={<ScalePaidAds />} />
+          <Route path="/get-outcomes/handle-support"   element={<HandleSupport />} />
+          <Route path="/agencies"                      element={<Agencies />} />
+          <Route path="/search"                        element={<Search />} />
+          <Route path="/find-talent"                   element={<FindTalent />} />
+          <Route path="/find-talent/:skill"            element={<FindTalent />} />
 
           {/* Auth */}
           <Route element={<AuthLayout />}>

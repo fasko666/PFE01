@@ -96,48 +96,96 @@ const TALENT_CATS = [
   {
     id: 'dev', label: 'Development & IT',
     items: [
-      { label: 'Full-Stack Developers', desc: 'End-to-end web development',   href: '/freelancers?category=fullstack' },
-      { label: 'Frontend Developers',   desc: 'React, Vue, Angular experts',  href: '/freelancers?category=frontend' },
-      { label: 'Backend Developers',    desc: 'APIs, databases, server-side', href: '/freelancers?category=backend' },
-      { label: 'Mobile Developers',     desc: 'iOS, Android, React Native',   href: '/freelancers?category=mobile' },
+      { label: 'Full Stack Developers', desc: 'End-to-end web development',   href: '/find-talent/full-stack-developers' },
+      { label: 'React Developers',      desc: 'React, Vue, Angular experts',  href: '/find-talent/react-developers' },
+      { label: 'Backend Developers',    desc: 'APIs, databases, server-side', href: '/find-talent/full-stack-developers' },
+      { label: 'Mobile Developers',     desc: 'iOS, Android, React Native',   href: '/find-talent/full-stack-developers' },
     ],
   },
   {
     id: 'ai', label: 'AI & Machine Learning',
     items: [
-      { label: 'AI Developers',      desc: 'Custom AI apps and features',    href: '/freelancers?category=ai' },
-      { label: 'ML Engineers',       desc: 'Models that learn from data',    href: '/freelancers?category=ml' },
-      { label: 'Automation Experts', desc: 'Streamline business processes',  href: '/freelancers?category=automation' },
-      { label: 'Chatbot Developers', desc: 'AI for support and sales',       href: '/freelancers?category=chatbot' },
+      { label: 'AI Video Creators',  desc: 'Veo, Sora, Kling, Runway',       href: '/find-talent/ai-video-creators' },
+      { label: 'Chatbot Developers', desc: 'AI for support and sales',       href: '/find-talent/chatbot-developers' },
+      { label: 'AI Developers',      desc: 'Custom AI apps and features',    href: '/find-talent/chatbot-developers' },
+      { label: 'Automation Experts', desc: 'Streamline business processes',  href: '/find-talent/chatbot-developers' },
     ],
   },
   {
     id: 'design', label: 'Design & Creative',
     items: [
-      { label: 'UI/UX Designers',   desc: 'User-centered interface design', href: '/freelancers?category=uiux' },
-      { label: 'Graphic Designers', desc: 'Logos, branding, print',         href: '/freelancers?category=graphic' },
-      { label: 'Motion Designers',  desc: 'Animation and video',            href: '/freelancers?category=motion' },
+      { label: 'UI/UX Designers',   desc: 'User-centered interface design', href: '/find-talent/ui-ux-designers' },
+      { label: 'Logo Designers',    desc: 'Brand identity and marks',       href: '/find-talent/logo-designers' },
+      { label: 'Graphic Designers', desc: 'Logos, branding, print',         href: '/find-talent/logo-designers' },
     ],
   },
   {
     id: 'marketing', label: 'Marketing',
     items: [
-      { label: 'Digital Marketing', desc: 'Full-funnel strategy',       href: '/freelancers?category=marketing' },
-      { label: 'SEO Experts',       desc: 'Search engine optimization', href: '/freelancers?category=seo' },
-      { label: 'Social Media',      desc: 'Content and community',      href: '/freelancers?category=social' },
+      { label: 'SEO Experts',       desc: 'Search engine optimization', href: '/find-talent/seo-experts' },
+      { label: 'Digital Marketing', desc: 'Full-funnel strategy',       href: '/find-talent/seo-experts' },
+      { label: 'Social Media',      desc: 'Content and community',      href: '/find-talent/seo-experts' },
     ],
   },
   {
     id: 'writing', label: 'Writing & Content',
     items: [
-      { label: 'Copywriters',     desc: 'Compelling sales copy',   href: '/freelancers?category=copywriting' },
-      { label: 'Content Writers', desc: 'Blog posts and articles', href: '/freelancers?category=content' },
-      { label: 'Translators',     desc: 'Multi-language content',  href: '/freelancers?category=translation' },
+      { label: 'Content Writers', desc: 'Blog posts and articles', href: '/find-talent/content-writers' },
+      { label: 'Copywriters',     desc: 'Compelling sales copy',   href: '/find-talent/content-writers' },
+      { label: 'Translators',     desc: 'Multi-language content',  href: '/find-talent/content-writers' },
     ],
   },
 ];
 
 const SEARCH_TYPES = ['Talent', 'Jobs'];
+
+/* ── Get outcomes mega-menu data ───────────────────────── */
+const GET_OUTCOMES = {
+  intro: {
+    heading: 'Drive larger-scale work',
+    sub: 'Build specialized teams for complex projects',
+  },
+  outcomes: [
+    [
+      { label: 'Build my website',              desc: 'Web design, development and more',          href: '/get-outcomes/build-website' },
+      { label: 'Scale my paid ad campaigns',    desc: 'Growth marketing, media strategy and more', href: '/get-outcomes/scale-paid-ads' },
+      { label: 'Handle customer support with AI', desc: 'Chatbots, AI agents, systems and more',   href: '/get-outcomes/handle-support' },
+    ],
+    [
+      { label: 'Design my brand',       desc: 'Logo, brand identity and more',              href: '/get-outcomes' },
+      { label: 'Automate my workflows', desc: 'Planning, integration, AI agents and more', href: '/get-outcomes' },
+      { label: 'Build my sales pipeline',desc: 'Lead generation, AI outreach and more',    href: '/get-outcomes' },
+    ],
+  ],
+};
+
+/* ── Why PANDA mega-menu data ──────────────────────────── */
+const WHY_PANDA = {
+  intro: {
+    heading: 'Learn about PANDA',
+    sub: 'Get to know the platform built for the future of work',
+  },
+  columns: [
+    {
+      title: 'Resources',
+      items: [
+        { label: 'Success Stories',  desc: 'Discover how teams work strategically to grow', href: '/success-stories' },
+        { label: 'Reviews',          desc: "See what it's like to collaborate on PANDA",     href: '/reviews' },
+        { label: 'How to hire',      desc: 'Learn the different ways you can get work done', href: '/how-it-works' },
+        { label: 'How to find work', desc: 'Learn about how to grow on your terms',           href: '/how-it-works' },
+      ],
+    },
+    {
+      title: "What's new",
+      items: [
+        { label: 'PANDA Updates',     desc: 'Our latest products, features, and partners',     href: '/updates' },
+        { label: 'Research Institute',desc: 'Insights and tools for business leaders',          href: '/research' },
+        { label: 'Blog',              desc: "News and stories from the world's work marketplace", href: '/blog' },
+        { label: 'Release notes',     desc: 'Our latest product news and improvements',         href: '/updates' },
+      ],
+    },
+  ],
+};
 
 /* ── Main component ────────────────────────────────────── */
 export default function GlobalNavbar() {
@@ -186,10 +234,10 @@ export default function GlobalNavbar() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
-    navigate(searchType === 'Jobs'
-      ? `/jobs?search=${encodeURIComponent(searchQuery.trim())}`
-      : `/freelancers?search=${encodeURIComponent(searchQuery.trim())}`);
+    const q = searchQuery.trim();
+    if (!q) return;
+    const type = searchType === 'Jobs' ? 'jobs' : 'talent';
+    navigate(`/search?q=${encodeURIComponent(q)}&type=${type}`);
     setSearchQuery('');
   };
 
@@ -266,7 +314,16 @@ export default function GlobalNavbar() {
             <Trigger label="Find Talent" isOpen={openMenu === 'talent'} onEnter={() => { open('talent'); setActiveCat(0); }} onLeave={close}>
               <MegaMenu cats={TALENT_CATS} activeCat={activeCat} setActiveCat={setActiveCat} onGo={go} onClose={() => setOpenMenu(null)} compact />
             </Trigger>
-            {[['Why PANDA', '/#how'], ['Pricing', '/pricing'], ['Enterprise', '/']].map(([lbl, href]) => (
+
+            <Trigger label="Get outcomes" isOpen={openMenu === 'outcomes'} onEnter={() => open('outcomes')} onLeave={close}>
+              <GetOutcomesMenu onGo={go} />
+            </Trigger>
+
+            <Trigger label="Why PANDA" isOpen={openMenu === 'why'} onEnter={() => open('why')} onLeave={close}>
+              <WhyPandaMenu onGo={go} />
+            </Trigger>
+
+            {[['Pricing', '/pricing'], ['Enterprise', '/']].map(([lbl, href]) => (
               <Link key={lbl} to={href} className="px-3 py-2 text-[13px] font-medium text-dark-400 hover:text-dark-100 hover:bg-dark-800/70 rounded-lg transition-all">
                 {lbl}
               </Link>
@@ -277,6 +334,52 @@ export default function GlobalNavbar() {
         {/* ── Right side ── */}
         {!token ? (
           <div className="flex items-center gap-2 ml-auto shrink-0">
+            {/* Public search bar */}
+            <form onSubmit={handleSearch} className="hidden md:flex items-center mr-2">
+              <div
+                className="flex items-center bg-dark-900 border border-dark-700 rounded-full overflow-hidden transition-all focus-within:border-dark-500 focus-within:bg-dark-800/80 hover:border-dark-600"
+                style={{ height: 36 }}
+              >
+                <Search className="w-3.5 h-3.5 text-dark-500 ml-3.5 shrink-0" strokeWidth={2} />
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  type="text"
+                  placeholder="Search"
+                  className="bg-transparent pl-2 pr-2 text-[13px] text-dark-100 placeholder:text-dark-500 outline-none w-40 lg:w-56"
+                />
+                <div className="relative border-l border-dark-700 h-full flex items-center" ref={typeRef}>
+                  <button
+                    type="button"
+                    onClick={() => setTypeOpen((v) => !v)}
+                    className="flex items-center gap-1 px-3.5 h-full text-[13px] font-medium text-dark-300 hover:bg-dark-700/60 transition-colors"
+                  >
+                    {searchType}
+                    <ChevronDown
+                      className={`w-3 h-3 text-dark-500 transition-transform ${typeOpen ? 'rotate-180' : ''}`}
+                      strokeWidth={2.5}
+                    />
+                  </button>
+                  {typeOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-28 bg-dark-800 border border-dark-700 rounded-xl shadow-float overflow-hidden z-50">
+                      {SEARCH_TYPES.map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => { setSearchType(t); setTypeOpen(false); }}
+                          className={`w-full text-left px-3 py-2 text-[13px] transition-colors ${
+                            searchType === t ? 'bg-dark-700 font-semibold text-dark-100' : 'text-dark-300 hover:bg-dark-700'
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </form>
+
             <Link to="/login"
               className="text-[13px] font-medium text-dark-400 hover:text-dark-100 px-4 py-2 rounded-lg hover:bg-dark-800/70 transition-all">
               Log in
@@ -484,10 +587,15 @@ export default function GlobalNavbar() {
 }
 
 /* ── Nav trigger ───────────────────────────────────────── */
-function Trigger({ label, isOpen, onEnter, onLeave, children }) {
+function Trigger({ label, isOpen, onEnter, onLeave, children, to }) {
+  const navigate = useNavigate();
+  const onClickLabel = () => { if (to) navigate(to); };
   return (
     <div className="relative" onMouseEnter={onEnter} onMouseLeave={onLeave}>
-      <button className={`flex items-center gap-0.5 px-3 py-2 text-[13px] font-medium rounded-lg transition-all text-dark-400 hover:bg-dark-800/70 hover:text-dark-100 ${isOpen ? 'bg-dark-800/70 text-dark-100' : ''}`}>
+      <button
+        onClick={onClickLabel}
+        className={`flex items-center gap-0.5 px-3 py-2 text-[13px] font-medium rounded-lg transition-all text-dark-400 hover:bg-dark-800/70 hover:text-dark-100 ${isOpen ? 'bg-dark-800/70 text-dark-100' : ''}`}
+      >
         {label}
         <ChevronDown className={`w-3 h-3 ml-0.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} strokeWidth={2.5} />
       </button>
@@ -587,6 +695,81 @@ function MegaMenu({ cats, activeCat, setActiveCat, onGo, onClose, compact }) {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ── Get outcomes mega-menu ────────────────────────────── */
+function GetOutcomesMenu({ onGo }) {
+  return (
+    <div className="grid grid-cols-[220px_1fr_1fr]" style={{ width: 820 }}>
+      {/* Left intro pane */}
+      <div className="p-5 bg-dark-800/40 border-r border-dark-700/60">
+        <div className="text-[13px] font-bold text-dark-100 leading-snug">{GET_OUTCOMES.intro.heading}</div>
+        <p className="text-[11px] text-dark-500 mt-2 leading-relaxed">{GET_OUTCOMES.intro.sub}</p>
+      </div>
+
+      {/* Two outcome columns */}
+      {GET_OUTCOMES.outcomes.map((col, ci) => (
+        <div key={ci} className="p-4">
+          {ci === 0 && (
+            <div className="text-[10px] font-bold text-dark-500 uppercase tracking-widest px-2 mb-2">
+              Outcomes
+            </div>
+          )}
+          {ci === 1 && <div className="h-[26px]" />}
+          <div className="space-y-0.5">
+            {col.map((it) => (
+              <button
+                key={it.label}
+                onClick={() => onGo(it.href)}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-dark-800 transition-colors group"
+              >
+                <div className="text-[13px] font-semibold text-dark-100 group-hover:text-primary-300 transition-colors leading-tight">
+                  {it.label}
+                </div>
+                <div className="text-[11px] text-dark-500 mt-0.5 leading-snug">{it.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Why PANDA mega-menu ───────────────────────────────── */
+function WhyPandaMenu({ onGo }) {
+  return (
+    <div className="grid grid-cols-[220px_1fr_1fr]" style={{ width: 760 }}>
+      {/* Left intro pane */}
+      <div className="p-5 bg-dark-800/40 border-r border-dark-700/60">
+        <div className="text-[13px] font-bold text-dark-100 leading-snug">{WHY_PANDA.intro.heading}</div>
+        <p className="text-[11px] text-dark-500 mt-2 leading-relaxed">{WHY_PANDA.intro.sub}</p>
+      </div>
+
+      {/* Two columns */}
+      {WHY_PANDA.columns.map((col) => (
+        <div key={col.title} className="p-4">
+          <div className="text-[10px] font-bold text-dark-500 uppercase tracking-widest px-2 mb-2">
+            {col.title}
+          </div>
+          <div className="space-y-0.5">
+            {col.items.map((it) => (
+              <button
+                key={it.label}
+                onClick={() => onGo(it.href)}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-dark-800 transition-colors group"
+              >
+                <div className="text-[13px] font-semibold text-dark-100 group-hover:text-primary-300 transition-colors leading-tight">
+                  {it.label}
+                </div>
+                <div className="text-[11px] text-dark-500 mt-0.5 leading-snug">{it.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
