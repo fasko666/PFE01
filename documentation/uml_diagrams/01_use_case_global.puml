@@ -1,0 +1,95 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #EBF5FB
+  BorderColor #2196F3
+}
+skinparam packageStyle rectangle
+left to right direction
+title Use Case -- FreeNest (Vue Globale)
+
+actor "Freelancer" as FL #LightGreen
+actor "Client"     as CL #LightBlue
+actor "Admin"      as ADM #LightCoral
+actor "Google OAuth" as G <<external>>
+actor "Ollama IA"    as AI <<external>>
+
+rectangle "FreeNest" {
+  package "Authentification" {
+    (S'inscrire) as REG
+    (Se connecter) as LOGIN
+    (OAuth Google) as GOAUTH
+    (Onboarding) as ONBOARD
+  }
+  package "Marketplace Offres" {
+    (Publier une offre) as POST
+    (Parcourir les offres) as BROWSE
+    (Rechercher offres) as SEARCH
+    (Sauvegarder offre) as SAVE
+  }
+  package "Propositions & Contrats" {
+    (Soumettre proposition) as SUBMIT
+    (Generer via IA) as AIPR
+    (Accepter / Rejeter) as ACCEPT
+    (Gerer les jalons) as MILE
+  }
+  package "Paiements Escrow" {
+    (Deposer des fonds) as DEP
+    (Financer l'escrow) as ESC
+    (Liberer paiement) as REL
+    (Portefeuille) as WAL
+  }
+  package "Communication" {
+    (Messagerie temps reel) as MSG
+    (Notifications) as NOTIF
+  }
+  package "IA Assistant" {
+    (Generation proposition) as GEN
+    (Matching freelancers) as MATCH
+    (Analyser profil) as ANAL
+    (Chat IA) as CHAT
+  }
+  package "Administration" {
+    (Dashboard admin) as DASH
+    (Gerer utilisateurs) as USERS
+    (Analytics) as ANALY
+  }
+}
+
+FL --> REG
+FL --> LOGIN
+FL --> GOAUTH
+FL --> ONBOARD
+FL --> BROWSE
+FL --> SEARCH
+FL --> SAVE
+FL --> SUBMIT
+FL --> AIPR
+FL --> MILE
+FL --> WAL
+FL --> MSG
+FL --> GEN
+FL --> ANAL
+FL --> CHAT
+
+CL --> REG
+CL --> LOGIN
+CL --> POST
+CL --> ACCEPT
+CL --> MILE
+CL --> DEP
+CL --> ESC
+CL --> REL
+CL --> MSG
+CL --> MATCH
+
+ADM --> DASH
+ADM --> USERS
+ADM --> ANALY
+
+GOAUTH ..> G  : <<uses>>
+AIPR   ..> AI : <<uses>>
+MATCH  ..> AI : <<uses>>
+GEN    ..> AI : <<uses>>
+@enduml

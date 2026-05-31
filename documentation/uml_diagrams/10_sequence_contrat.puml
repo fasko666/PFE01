@@ -1,0 +1,48 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam sequenceMessageAlign center
+title Sequence -- Acceptation Proposition et Creation Contrat
+
+actor "Client" as CL
+actor "Freelancer" as FL
+participant "Frontend" as FE
+participant "ProposalController" as PC
+participant "ChatController" as CC
+database "MySQL" as DB
+
+CL -> FE : Consulte les propositions recues
+FE -> PC : GET /api/jobs/42/proposals
+PC -> DB : SELECT proposals WITH freelancer_profiles
+DB --> PC : Liste des propositions
+PC --> FE : HTTP 200 {proposals}
+
+CL -> FE : Accepte la proposition #89
+FE -> PC : POST /api/proposals/89/accept
+
+PC -> DB : BEGIN TRANSACTION
+PC -> DB : UPDATE proposals SET status='accepted' WHERE id=89
+PC -> DB : UPDATE proposals SET status='rejected' WHERE job_id=42 AND id!=89
+PC -> DB : UPDATE job_postings SET status='in_progress' WHERE id=42
+
+PC -> DB : INSERT contracts {
+  job_id:42, proposal_id:89,
+  client_id:8, freelancer_id:15,
+  amount:1200, status:'active'
+}
+DB --> PC : contract {id:33}
+
+PC -> DB : INSERT milestones []
+(depuis proposal.milestones JSON)
+
+PC -> DB : COMMIT
+
+PC -> CC : createConversation(contract_id:33, [8,15])
+CC -> DB : INSERT conversations + participants
+
+PC -> DB : INSERT notifications []
+(client + freelancer)
+
+PC --> FE : HTTP 200 {contract, conversation_id}
+FE --> CL : Contrat #33 cree !
+FE --> FL : Proposition acceptee - Contrat cree !
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam node {
+  BackgroundColor #EBF5FB
+  BorderColor #2196F3
+}
+skinparam database {
+  BackgroundColor #FFF9E6
+  BorderColor #E67E22
+}
+title Diagramme de Deploiement -- FreeNest
+
+node "Poste Developpeur (Windows 11)" {
+  node "Navigateur Web" {
+    component "React 19 + Vite\nlocalhost:5173" as REACT
+  }
+  node "PHP 8.2 / Artisan" {
+    component "Laravel 12 API\nlocalhost:8000" as LARAVEL
+    component "Sanctum\n+ Socialite" as AUTH
+  }
+  node "MySQL 8.0" {
+    database "freenest_db\n19 tables" as DB
+  }
+  node "Ollama" {
+    component "Mistral 7B\nlocalhost:11434" as OLLAMA
+  }
+  node "Node.js" {
+    component "Socket.IO\nlocalhost:3001" as SOCKET
+  }
+}
+
+cloud "Services Externes" {
+  component "Google OAuth 2.0" as GOOGLE
+  component "Stripe API" as STRIPE
+}
+
+REACT -down-> LARAVEL : REST API\nBearer Token
+REACT -down-> SOCKET  : WebSocket\nSocket.IO
+LARAVEL -down-> DB     : SQL / Eloquent
+LARAVEL -right-> OLLAMA : HTTP POST
+LARAVEL -up-> GOOGLE  : OAuth2
+LARAVEL -up-> STRIPE  : Paiements
+@enduml

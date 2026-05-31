@@ -1,0 +1,45 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam sequenceMessageAlign center
+title Sequence -- Paiement Escrow (4 phases)
+
+actor "Client" as CL
+actor "Freelancer" as FL
+participant "Frontend" as FE
+participant "PaymentController" as PAY
+database "MySQL" as DB
+
+== Phase 1 : Depot de fonds ==
+CL -> FE : Depose 1500$
+FE -> PAY : POST /api/payments/deposit
+PAY -> DB : wallet.balance += 1500
+PAY --> FE : {balance: 1500$}
+
+== Phase 2 : Financement escrow ==
+CL -> FE : Finance jalon 1 (300$)
+FE -> PAY : POST /api/payments/fund-escrow
+PAY -> DB : wallet.balance -= 300
+wallet.escrow += 300
+milestone.status = 'funded'
+PAY --> FE : Escrow finance
+FE --> FL : Jalon finance - commencez !
+
+== Phase 3 : Livraison ==
+FL -> FE : Soumet jalon termine
+FE -> PAY : PUT /api/milestones/{id}/submit
+PAY -> DB : milestone.status = 'submitted'
+FE --> CL : Revision requise !
+
+== Phase 4 : Liberation du paiement ==
+CL -> FE : Approuve le travail
+FE -> PAY : POST /api/payments/release-milestone
+note right : commission = 300 x 10% = 30$
+net freelancer = 270$
+PAY -> DB : BEGIN TRANSACTION
+client.escrow -= 300
+freelancer.balance += 270
+milestone.status = 'approved'
+COMMIT
+PAY --> FE : {net_received: 270$}
+FE --> FL : +270$ credites !
+@enduml

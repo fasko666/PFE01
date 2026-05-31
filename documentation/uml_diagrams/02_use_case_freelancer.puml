@@ -1,0 +1,81 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #E8F8E8
+  BorderColor #27AE60
+}
+left to right direction
+title Use Case -- Freelancer (Detail)
+
+actor "Freelancer" as FL #LightGreen
+
+rectangle "Espace Freelancer" {
+  package "Compte et Profil" {
+    (S'inscrire par email) as REG
+    (Connexion Google) as GOOGLE
+    (Onboarding 5 etapes) as OB
+    (Modifier profil) as EDIT
+    (Upload photo) as PHOTO
+  }
+  package "Portfolio et Competences" {
+    (Ajouter projet portfolio) as PORT
+    (Modifier projet) as EDITP
+    (Gerer competences) as SKILL
+    (Definir niveaux) as LEVEL
+  }
+  package "Marketplace" {
+    (Parcourir les offres) as BROWSE
+    (Filtrer par categorie) as FCAT
+    (Filtrer par budget) as FBUD
+    (Consulter une offre) as VIEW
+    (Sauvegarder offre) as SAVE
+  }
+  package "Propositions" {
+    (Soumettre proposition) as SUB
+    (Generer via IA) as AI
+    (Definir jalons) as MIL
+    (Voir mes propositions) as MYPROP
+    (Retirer proposition) as WITHD
+  }
+  package "Missions et Finance" {
+    (Voir mes contrats) as CONTRACT
+    (Soumettre jalon termine) as SUBM
+    (Consulter portefeuille) as WAL
+    (Retirer mes gains) as CASH
+  }
+  package "IA" {
+    (Analyser mon profil) as ANAL
+    (Chat assistant IA) as CHAT
+  }
+}
+
+FL --> REG
+FL --> GOOGLE
+FL --> OB
+FL --> EDIT
+FL --> PHOTO
+FL --> PORT
+FL --> EDITP
+FL --> SKILL
+FL --> LEVEL
+FL --> BROWSE
+FL --> FCAT
+FL --> FBUD
+FL --> VIEW
+FL --> SAVE
+FL --> SUB
+FL --> AI
+FL --> MIL
+FL --> MYPROP
+FL --> WITHD
+FL --> CONTRACT
+FL --> SUBM
+FL --> WAL
+FL --> CASH
+FL --> ANAL
+FL --> CHAT
+
+SUB .> AI  : <<extend>>
+SUB .> MIL : <<include>>
+@enduml

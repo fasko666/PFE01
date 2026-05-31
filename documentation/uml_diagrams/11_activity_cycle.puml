@@ -1,0 +1,77 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam activity {
+  BackgroundColor #EBF5FB
+  BorderColor #2196F3
+  ArrowColor #1565C0
+}
+title Activite -- Cycle de Vie d'une Mission FreeNest
+
+|#AED6F1|Client|
+|#A9DFBF|Freelancer|
+|#FAD7A0|Systeme|
+
+|Client|
+start
+:Publie une offre d'emploi;
+
+|Systeme|
+:Offre statut = "open";
+:Notifie les freelancers;
+
+|Freelancer|
+:Browse les offres;
+if (Interesse ?) then (Oui)
+  if (Utilise IA ?) then (Oui)
+    :Generation IA de la proposition;
+  else (Non)
+    :Redige manuellement;
+  endif
+  :Soumet la proposition;
+else (Non)
+  stop
+endif
+
+|Systeme|
+:Proposition = "pending";
+:Notifie le client;
+
+|Client|
+:Examine les propositions;
+if (Accepte ?) then (Oui)
+  :Accepte la proposition;
+else (Non)
+  stop
+endif
+
+|Systeme|
+:Contrat cree automatiquement;
+:Conversation ouverte;
+
+|Client|
+:Finance l'escrow du 1er jalon;
+
+|Freelancer|
+:Realise le travail;
+:Soumet le jalon;
+
+|Client|
+:Revise les livrables;
+if (Approuve ?) then (Oui)
+  :Libere le paiement;
+  |Systeme|
+  :Freelancer recoit 90%;
+  :Commission 10% plateforme;
+  if (Jalons restants ?) then (Oui)
+    |Client|
+    backward: Finance prochain jalon;
+  else (Non)
+    :Contrat = "completed";
+    :Echange des avis;
+    stop
+  endif
+else (Corrections)
+  |Freelancer|
+  backward: Corrige et resoumet;
+endif
+@enduml

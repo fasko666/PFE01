@@ -1,0 +1,87 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #EBF5FB
+  BorderColor #2196F3
+}
+left to right direction
+title Use Case -- Client (Detail)
+
+actor "Client" as CL #LightBlue
+
+rectangle "Espace Client" {
+  package "Compte" {
+    (S'inscrire) as REG
+    (Se connecter) as LOGIN
+    (Profil entreprise) as CPRO
+  }
+  package "Gestion Offres" {
+    (Creer une offre) as CREATE
+    (Definir budget et comp.) as SETDET
+    (Publier l'offre) as PUB
+    (Modifier offre) as EDIT
+    (Voir mes offres) as MYJOBS
+    (Cloturer offre) as CLOSE
+  }
+  package "Recrutement" {
+    (Parcourir freelancers) as BROWSE
+    (Voir profil freelancer) as VIEW
+    (Voir portfolio) as PORT
+    (Consulter propositions) as PROPS
+    (Accepter proposition) as ACCEPT
+    (Rejeter proposition) as REJECT
+    (Matching IA) as MATCH
+  }
+  package "Contrats et Jalons" {
+    (Creer contrat) as CON
+    (Definir jalons) as DEFMIL
+    (Reviser le travail) as REV
+    (Approuver jalon) as APR
+    (Demander corrections) as CORR
+    (Ouvrir un litige) as DISP
+  }
+  package "Finance" {
+    (Deposer des fonds) as DEP
+    (Financer l'escrow) as ESC
+    (Liberer paiement) as REL
+    (Historique transactions) as HIST
+  }
+  package "Communication" {
+    (Messagerie) as MSG
+    (Evaluer freelancer) as REVI
+  }
+}
+
+CL --> REG
+CL --> LOGIN
+CL --> CPRO
+CL --> CREATE
+CL --> SETDET
+CL --> PUB
+CL --> EDIT
+CL --> MYJOBS
+CL --> CLOSE
+CL --> BROWSE
+CL --> VIEW
+CL --> PORT
+CL --> PROPS
+CL --> ACCEPT
+CL --> REJECT
+CL --> MATCH
+CL --> CON
+CL --> DEFMIL
+CL --> REV
+CL --> APR
+CL --> CORR
+CL --> DISP
+CL --> DEP
+CL --> ESC
+CL --> REL
+CL --> HIST
+CL --> MSG
+CL --> REVI
+
+ACCEPT .> CON : <<include>>
+APR    .> REL : <<include>>
+@enduml

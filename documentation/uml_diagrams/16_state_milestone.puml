@@ -1,0 +1,27 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam state {
+  BackgroundColor #F0E6FF
+  BorderColor #8E44AD
+  ArrowColor #7D3C98
+}
+title Etats d'un Jalon (Milestone)
+
+[*] --> pending : Contrat cree
+
+pending   --> funded    : Client finance l'escrow
+funded    --> submitted : Freelancer soumet le travail
+submitted --> approved  : Client approuve\n-> Paiement libere
+submitted --> funded    : Client demande corrections
+submitted --> disputed  : Litige ouvert
+
+disputed  --> approved  : Admin - freelancer gagne
+disputed  --> pending   : Admin - remboursement client
+
+approved --> [*] : 90% au freelancer
+
+note right of funded
+  Argent bloque
+  en escrow
+end note
+@enduml

@@ -1,0 +1,156 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam classFontSize 10
+skinparam linetype ortho
+skinparam backgroundColor #FAFAFA
+skinparam class {
+  BackgroundColor #EBF5FB
+  BorderColor #2196F3
+  HeaderBackgroundColor #2196F3
+  HeaderFontColor white
+}
+title Diagramme de Classes -- FreeNest
+
+class User {
+  +id: int
+  +name: string
+  +email: string
+  +role: enum[freelancer|client|admin]
+  +avatar: string
+  +is_verified: boolean
+  +google_id: string
+}
+
+class FreelancerProfile {
+  +title: string
+  +bio: text
+  +hourly_rate: decimal
+  +experience_level: enum
+  +avg_rating: decimal
+  +total_jobs: int
+  +total_earned: decimal
+  +is_top_rated: boolean
+  +category: string
+}
+
+class ClientProfile {
+  +company_name: string
+  +industry: string
+  +total_spent: decimal
+  +payment_verified: boolean
+}
+
+class Category {
+  +name: string
+  +slug: string
+  +parent_id: int
+}
+
+class Skill {
+  +name: string
+  +slug: string
+  +category_id: int
+}
+
+class Portfolio {
+  +title: string
+  +project_url: string
+  +images: json
+  +is_featured: boolean
+}
+
+class JobPosting {
+  +title: string
+  +description: text
+  +type: enum[hourly|fixed]
+  +budget_min: decimal
+  +budget_max: decimal
+  +status: enum
+  +proposals_count: int
+}
+
+class Proposal {
+  +cover_letter: text
+  +bid_amount: decimal
+  +status: enum
+  +is_ai_generated: boolean
+  +connects_used: int
+}
+
+class Contract {
+  +title: string
+  +type: enum
+  +amount: decimal
+  +escrow_amount: decimal
+  +status: enum
+  +deadline_at: timestamp
+}
+
+class Milestone {
+  +title: string
+  +amount: decimal
+  +status: enum
+  +due_at: timestamp
+  +submitted_at: timestamp
+  +approved_at: timestamp
+}
+
+class Review {
+  +rating: decimal
+  +comment: text
+  +breakdown: json
+}
+
+class Wallet {
+  +balance: decimal
+  +pending_balance: decimal
+  +escrow_balance: decimal
+}
+
+class Transaction {
+  +type: enum[credit|escrow|debit]
+  +amount: decimal
+  +fee: decimal
+  +status: enum
+}
+
+class Conversation {
+  +type: enum[direct|group]
+}
+
+class Message {
+  +body: text
+  +type: enum[text|file|image]
+  +is_read: boolean
+}
+
+class AiHistory {
+  +type: enum
+  +input: json
+  +output: json
+  +tokens_used: int
+}
+
+User "1" *-- "0..1" FreelancerProfile : possede >
+User "1" *-- "0..1" ClientProfile     : possede >
+User "1" *-- "1"    Wallet            : a >
+User "1" o-- "N"    Portfolio         : publie >
+User "N" -- "N"     Skill
+User "N" -- "N"     Conversation
+
+User "1" o-- "N" JobPosting
+User "1" o-- "N" Proposal
+User "1" o-- "N" AiHistory
+
+JobPosting "N" o-- "1" Category
+JobPosting "1" o-- "N" Proposal
+
+Proposal "0..1" --> "1" Contract : genere >
+
+Contract "1" *-- "N" Milestone : contient >
+Contract "1" o-- "N" Review    : evalue >
+
+Wallet "1" *-- "N" Transaction : enregistre >
+
+Conversation "1" *-- "N" Message : contient >
+@enduml

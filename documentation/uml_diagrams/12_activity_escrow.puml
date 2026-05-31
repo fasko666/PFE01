@@ -1,0 +1,66 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam activity {
+  BackgroundColor #FFF9E6
+  BorderColor #E67E22
+  ArrowColor #D35400
+}
+title Activite -- Flux de Paiement Escrow
+
+|#AED6F1|Client|
+|#A9DFBF|Freelancer|
+|#FAD7A0|Systeme|
+
+|Client|
+start
+
+:Accede a son portefeuille;
+:Depose des fonds;
+
+|Systeme|
+:wallet.balance += montant;
+:Transaction credit enregistree;
+
+|Client|
+:Selectionne un jalon a financer;
+:Clique "Financer l'escrow";
+
+|Systeme|
+if (balance >= montant ?) then (Oui)
+  :wallet.balance -= montant;
+  :wallet.escrow_balance += montant;
+  :milestone.status = "funded";
+else (Non)
+  :Erreur "Solde insuffisant";
+  |Client|
+  backward: Depose plus de fonds;
+endif
+
+|Freelancer|
+:Realise le travail;
+:Soumet le jalon;
+
+|Systeme|
+:milestone.status = "submitted";
+:Notifie le client;
+
+|Client|
+:Revise les livrables;
+if (Approuve ?) then (Oui)
+  :Libere le paiement;
+  |Systeme|
+  :commission = montant x 10%;
+  :client.escrow -= montant;
+  :freelancer.balance += 90%;
+  :2 transactions enregistrees;
+  stop
+else if (Corrections) then (Oui)
+  |Freelancer|
+  backward: Corrige et resoumet;
+else (Litige)
+  |Systeme|
+  :contract.status = "disputed";
+  :Alerte admin;
+  stop
+endif
+@enduml

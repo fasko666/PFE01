@@ -1,0 +1,159 @@
+@startuml
+skinparam backgroundColor #FFFDF0
+skinparam class {
+  BackgroundColor #FFF9E6
+  BorderColor #E67E22
+  HeaderBackgroundColor #E67E22
+  HeaderFontColor white
+}
+skinparam linetype ortho
+title ERD -- FreeNest (19 tables)
+
+entity "users" as U {
+  * id: INT <<PK>>
+  --
+  name: VARCHAR
+  email: VARCHAR UNIQUE
+  role: ENUM
+  google_id: VARCHAR
+}
+
+entity "freelancer_profiles" as FP {
+  * id: INT <<PK>>
+  --
+  user_id: INT <<FK>>
+  title: VARCHAR
+  hourly_rate: DECIMAL
+  avg_rating: DECIMAL
+}
+
+entity "client_profiles" as CP {
+  * id: INT <<PK>>
+  --
+  user_id: INT <<FK>>
+  company_name: VARCHAR
+  total_spent: DECIMAL
+}
+
+entity "categories" as CAT {
+  * id: INT <<PK>>
+  --
+  parent_id: INT <<FK>>
+  name: VARCHAR
+  slug: VARCHAR
+}
+
+entity "skills" as SK {
+  * id: INT <<PK>>
+  --
+  category_id: INT <<FK>>
+  name: VARCHAR
+}
+
+entity "job_postings" as JP {
+  * id: INT <<PK>>
+  --
+  client_id: INT <<FK>>
+  category_id: INT <<FK>>
+  title: VARCHAR
+  budget_min: DECIMAL
+  status: ENUM
+}
+
+entity "proposals" as PR {
+  * id: INT <<PK>>
+  --
+  job_id: INT <<FK>>
+  freelancer_id: INT <<FK>>
+  bid_amount: DECIMAL
+  status: ENUM
+}
+
+entity "contracts" as CO {
+  * id: INT <<PK>>
+  --
+  job_id: INT <<FK>>
+  proposal_id: INT <<FK>>
+  client_id: INT <<FK>>
+  freelancer_id: INT <<FK>>
+  amount: DECIMAL
+  status: ENUM
+}
+
+entity "milestones" as MI {
+  * id: INT <<PK>>
+  --
+  contract_id: INT <<FK>>
+  title: VARCHAR
+  amount: DECIMAL
+  status: ENUM
+}
+
+entity "reviews" as RV {
+  * id: INT <<PK>>
+  --
+  contract_id: INT <<FK>>
+  reviewer_id: INT <<FK>>
+  rating: DECIMAL
+}
+
+entity "wallets" as WA {
+  * id: INT <<PK>>
+  --
+  user_id: INT <<FK>>
+  balance: DECIMAL
+  escrow_balance: DECIMAL
+}
+
+entity "transactions" as TR {
+  * id: INT <<PK>>
+  --
+  wallet_id: INT <<FK>>
+  type: ENUM
+  amount: DECIMAL
+  fee: DECIMAL
+}
+
+entity "conversations" as CV {
+  * id: INT <<PK>>
+  --
+  type: ENUM
+  contract_id: INT <<FK>>
+}
+
+entity "messages" as MSG {
+  * id: INT <<PK>>
+  --
+  conversation_id: INT <<FK>>
+  sender_id: INT <<FK>>
+  body: TEXT
+}
+
+entity "ai_histories" as AI {
+  * id: INT <<PK>>
+  --
+  user_id: INT <<FK>>
+  type: ENUM
+  tokens_used: INT
+}
+
+U ||--o| FP  : "1..1"
+U ||--o| CP  : "1..1"
+U ||--|| WA  : "1..1"
+U ||--o{ JP  : "publie"
+U ||--o{ PR  : "soumet"
+U ||--o{ AI  : "genere"
+
+CAT ||--o{ JP : "categorise"
+CAT ||--o{ SK : "groupe"
+
+JP ||--o{ PR : "recoit"
+PR ||--o| CO : "genere"
+
+CO ||--o{ MI : "contient"
+CO ||--o{ RV : "evalue"
+
+WA ||--o{ TR : "enregistre"
+
+CV ||--o{ MSG : "contient"
+@enduml

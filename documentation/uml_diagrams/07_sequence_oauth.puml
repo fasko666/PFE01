@@ -1,0 +1,37 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam sequenceMessageAlign center
+title Sequence -- Connexion Google OAuth
+
+actor "Utilisateur" as USR
+participant "Frontend" as FE
+participant "AuthController" as AUTH
+participant "Google OAuth" as GOOGLE
+database "MySQL" as DB
+
+USR -> FE : Clique "Continuer avec Google"
+FE -> AUTH : GET /auth/google/redirect
+AUTH -> GOOGLE : Socialite redirect
+GOOGLE --> USR : Page consentement Google
+
+USR -> GOOGLE : Autorise l'application
+GOOGLE -> AUTH : Callback ?code=xxx
+
+AUTH -> GOOGLE : Echange code vers access_token
+GOOGLE --> AUTH : {id, name, email, picture}
+
+AUTH -> DB : SELECT user WHERE google_id=X OR email=Y
+
+alt Utilisateur existant
+  DB --> AUTH : User trouve
+  AUTH -> DB : UPDATE last_seen_at
+else Nouvel utilisateur
+  DB --> AUTH : NULL
+  AUTH -> DB : INSERT users + INSERT freelancer_profiles
+end
+
+AUTH -> AUTH : user->createToken()
+AUTH --> FE : Redirect /auth/callback?token=xxx
+FE -> FE : Stocke token localStorage
+FE --> USR : Connecte - Dashboard
+@enduml
