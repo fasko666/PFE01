@@ -1078,6 +1078,7 @@ export default function Search() {
   const [sortOpen, setSortOpen] = useState(false);
   const [selectedTalent, setSelectedTalent] = useState(null);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const clearFilters = () => setFilters(DEFAULT_FILTERS);
 
   useEffect(() => {
@@ -1248,11 +1249,28 @@ export default function Search() {
       </section>
 
       {/* Body grid */}
-      <section className="container-custom py-8">
-        <div className="grid lg:grid-cols-[250px_1fr] gap-10">
+      <section className="container-custom py-6 sm:py-8 px-4 sm:px-6">
+        {/* Mobile filters toggle */}
+        <div className="lg:hidden mb-4 flex items-center justify-between">
+          <button
+            onClick={() => setMobileFiltersOpen((v) => !v)}
+            className="flex items-center gap-2 px-4 py-2 rounded-full border border-dark-700 bg-dark-900 text-xs font-semibold text-dark-100 hover:border-dark-500 transition-colors"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            {mobileFiltersOpen ? 'Hide filters' : 'Show filters'}
+          </button>
+          <button
+            onClick={clearFilters}
+            className="text-xs font-medium text-primary-400 hover:text-primary-300 transition-colors"
+          >
+            Clear all
+          </button>
+        </div>
 
-          {/* Sidebar */}
-          <div className="lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto pr-2 scrollbar-none">
+        <div className="grid lg:grid-cols-[250px_1fr] gap-6 lg:gap-10">
+
+          {/* Sidebar — hidden on mobile by default */}
+          <div className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto pr-2 scrollbar-none pb-4 lg:pb-0`}>
             {tab === 'talent'
               ? <TalentFilters filters={filters} setFilters={setFilters} />
               : <JobFilters />}

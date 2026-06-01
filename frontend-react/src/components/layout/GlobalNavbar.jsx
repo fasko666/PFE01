@@ -5,6 +5,7 @@ import {
   Bell, ChevronDown, LogOut, Settings,
   UserCircle2,
   ShieldCheck, BadgeCheck, UserPlus, Sun, Moon, Monitor,
+  Menu, X, Search as SearchIcon,
 } from 'lucide-react';
 import PandaLogo from '../ui/PandaLogo';
 import NotificationPanel from '../ui/NotificationPanel';
@@ -291,6 +292,7 @@ export default function GlobalNavbar() {
   const [activeCat,   setActiveCat]   = useState(0);
   const [onlineMsg,   setOnlineMsg]   = useState(true);
   const [themeOpen,   setThemeOpen]   = useState(false);
+  const [mobileOpen,  setMobileOpen]  = useState(false);
 
   const closeTimer = useRef(null);
   const navRef     = useRef(null);
@@ -319,23 +321,86 @@ export default function GlobalNavbar() {
   const open  = (name) => { clearTimeout(closeTimer.current); setOpenMenu(name); };
   const close = ()     => { closeTimer.current = setTimeout(() => setOpenMenu(null), 140); };
 
+  // Auto-close mobile drawer on route change
+  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
   const handleLogout = async () => {
     setOpenMenu(null);
     setShowNotifs(false);
+    setMobileOpen(false);
     await logout();
     toast.success('Logged out successfully');
     navigate('/');
   };
 
-  const go = (path) => { setOpenMenu(null); setShowNotifs(false); navigate(path); };
+  const go = (path) => { setOpenMenu(null); setShowNotifs(false); setMobileOpen(false); navigate(path); };
+
+  // Mobile menu items derived from role
+  const mobileNavItems = !token
+    ? [
+        { label: 'Find Talent', href: '/freelancers' },
+        { label: 'Find Work',   href: '/jobs' },
+        { label: 'Pricing',     href: '/pricing' },
+        { label: 'Enterprise',  href: '/' },
+        { label: 'How it works', href: '/how-it-works' },
+        { label: 'Blog',        href: '/blog' },
+      ]
+    : isClient
+    ? [
+        { label: 'Dashboard',   href: '/client/dashboard' },
+        { label: 'Post a Job',  href: '/jobs/post' },
+        { label: 'My Jobs',     href: '/my-jobs' },
+        { label: 'Find Talent', href: '/freelancers' },
+        { label: 'Messages',    href: '/messages' },
+        { label: 'Payments',    href: '/payments' },
+        { label: 'Reports',     href: '/reports' },
+        { label: 'Settings',    href: '/settings' },
+      ]
+    : isFreelancer
+    ? [
+        { label: 'Dashboard',     href: '/freelancer/dashboard' },
+        { label: 'Find Work',     href: '/jobs' },
+        { label: 'My Proposals',  href: '/my-proposals' },
+        { label: 'My Jobs',       href: '/my-jobs' },
+        { label: 'Messages',      href: '/messages' },
+        { label: 'Payments',      href: '/payments' },
+        { label: 'AI Assistant',  href: '/ai-assistant' },
+        { label: 'Profile',       href: '/freelancer/profile' },
+        { label: 'Settings',      href: '/freelancer/settings' },
+      ]
+    : [
+        { label: 'Admin Dashboard', href: '/admin/dashboard' },
+        { label: 'Users',           href: '/freelancers' },
+        { label: 'Jobs',            href: '/jobs' },
+        { label: 'Messages',        href: '/messages' },
+        { label: 'Payments',        href: '/payments' },
+      ];
 
   return (
     <nav
       ref={navRef}
-      className="fixed top-0 left-0 right-0 z-50 h-[60px] bg-dark-950/90 backdrop-blur-xl border-b border-dark-700/50"
-      style={{ boxShadow: '0 1px 0 rgba(255,255,255,0.04)' }}
+      className="fixed top-0 left-0 right-0 z-50 h-[60px] backdrop-blur-xl bg-dark-950/95 border-b border-dark-700/60"
+      style={{ boxShadow: '0 2px 12px -4px rgba(0,0,0,0.08)' }}
     >
-      <div className="h-full max-w-[1440px] mx-auto px-5 flex items-center gap-2">
+      <div className="navbar-header h-full max-w-[1440px] mx-auto px-4 sm:px-5 flex items-center gap-2">
+
+        {/* ── Mobile hamburger (circle button like Upwork) ── */}
+        <button
+          onClick={() => setMobileOpen((v) => !v)}
+          aria-label="Toggle menu"
+          aria-expanded={mobileOpen}
+          className="md:hidden w-10 h-10 flex items-center justify-center rounded-full border border-dark-700 text-dark-100 hover:bg-dark-800/70 transition-all shrink-0"
+        >
+          {mobileOpen
+            ? <X className="w-4 h-4" strokeWidth={2.5} />
+            : <Menu className="w-4 h-4" strokeWidth={2.5} />}
+        </button>
 
         {/* ── Logo ── */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0 mr-3 group">
@@ -415,20 +480,32 @@ export default function GlobalNavbar() {
 
         {/* ── Right side ── */}
         {!token ? (
-          <div className="flex items-center gap-2 ml-auto shrink-0">
-            {/* Public search bar — hidden on home (hero already has one) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
+            {/* Public search bar — desktop only; mobile uses the search icon below */}
             {!isHome && (
               <div className="hidden md:block mr-2">
                 <NavSearch variant="public" />
               </div>
             )}
 
+            {/* Mobile search icon (circle button like Upwork) */}
+            <button
+              onClick={() => navigate('/search')}
+              aria-label="Search"
+              className="md:hidden w-10 h-10 flex items-center justify-center rounded-full border border-dark-700 text-dark-100 hover:bg-dark-800/70 transition-all"
+            >
+              <SearchIcon className="w-4 h-4" strokeWidth={2.5} />
+            </button>
+
+            {/* Log in — hidden on small phones to save space */}
             <Link to="/login"
-              className="text-[13px] font-medium text-dark-400 hover:text-dark-100 px-4 py-2 rounded-lg hover:bg-dark-800/70 transition-all">
+              className="hidden sm:inline-block text-[13px] font-medium text-dark-300 hover:text-dark-100 px-3 sm:px-4 py-2 rounded-lg hover:bg-dark-800/70 transition-all">
               Log in
             </Link>
+
+            {/* Sign up — always visible, primary brand button */}
             <Link to="/register"
-              className="text-[13px] font-semibold bg-primary-500 text-white px-5 py-2 rounded-full hover:bg-primary-600 transition-all shadow-glow">
+              className="text-[13px] font-semibold bg-primary-500 text-white px-4 sm:px-5 py-2 rounded-full hover:bg-primary-600 transition-all">
               Sign up
             </Link>
           </div>
@@ -598,6 +675,125 @@ export default function GlobalNavbar() {
           </div>
         )}
       </div>
+
+      {/* ─── Mobile drawer ─── */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="mobile-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileOpen(false)}
+              className="md:hidden fixed inset-0 top-[60px] bg-black/60 backdrop-blur-sm z-40"
+            />
+
+            {/* Panel — Upwork-style: clean white surface, plain nav list, sticky bottom bar */}
+            <motion.div
+              key="mobile-panel"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+              style={{ backgroundColor: '#ffffff', color: '#18181b' }}
+              className="md:hidden fixed top-[60px] left-0 right-0 bottom-0 z-50 overflow-y-auto overscroll-contain flex flex-col shadow-[0_10px_40px_-12px_rgba(0,0,0,0.25)]"
+            >
+              {/* Search row at top */}
+              <div className="px-5 py-4 flex items-center justify-end border-b" style={{ borderColor: '#e4e4e7' }}>
+                <button
+                  onClick={() => {
+                    setMobileOpen(false);
+                    navigate('/search');
+                  }}
+                  aria-label="Search"
+                  className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-zinc-100 transition-colors"
+                  style={{ color: '#18181b' }}
+                >
+                  <SearchIcon className="w-5 h-5" strokeWidth={2} />
+                </button>
+              </div>
+
+              {/* User card (if logged in) */}
+              {token && user && (
+                <div className="px-5 py-4 border-b flex items-center gap-3" style={{ borderColor: '#e4e4e7' }}>
+                  <img
+                    src={user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=4361ff&color=fff`}
+                    alt={user.name}
+                    className="w-11 h-11 rounded-full shrink-0"
+                    style={{ outline: '2px solid #e4e4e7' }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-base font-semibold truncate" style={{ color: '#18181b' }}>{user.name}</div>
+                    <div className="text-xs capitalize truncate" style={{ color: '#71717a' }}>{user.role}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Nav links — big tap targets, plain text, chevron on right */}
+              <nav className="flex-1 py-2 pb-24">
+                {mobileNavItems.map((item) => {
+                  const isExternal = item.label === 'Enterprise';
+                  return (
+                    <Link
+                      key={item.href + item.label}
+                      to={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center justify-between px-5 py-4 text-base font-medium hover:bg-zinc-50 transition-colors"
+                      style={{ color: '#18181b' }}
+                    >
+                      <span>{item.label}</span>
+                      {isExternal
+                        ? <ArrowRight className="w-4 h-4" style={{ color: '#71717a' }} strokeWidth={2} />
+                        : <ChevronDown className="w-4 h-4 -rotate-90" style={{ color: '#71717a' }} strokeWidth={2} />
+                      }
+                    </Link>
+                  );
+                })}
+
+                {/* Sign-out link (logged-in only) — styled as a normal row */}
+                {token && (
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-between px-5 py-4 text-base font-medium text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <LogOut className="w-4 h-4" strokeWidth={2} />
+                      Sign out
+                    </span>
+                  </button>
+                )}
+              </nav>
+
+              {/* Sticky bottom bar: Log in + Sign up (only when logged out) */}
+              {!token && (
+                <div
+                  className="sticky bottom-0 left-0 right-0 px-5 py-4 border-t flex items-center gap-3"
+                  style={{ backgroundColor: '#ffffff', borderColor: '#e4e4e7' }}
+                >
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-sm font-semibold px-4 py-2.5"
+                    style={{ color: '#18181b' }}
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex-1 text-center text-sm font-semibold py-3 rounded-full bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+                  >
+                    Sign up
+                  </Link>
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MoreHorizontal, MessageSquare, Send, ArrowRight } from 'lucide-react';
+import { Search, MoreHorizontal, MessageSquare, Send, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api';
 import useAuthStore from '../../store/authStore';
@@ -95,8 +95,8 @@ export default function Messages() {
   return (
     <div className="h-[calc(100vh-7.5rem)] flex rounded-2xl overflow-hidden border border-dark-800 bg-dark-950">
 
-      {/* ── Left panel ── */}
-      <div className="w-72 shrink-0 border-r border-dark-800 flex flex-col bg-dark-900">
+      {/* ── Left panel (list) — full width on mobile, hidden when a chat is open ── */}
+      <div className={`${active ? 'hidden md:flex' : 'flex'} w-full md:w-72 md:shrink-0 border-r border-dark-800 flex-col bg-dark-900`}>
 
         {/* Header */}
         <div className="px-4 pt-4 pb-3 border-b border-dark-800 shrink-0">
@@ -212,19 +212,26 @@ export default function Messages() {
         </div>
       </div>
 
-      {/* ── Right panel ── */}
+      {/* ── Right panel (chat) — hidden on mobile until a conversation is selected ── */}
       {active ? (
         <div className="flex-1 flex flex-col min-w-0">
           {/* Chat header */}
-          <div className="h-14 px-5 flex items-center gap-3 border-b border-dark-800 shrink-0 bg-dark-950">
+          <div className="h-14 px-3 sm:px-5 flex items-center gap-3 border-b border-dark-800 shrink-0 bg-dark-950">
+            <button
+              onClick={() => setActive(null)}
+              aria-label="Back to conversations"
+              className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-dark-300 hover:bg-dark-800 hover:text-dark-100 transition-colors shrink-0"
+            >
+              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+            </button>
             <div className="relative">
               <UserAvatar user={otherUser(active)} size={32} ring={false} />
               {otherUser(active).is_online && (
                 <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 rounded-full border border-dark-950" />
               )}
             </div>
-            <div>
-              <p className="text-sm font-semibold text-white leading-tight">{otherUser(active).name || 'User'}</p>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-white leading-tight truncate">{otherUser(active).name || 'User'}</p>
               <p className="text-2xs text-dark-500">{otherUser(active).is_online ? 'Online now' : 'Offline'}</p>
             </div>
           </div>
@@ -304,11 +311,11 @@ export default function Messages() {
           </form>
         </div>
       ) : (
-        /* Welcome to Messages empty state */
-        <div className="flex-1 flex items-center justify-center bg-dark-950">
+        /* Welcome to Messages empty state — desktop only, on mobile the list takes the screen */
+        <div className="hidden md:flex flex-1 items-center justify-center bg-dark-950">
           <div className="text-center max-w-xs">
             <div className="w-16 h-16 rounded-2xl bg-dark-800/80 border border-dark-700/50 flex items-center justify-center mx-auto mb-5">
-              <MessageSquare className="w-7 h-7 text-dark-500" strokeWidth={1.5} />
+              <MessageSquare className="w-7 h-7 text-dark-500" strokeWidth={1.75} />
             </div>
             <h3 className="text-base font-semibold text-white mb-2">Welcome to Messages</h3>
             <p className="text-xs text-dark-500 leading-relaxed mb-6">

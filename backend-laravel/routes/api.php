@@ -13,7 +13,8 @@ use App\Http\Controllers\API\Notifications\NotificationController;
 use App\Http\Controllers\API\Reviews\ReviewController;
 
 // ─── Public Routes ─────────────────────────────────────────────────────────
-Route::prefix('auth')->group(function () {
+// Rate-limited to prevent brute-force / credential stuffing on auth endpoints
+Route::prefix('auth')->middleware('throttle:10,1')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login',    [AuthController::class, 'login']);
 });
@@ -91,21 +92,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/milestones/{milestone}/release',        [PaymentController::class, 'releaseMilestone']);
     });
 
-    // AI
-    Route::prefix('ai')->group(function () {
+    // AI — rate-limited (cost protection: AI calls hit a paid LLM upstream)
+    Route::prefix('ai')->middleware('throttle:20,1')->group(function () {
         Route::post('/generate-proposal',   [AIController::class, 'generateProposal']);
         Route::post('/match-freelancers',   [AIController::class, 'matchFreelancers']);
         Route::post('/chat',                [AIController::class, 'chat']);
-        Route::post('/analyze-profile',    [AIController::class, 'analyzeProfile']);
-        Route::post('/smart-search',       [AIController::class, 'smartSearch']);
+        Route::post('/analyze-profile',     [AIController::class, 'analyzeProfile']);
+        Route::post('/smart-search',        [AIController::class, 'smartSearch']);
     });
 
     // Reviews
     Route::post('/reviews',             [ReviewController::class, 'store']);
     Route::delete('/reviews/{review}',  [ReviewController::class, 'destroy']);
 
-    // Admin
-    Route::prefix('admin')->group(function () {
+    // Admin — protected by admin middleware (defense in depth: also checked in controller)
+    Route::prefix('admin')->middleware('admin')->group(function () {
         Route::get('/dashboard',            [AdminController::class, 'dashboard']);
         Route::get('/users',                [AdminController::class, 'users']);
         Route::post('/users/{user}/ban',    [AdminController::class, 'banUser']);

@@ -343,7 +343,7 @@ export default function FreelancerProfile() {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => <div key={i} className="card p-5 h-20 skeleton" />)}
         </div>
       </div>
@@ -493,7 +493,7 @@ export default function FreelancerProfile() {
       </motion.div>
 
       {/* Stats row */}
-      <motion.div {...fadeUp(0.05)} className="grid grid-cols-3 gap-4">
+      <motion.div {...fadeUp(0.05)} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { icon: Briefcase,  label: 'Jobs Done',   value: profile.completed_contracts || 0,  color: 'text-primary-400', bg: 'bg-primary-500/10' },
           { icon: Star,       label: 'Rating',      value: avgRating.toFixed(1),               color: 'text-yellow-400',  bg: 'bg-yellow-500/10' },

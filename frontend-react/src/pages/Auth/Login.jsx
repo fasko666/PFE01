@@ -109,21 +109,6 @@ export default function Login() {
 
   const handleGoogle = () => { window.location.href = `${API_BASE}/auth/google`; };
 
-  const demoLogin = async (demoEmail) => {
-    setLoading(true);
-    try {
-      const data = await login({ email: demoEmail, password: 'password' });
-      const u = data.user || data;
-      await fetchNotifs();
-      toast.success(`Logged in as ${u.name}`);
-      redirect(u);
-    } catch {
-      toast.error('Demo login failed — is the backend running?');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const slide = {
     initial:    { opacity: 0, x: 18 },
     animate:    { opacity: 1, x: 0 },
@@ -220,26 +205,6 @@ export default function Login() {
               </Link>
             </div>
 
-            {/* Demo quick-access */}
-            <div className="pt-3 border-t border-dark-700/40">
-              <p className="text-xs text-dark-600 text-center mb-2">Quick demo access</p>
-              <div className="flex gap-2 justify-center">
-                {[
-                  { label: 'Freelancer', email: 'youness@freenest.io' },
-                  { label: 'Client',     email: 'client1@freenest.io' },
-                  { label: 'Admin',      email: 'admin@freenest.io' },
-                ].map((d) => (
-                  <button
-                    key={d.email}
-                    onClick={() => demoLogin(d.email)}
-                    disabled={loading}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-dark-800 border border-dark-700 text-dark-400 hover:bg-dark-700 hover:text-dark-200 transition-all disabled:opacity-40"
-                  >
-                    {d.label}
-                  </button>
-                ))}
-              </div>
-            </div>
           </motion.div>
         )}
 

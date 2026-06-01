@@ -72,7 +72,7 @@ export default function JobDetail() {
         <div className="card p-6 space-y-4">
           <div className="skeleton h-7 rounded-lg w-3/4" />
           <div className="skeleton h-4 rounded-lg w-1/2" />
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[1, 2, 3, 4].map((i) => <div key={i} className="skeleton h-20 rounded-xl" />)}
           </div>
           <div className="skeleton h-32 rounded-xl" />

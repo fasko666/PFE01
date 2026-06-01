@@ -12,10 +12,17 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
+    /**
+     * Mass-assignable fields.
+     * SECURITY: 'role', 'is_active', 'is_verified', 'email_verified_at' are
+     * intentionally excluded — they must only be set via explicit, audited code
+     * paths (registration controller, admin actions, email-verification flow).
+     * This prevents privilege escalation if any controller ever passes $request->all().
+     */
     protected $fillable = [
-        'name','username','email','password','role',
+        'name','username','email','password',
         'avatar','country','timezone','phone','phone_verified',
-        'is_verified','is_active','is_online','last_seen_at',
+        'is_online','last_seen_at',
         'google_id','github_id',
     ];
 

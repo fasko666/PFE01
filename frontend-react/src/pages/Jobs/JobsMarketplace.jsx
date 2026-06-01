@@ -40,6 +40,7 @@ export default function JobsMarketplace() {
   const [loading, setLoading] = useState(true);
   const [savedJobs, setSavedJobs] = useState(new Set());
   const [sortOpen, setSortOpen] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const [filters, setFilters] = useState({
     search: params.get('search') || '',
@@ -134,9 +135,20 @@ export default function JobsMarketplace() {
         </button>
       </motion.form>
 
-      <div className="flex gap-6">
-        {/* Filters sidebar */}
-        <motion.aside {...fadeUp(0.08)} className="w-56 shrink-0 space-y-5 hidden lg:block">
+      {/* Mobile filter toggle */}
+      <div className="lg:hidden -mb-2">
+        <button
+          onClick={() => setMobileFiltersOpen((v) => !v)}
+          className="flex items-center gap-2 px-4 py-2 rounded-full border border-dark-700 bg-dark-900 text-xs font-semibold text-dark-100 hover:border-dark-500 transition-colors"
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5" />
+          {mobileFiltersOpen ? 'Hide filters' : 'Show filters'}
+        </button>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Filters sidebar — collapsible on mobile */}
+        <motion.aside {...fadeUp(0.08)} className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block w-full lg:w-56 lg:shrink-0 space-y-5`}>
           {/* Category */}
           <div className="card p-4 space-y-1">
             <p className="text-2xs font-semibold text-dark-500 uppercase tracking-widest mb-2 px-1">Category</p>

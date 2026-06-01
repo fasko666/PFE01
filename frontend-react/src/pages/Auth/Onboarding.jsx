@@ -496,11 +496,11 @@ export default function Onboarding() {
             </p>
 
             <div className="space-y-3 max-w-3xl">
-              <div className="grid grid-cols-[1fr_1fr_auto] gap-4 text-xs font-semibold text-dark-300">
+              <div className="grid grid-cols-[1fr_1fr_auto] gap-2 sm:gap-4 text-xs font-semibold text-dark-300">
                 <span>Language</span><span>Proficiency</span><span className="w-8" />
               </div>
               {form.languages.map((row, i) => (
-                <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-4 items-center">
+                <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-2 sm:gap-4 items-center">
                   {i === 0 ? (
                     <div className="px-3 py-2.5 text-sm text-primary-400">English (all profiles include this)</div>
                   ) : (
@@ -829,7 +829,7 @@ export default function Onboarding() {
     <div className="min-h-screen bg-dark-950 flex flex-col">
       <TopBar user={user} onLogout={handleLogout} />
 
-      <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-10 pb-32">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10 pb-32">
         {step <= 10 && <Progress step={step} />}
         <AnimatePresence mode="wait">
           <motion.div
@@ -846,23 +846,23 @@ export default function Onboarding() {
 
       {step <= 10 && (
         <footer className="fixed bottom-0 inset-x-0 bg-dark-950/95 backdrop-blur border-t border-dark-800 z-30">
-          <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
             <button onClick={back}
               disabled={step <= 2}
-              className="px-6 py-2.5 rounded-full border border-dark-700 text-xs font-semibold text-dark-200 hover:border-dark-500 hover:text-dark-100 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+              className="px-4 sm:px-6 py-2.5 rounded-full border border-dark-700 text-xs font-semibold text-dark-200 hover:border-dark-500 hover:text-dark-100 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
               Back
             </button>
 
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-3 sm:gap-5">
               {skipAvailable && (
-                <button onClick={next} className="text-xs font-semibold text-dark-300 hover:text-dark-100 transition-colors">
+                <button onClick={next} className="text-xs font-semibold text-dark-300 hover:text-dark-100 transition-colors hidden sm:inline">
                   Skip for now
                 </button>
               )}
               <button
                 onClick={step === 10 ? () => setStep(11) : next}
                 disabled={!canProceed}
-                className="px-6 py-2.5 rounded-full bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="px-4 sm:px-6 py-2.5 rounded-full bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 {NextLabel}
               </button>

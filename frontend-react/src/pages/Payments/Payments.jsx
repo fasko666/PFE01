@@ -306,7 +306,7 @@ export default function Payments() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {[50, 100, 250, 500, 1000, 2000].map((a) => (
                   <button
                     key={a}

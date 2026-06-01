@@ -198,7 +198,7 @@ function PricingCard({ plan }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className={`relative rounded-3xl p-8 border transition-all ${
+      className={`relative rounded-3xl p-6 sm:p-8 border transition-all ${
         plan.popular
           ? 'border-primary-500/40 bg-gradient-to-br from-primary-500/10 via-dark-900 to-dark-900 shadow-[0_30px_80px_-20px_rgba(67,97,255,0.35)]'
           : 'border-dark-800 bg-dark-900'
@@ -210,7 +210,7 @@ function PricingCard({ plan }) {
         </div>
       )}
 
-      <h3 className="text-3xl font-bold font-display text-dark-100 mb-2">{plan.name}</h3>
+      <h3 className="text-2xl sm:text-3xl font-bold font-display text-dark-100 mb-2">{plan.name}</h3>
       <p className="text-sm text-dark-400 mb-6">{plan.tagline}</p>
 
       <Link
@@ -266,7 +266,7 @@ function ComparisonGroup({ group, rows }) {
         const isOpen = openRow === idx;
         return (
           <div key={idx} className="border-t border-dark-800/60">
-            <div className="grid grid-cols-[1fr_180px_180px] items-center">
+            <div className="grid grid-cols-[1fr_90px_90px] sm:grid-cols-[1fr_140px_140px] md:grid-cols-[1fr_180px_180px] items-center">
               <button
                 onClick={() => setOpenRow(isOpen ? null : idx)}
                 className="flex items-center gap-2 px-4 py-4 text-left text-xs text-dark-200 hover:text-dark-100 transition-colors"
@@ -306,14 +306,14 @@ export default function Pricing() {
     <div className="min-h-screen bg-dark-950" style={{ paddingTop: 64 }}>
 
       {/* ── Hero ── */}
-      <section className="pt-20 pb-16 relative overflow-hidden">
+      <section className="pt-12 sm:pt-20 pb-10 sm:pb-16 px-4 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-primary-500/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="container-custom relative z-10 text-center max-w-3xl mx-auto">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-5xl md:text-6xl font-bold font-display text-dark-100 leading-[1.05] tracking-tight mb-5"
+            className="text-3xl sm:text-5xl md:text-6xl font-bold font-display text-dark-100 leading-[1.1] sm:leading-[1.05] tracking-tight mb-5"
           >
             Flexible pricing that scales<br />
             with your <span className="gradient-text">business</span>
@@ -357,7 +357,7 @@ export default function Pricing() {
         <div className="container-custom">
           <div className="max-w-5xl mx-auto">
             {/* Sticky comparison header */}
-            <div className="grid grid-cols-[1fr_180px_180px] items-end gap-0 border-b-2 border-dark-800 pb-6 mb-2">
+            <div className="grid grid-cols-[1fr_90px_90px] sm:grid-cols-[1fr_140px_140px] md:grid-cols-[1fr_180px_180px] items-end gap-0 border-b-2 border-dark-800 pb-6 mb-2">
               <div>
                 <h2 className="text-3xl md:text-4xl font-bold font-display text-dark-100">Key Features</h2>
               </div>

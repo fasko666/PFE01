@@ -52,14 +52,26 @@ class AdminController extends Controller
 
     public function banUser(Request $request, User $user): JsonResponse
     {
-        $user->update(['is_active' => false]);
+        // Prevent admin from banning themselves (lock-out protection)
+        if ($user->id === $request->user()->id) {
+            return response()->json(['message' => 'You cannot ban yourself'], 422);
+        }
+        // Prevent banning other admins (privilege protection)
+        if ($user->role === 'admin') {
+            return response()->json(['message' => 'Cannot ban another admin'], 403);
+        }
+
+        $user->forceFill(['is_active' => false])->save();
         $user->tokens()->delete();
         return response()->json(['message' => "User {$user->name} banned"]);
     }
 
     public function verifyUser(Request $request, User $user): JsonResponse
     {
-        $user->update(['is_verified' => true]);
+        if ($user->id === $request->user()->id) {
+            return response()->json(['message' => 'Cannot verify yourself'], 422);
+        }
+        $user->forceFill(['is_verified' => true])->save();
         return response()->json(['message' => "User {$user->name} verified"]);
     }
 

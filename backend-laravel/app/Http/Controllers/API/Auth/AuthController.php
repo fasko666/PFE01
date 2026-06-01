@@ -39,7 +39,9 @@ class AuthController extends Controller
             $avatarPath = $this->saveBase64Avatar($request->avatar);
         }
 
-        $user = User::create([
+        // Use forceFill for guarded fields (role, email_verified_at) — explicit,
+        // audited path. Validation above already restricted role to freelancer|client.
+        $user = (new User)->forceFill([
             'name'              => $request->name,
             'username'          => $this->generateUsername($request->name),
             'email'             => $request->email,
@@ -48,7 +50,9 @@ class AuthController extends Controller
             'country'           => $request->country,
             'avatar'            => $avatarPath,
             'email_verified_at' => now(),
+            'is_active'         => true,
         ]);
+        $user->save();
 
         if ($user->isFreelancer()) {
             $user->freelancerProfile()->create([]);
@@ -86,6 +90,13 @@ class AuthController extends Controller
         }
 
         $user = User::with(['freelancerProfile', 'clientProfile', 'subscription', 'wallet'])->find(Auth::id());
+
+        // Banned account check — refuse login and do not issue token
+        if (!$user->is_active) {
+            Auth::logout();
+            return response()->json(['message' => 'This account has been suspended. Contact support.'], 403);
+        }
+
         $user->update(['is_online' => true, 'last_seen_at' => now()]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -239,8 +250,8 @@ class AuthController extends Controller
                 $user->update($updates);
             }
         } else {
-            // Create new user from Google data
-            $user = User::create([
+            // Create new user from Google data — forceFill for guarded fields
+            $user = (new User)->forceFill([
                 'name'              => $googleUser->getName(),
                 'username'          => $this->generateUsername($googleUser->getName()),
                 'email'             => $googleUser->getEmail(),
@@ -249,11 +260,18 @@ class AuthController extends Controller
                 'google_id'         => $googleUser->getId(),
                 'avatar'            => $this->highResGoogleAvatar($googleUser->getAvatar()),
                 'email_verified_at' => now(), // Google already verified the email
+                'is_active'         => true,
             ]);
 
+            $user->save();
             $user->freelancerProfile()->create([]);
             Wallet::create(['user_id' => $user->id]);
             Subscription::create(['user_id' => $user->id, 'plan' => 'free', 'connects_balance' => 10]);
+        }
+
+        // Reject Google login for banned accounts
+        if (!$user->is_active) {
+            return redirect("{$frontendUrl}/auth/callback?error=account_suspended");
         }
 
         $user->update(['is_online' => true, 'last_seen_at' => now()]);
@@ -268,16 +286,46 @@ class AuthController extends Controller
 
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
+    /**
+     * Save a base64 data-URI avatar. Hardened against:
+     *  - Wrong MIME type (only image/jpeg, image/png, image/webp accepted)
+     *  - Mismatch between declared MIME and actual bytes (re-verified via getimagesizefromstring)
+     *  - Oversized uploads (max ~5 MB decoded)
+     *  - Fake extensions (server picks the extension from the verified MIME)
+     */
     private function saveBase64Avatar(string $base64): ?string
     {
         try {
-            if (!str_contains($base64, ',')) return null;
-            $data    = explode(',', $base64, 2)[1];
-            $decoded = base64_decode($data);
-            if (!$decoded) return null;
+            // Must be a data URI: data:image/png;base64,iVBOR...
+            if (!preg_match('#^data:(image/(jpeg|png|webp));base64,(.+)$#', $base64, $m)) {
+                return null;
+            }
+            $declaredMime = $m[1];
+            $payload      = $m[3];
 
-            $ext      = 'jpg';
-            $filename = 'avatars/' . Str::uuid() . '.' . $ext;
+            $decoded = base64_decode($payload, true);
+            if ($decoded === false) return null;
+
+            // Hard size limit: ~5 MB decoded
+            if (strlen($decoded) > 5 * 1024 * 1024) return null;
+
+            // Verify the bytes are actually an image and the MIME matches what was declared
+            $info = @getimagesizefromstring($decoded);
+            if ($info === false) return null;
+
+            $allowed = [
+                IMAGETYPE_JPEG => ['mime' => 'image/jpeg', 'ext' => 'jpg'],
+                IMAGETYPE_PNG  => ['mime' => 'image/png',  'ext' => 'png'],
+                IMAGETYPE_WEBP => ['mime' => 'image/webp', 'ext' => 'webp'],
+            ];
+            if (!isset($allowed[$info[2]]) || $allowed[$info[2]]['mime'] !== $declaredMime) {
+                return null;
+            }
+
+            // Cap dimensions to prevent decompression-bomb resource exhaustion
+            if ($info[0] > 4096 || $info[1] > 4096) return null;
+
+            $filename = 'avatars/' . Str::uuid() . '.' . $allowed[$info[2]]['ext'];
             \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $decoded);
             return $filename;
         } catch (\Exception $e) {
