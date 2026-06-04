@@ -24,24 +24,46 @@ class User extends Authenticatable
         'avatar','country','timezone','phone','phone_verified',
         'is_online','last_seen_at',
         'google_id','github_id',
+        'connects_balance',
     ];
 
-    protected $hidden = ['password','remember_token'];
+    protected $hidden = ['password','remember_token','two_factor_secret','two_factor_recovery_codes'];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'last_seen_at'      => 'datetime',
-        'password'          => 'hashed',
-        'is_verified'       => 'boolean',
-        'is_active'         => 'boolean',
-        'is_online'         => 'boolean',
-        'phone_verified'    => 'boolean',
+        'email_verified_at'        => 'datetime',
+        'last_seen_at'             => 'datetime',
+        'two_factor_confirmed_at'  => 'datetime',
+        'password'                 => 'hashed',
+        'is_verified'              => 'boolean',
+        'is_active'                => 'boolean',
+        'is_online'                => 'boolean',
+        'phone_verified'           => 'boolean',
     ];
+
+    /** @internal — exposed for the auth flow */
+    public function hasEnabledTwoFactorAuthentication(): bool
+    {
+        return ! is_null($this->two_factor_confirmed_at);
+    }
 
     public function freelancerProfile() { return $this->hasOne(FreelancerProfile::class); }
     public function clientProfile()     { return $this->hasOne(ClientProfile::class); }
     public function wallet()            { return $this->hasOne(Wallet::class); }
-    public function subscription()      { return $this->hasOne(Subscription::class); }
+    /** Subscriptions — Cashier-compatible. `subscription()` returns the active 'default' if any. */
+    public function subscriptions()     { return $this->hasMany(Subscription::class); }
+    public function subscription(string $type = 'default')
+    {
+        return $this->hasOne(Subscription::class)->where('type', $type)
+            ->orderByDesc('created_at');
+    }
+    /** True if user has any active subscription of any type (or a specific plan if $slug given). */
+    public function subscribed(?string $slug = null, string $type = 'default'): bool
+    {
+        $sub = $this->subscriptions()->where('type', $type)->latest()->first();
+        if (! $sub) return false;
+        if ($slug && $sub->plan_slug !== $slug) return false;
+        return $sub->active();
+    }
     public function skills()            { return $this->belongsToMany(Skill::class,'freelancer_skills')->withPivot('level')->withTimestamps(); }
     public function portfolios()        { return $this->hasMany(Portfolio::class); }
     public function jobPostings()       { return $this->hasMany(JobPosting::class,'client_id'); }

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { resolveFooter } from '../../utils/footerLinks';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -652,7 +653,7 @@ export default function Reviews() {
                 <ul className="space-y-2.5">
                   {col.items.map((l) => (
                     <li key={l}>
-                      <a href="#" className="text-xs text-dark-400 hover:text-dark-100 transition-colors">{l}</a>
+                      <Link to={resolveFooter(l)} className="text-xs text-dark-400 hover:text-dark-100 transition-colors" >{l}</Link>
                     </li>
                   ))}
                 </ul>
@@ -664,7 +665,7 @@ export default function Reviews() {
             <div className="flex items-center gap-4">
               <span className="text-xs text-dark-500">Follow us</span>
               {SOCIAL.map((s) => (
-                <a key={s.label} href="#" aria-label={s.label}
+                <a key={s.label} onClick={(e) => e.preventDefault()} href="#" aria-label={s.label}
                    className="w-7 h-7 rounded-full border border-dark-700 flex items-center justify-center text-dark-400 hover:text-dark-100 hover:border-dark-500 transition-colors">
                   <SocialIcon d={s.d} label={s.label} />
                 </a>
@@ -672,10 +673,10 @@ export default function Reviews() {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-dark-500">Mobile app</span>
-              <a href="#" aria-label="iOS app" className="w-7 h-7 rounded-full border border-dark-700 flex items-center justify-center text-dark-400 hover:text-dark-100 hover:border-dark-500 transition-colors">
+              <a onClick={(e) => e.preventDefault()} href="#" aria-label="iOS app" className="w-7 h-7 rounded-full border border-dark-700 flex items-center justify-center text-dark-400 hover:text-dark-100 hover:border-dark-500 transition-colors">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 1.2a4.6 4.6 0 0 1-1.1 3.2c-.8 1-2 1.7-3.2 1.6a4.4 4.4 0 0 1 1.1-3.2c.8-1 2.1-1.6 3.2-1.6Zm4 17.4c-.6 1.4-1.4 2.7-2.6 3.4a4 4 0 0 1-2.2.6c-.9 0-1.5-.3-2.4-.3-.9 0-1.6.3-2.4.3a3.8 3.8 0 0 1-2.2-.6c-1.2-.7-2.1-2-2.7-3.4-1.3-2.9-1.3-6.2 0-8.9 1-2.1 2.7-3.3 4.6-3.4.9 0 1.7.3 2.4.3.7 0 1.5-.3 2.4-.3 1.7 0 3.3.9 4.3 2.5-3.8 2.1-3.2 7.6.8 9.8Z"/></svg>
               </a>
-              <a href="#" aria-label="Android app" className="w-7 h-7 rounded-full border border-dark-700 flex items-center justify-center text-dark-400 hover:text-dark-100 hover:border-dark-500 transition-colors">
+              <a onClick={(e) => e.preventDefault()} href="#" aria-label="Android app" className="w-7 h-7 rounded-full border border-dark-700 flex items-center justify-center text-dark-400 hover:text-dark-100 hover:border-dark-500 transition-colors">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 9.5 19 6.8c.1-.2 0-.5-.2-.6-.2-.1-.5 0-.6.2L16.6 9c-1.4-.6-3-1-4.6-1s-3.2.4-4.6 1L5.8 6.4c-.1-.2-.4-.3-.6-.2-.2.1-.3.4-.2.6L6.5 9.5C4.5 10.8 3 13 3 15.5h18c0-2.5-1.5-4.7-3.5-6Zm-9 3.5a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm7 0a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"/></svg>
               </a>
             </div>

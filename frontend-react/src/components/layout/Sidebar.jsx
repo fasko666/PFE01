@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Search, Users, FileText, MessageSquare,
   CreditCard, User, Sparkles, Settings, PenSquare, Briefcase,
-  BarChart3, LogOut, ChevronRight, TrendingUp,
+  BarChart3, LogOut, ChevronRight, TrendingUp, FileSignature,
 } from 'lucide-react';
 import PandaLogo from '../ui/PandaLogo';
 import useAuthStore from '../../store/authStore';
@@ -17,6 +17,7 @@ const freelancerNav = [
   { to: '/my-jobs',              icon: Briefcase,       label: 'My Jobs' },
   { to: '/freelancers',          icon: Users,           label: 'Talent Market' },
   { to: '/my-proposals',         icon: FileText,        label: 'My Proposals' },
+  { to: '/contracts',            icon: FileSignature,   label: 'Contracts' },
   { to: '/messages',             icon: MessageSquare,   label: 'Messages' },
   { to: '/payments',             icon: CreditCard,      label: 'Payments' },
   { to: '/freelancer/profile',   icon: User,            label: 'My Profile' },
@@ -30,6 +31,7 @@ const clientNav = [
   { to: '/freelancers',       icon: Search,          label: 'Find Talent' },
   { to: '/jobs/post',         icon: PenSquare,       label: 'Post a Job' },
   { to: '/my-jobs',           icon: Briefcase,       label: 'My Jobs' },
+  { to: '/contracts',         icon: FileSignature,   label: 'Contracts' },
   { to: '/messages',          icon: MessageSquare,   label: 'Messages' },
   { to: '/payments',          icon: CreditCard,      label: 'Payments' },
   { to: '/reports',           icon: TrendingUp,      label: 'Reports' },
@@ -41,6 +43,7 @@ const adminNav = [
   { to: '/admin/dashboard', icon: BarChart3,     label: 'Admin Dashboard' },
   { to: '/freelancers',     icon: Users,         label: 'Users' },
   { to: '/jobs',            icon: Briefcase,     label: 'Jobs' },
+  { to: '/contracts',       icon: FileSignature, label: 'Contracts' },
   { to: '/payments',        icon: CreditCard,    label: 'Payments' },
   { to: '/messages',        icon: MessageSquare, label: 'Messages' },
 ];

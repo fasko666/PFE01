@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { resolveFooter } from '../../utils/footerLinks';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -338,7 +339,7 @@ export default function Research() {
                 <div className="text-2xs font-bold text-primary-400 uppercase tracking-widest mb-3">{e.role}</div>
                 <h3 className="text-2xl font-bold font-display text-dark-100 mb-4">{e.name}</h3>
                 <p className="text-sm text-dark-400 leading-relaxed mb-4">{e.bio}</p>
-                <a href="#" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-400 hover:text-primary-300">
+                <a onClick={(e) => e.preventDefault()} href="#" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-400 hover:text-primary-300">
                   <LinkedInSVG className="w-3.5 h-3.5" />
                   LinkedIn
                 </a>
@@ -431,7 +432,7 @@ export default function Research() {
                 <h4 className="text-xs font-bold text-dark-100 mb-4 tracking-wide">{col.title}</h4>
                 <ul className="space-y-2.5">
                   {col.items.map((l) => (
-                    <li key={l}><a href="#" className="text-xs text-dark-400 hover:text-dark-100 transition-colors">{l}</a></li>
+                    <li key={l}><Link to={resolveFooter(l)} className="text-xs text-dark-400 hover:text-dark-100 transition-colors" >{l}</Link></li>
                   ))}
                 </ul>
               </div>

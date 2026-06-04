@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { resolveFooter } from '../../utils/footerLinks';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Check, ChevronDown, Info, Sparkles } from 'lucide-react';
@@ -543,7 +544,7 @@ export default function Pricing() {
                 <ul className="space-y-3">
                   {col.links.map((l) => (
                     <li key={l}>
-                      <a href="#" className="text-xs text-dark-400 hover:text-white transition-colors">{l}</a>
+                      <Link to={resolveFooter(l)} className="text-xs text-dark-400 hover:text-white transition-colors" >{l}</Link>
                     </li>
                   ))}
                 </ul>
@@ -564,7 +565,7 @@ export default function Pricing() {
               ].map((s) => (
                 <a
                   key={s.name}
-                  href="#"
+                  onClick={(e) => e.preventDefault()} href="#"
                   aria-label={s.name}
                   className="w-8 h-8 rounded-full border border-dark-700 flex items-center justify-center text-dark-400 hover:text-white hover:border-white transition-colors"
                 >
@@ -576,7 +577,7 @@ export default function Pricing() {
             </div>
 
             <div className="flex items-center gap-3">
-              <a href="#" className="flex items-center gap-1.5 text-2xs text-white">
+              <a onClick={(e) => e.preventDefault()} href="#" className="flex items-center gap-1.5 text-2xs text-white">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path d="M17.5 12.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
                 Mobile app
               </a>
@@ -594,7 +595,7 @@ export default function Pricing() {
             <p className="text-2xs text-dark-500">© 2026 PANDA Global Inc.</p>
             <div className="flex gap-5 flex-wrap justify-center">
               {['Terms of Service', 'Privacy Policy', 'CA Notice at Collection', 'Cookie Settings', 'Accessibility', 'Desktop App'].map((l) => (
-                <a key={l} href="#" className="text-2xs text-dark-500 hover:text-white transition-colors">{l}</a>
+                <Link key={l} to={resolveFooter(l)} className="text-2xs text-dark-500 hover:text-white transition-colors" >{l}</Link>
               ))}
             </div>
           </div>
@@ -628,7 +629,7 @@ function FaqItem({ q, a }) {
         className="overflow-hidden"
       >
         <p className="text-xs md:text-sm text-dark-400 leading-relaxed pr-8">{a}</p>
-        <a href="#" className="inline-block mt-3 text-2xs text-primary-400 hover:text-primary-300 font-semibold tracking-wide">
+        <a onClick={(e) => e.preventDefault()} href="#" className="inline-block mt-3 text-2xs text-primary-400 hover:text-primary-300 font-semibold tracking-wide">
           Read more
         </a>
       </motion.div>

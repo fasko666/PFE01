@@ -303,7 +303,7 @@ class FreelancerController extends Controller
         $totalEarned     = $user->wallet?->balance ?? 0;
         $avgRating       = $user->freelancerProfile?->avg_rating ?? 0;
         $reviewsCount    = $user->freelancerProfile?->total_reviews ?? 0;
-        $connects        = $user->subscription?->connects_balance ?? 0;
+        $connects        = (int) $user->connects_balance;
 
         $recentProposals = $user->proposals()
             ->with('job')

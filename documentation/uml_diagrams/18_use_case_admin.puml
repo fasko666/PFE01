@@ -1,0 +1,100 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FDEDED
+  BorderColor #C0392B
+}
+left to right direction
+title Use Case -- Administrateur (Detail)
+
+actor "Admin"  as AD #LightCoral
+actor "Stripe" as ST <<external>>
+
+rectangle "Espace Administration" {
+  package "Tableau de bord" {
+    (Dashboard global)             as DASH
+    (Statistiques croissance)      as STATS
+    (Revenus de la plateforme)     as REV
+  }
+  package "Utilisateurs & Moderation" {
+    (Lister utilisateurs)          as LIST
+    (Rechercher utilisateurs)      as SRC
+    (Verifier un compte)           as VERIF
+    (Bannir un compte)             as BAN
+    (Voir profil complet)          as VIEW
+  }
+  package "Verification d'identite (KYC)" {
+    (File des demandes KYC)        as KYCQ
+    (Consulter pieces ID + selfie) as KYCV
+    (Approuver KYC)                as KYCA
+    (Rejeter KYC avec motif)       as KYCR
+  }
+  package "Documents fiscaux" {
+    (File des formulaires W-9/W-8) as TAXQ
+    (Approuver document fiscal)    as TAXA
+    (Rejeter document fiscal)      as TAXR
+  }
+  package "Finance & Retraits" {
+    (Tableau de bord financier)    as FDB
+    (File des retraits)            as WDQ
+    (Approuver retrait)            as WDA
+    (Rejeter retrait)              as WDR
+    (Declencher payout Stripe)     as PAY
+    (Reglages des commissions)     as FEES
+  }
+  package "Litiges" {
+    (File des litiges actifs)      as DLIST
+    (Examiner preuves)             as DEXAM
+    (Resoudre: remboursement)      as DREF
+    (Resoudre: liberer au freelancer) as DREL
+    (Resoudre: partage de l'escrow)   as DSPL
+  }
+  package "Securite & Conformite" {
+    (Journal d'audit)              as AUDIT
+    (Suivre actions admin)         as TRACK
+    (Webhooks Stripe)              as WHK
+  }
+}
+
+AD --> DASH
+AD --> STATS
+AD --> REV
+AD --> LIST
+AD --> SRC
+AD --> VERIF
+AD --> BAN
+AD --> VIEW
+AD --> KYCQ
+AD --> KYCV
+AD --> KYCA
+AD --> KYCR
+AD --> TAXQ
+AD --> TAXA
+AD --> TAXR
+AD --> FDB
+AD --> WDQ
+AD --> WDA
+AD --> WDR
+AD --> PAY
+AD --> FEES
+AD --> DLIST
+AD --> DEXAM
+AD --> DREF
+AD --> DREL
+AD --> DSPL
+AD --> AUDIT
+AD --> TRACK
+AD --> WHK
+
+PAY ..> ST : <<uses>>
+WHK ..> ST : <<uses>>
+
+KYCA .> AUDIT : <<include>>
+KYCR .> AUDIT : <<include>>
+WDA  .> AUDIT : <<include>>
+BAN  .> AUDIT : <<include>>
+DREF .> AUDIT : <<include>>
+DREL .> AUDIT : <<include>>
+DSPL .> AUDIT : <<include>>
+@enduml

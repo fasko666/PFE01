@@ -107,7 +107,14 @@ export default function NavSearch({ variant = 'public' }) {
     <div ref={wrapRef} className="relative">
       <form onSubmit={submit}>
         <div className={shellCls} style={{ height: shellHeight }}>
-          <SearchIcon className={`${iconCls} text-dark-500 shrink-0`} strokeWidth={2} />
+          {/* Search icon doubles as the submit button */}
+          <button
+            type="submit"
+            aria-label="Search"
+            className={`${iconCls} flex items-center justify-center text-dark-500 hover:text-dark-100 transition-colors shrink-0`}
+          >
+            <SearchIcon className={isPublic ? 'w-4 h-4' : 'w-3.5 h-3.5'} strokeWidth={2} />
+          </button>
           <input
             value={query}
             onChange={(e) => { setQuery(e.target.value); setResultsOpen(true); }}

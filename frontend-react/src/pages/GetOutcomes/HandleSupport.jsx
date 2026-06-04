@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { resolveFooter } from '../../utils/footerLinks';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -492,7 +493,7 @@ export default function HandleSupport() {
             {FOOTER_COLS.map((col) => (
               <div key={col.title}>
                 <h4 className="text-xs font-bold text-dark-100 mb-4 tracking-wide">{col.title}</h4>
-                <ul className="space-y-2.5">{col.items.map((l) => <li key={l}><a href="#" className="text-xs text-dark-400 hover:text-dark-100 transition-colors">{l}</a></li>)}</ul>
+                <ul className="space-y-2.5">{col.items.map((l) => <li key={l}><Link to={resolveFooter(l)} className="text-xs text-dark-400 hover:text-dark-100 transition-colors" >{l}</Link></li>)}</ul>
               </div>
             ))}
           </div>

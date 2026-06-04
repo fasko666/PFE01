@@ -1,0 +1,75 @@
+name: Backend CI
+
+on:
+  push:
+    paths: ['backend-laravel/**', '.github/workflows/backend.yml']
+  pull_request:
+    paths: ['backend-laravel/**', '.github/workflows/backend.yml']
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:  [ubuntu-latest]
+        php: ['8.2', '8.3']
+    defaults:
+      run:
+        working-directory: backend-laravel
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, bcmath, intl, pdo_sqlite, redis, gd
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Get composer cache dir
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache composer
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key:  ${{ runner.os }}-php-${{ matrix.php }}-${{ hashFiles('backend-laravel/composer.lock') }}
+          restore-keys: ${{ runner.os }}-php-${{ matrix.php }}-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+          touch database/database.sqlite
+
+      - name: Run Pint (lint)
+        run: vendor/bin/pint --test
+
+      - name: Run tests with coverage
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Upload coverage artifact
+        if: matrix.php == '8.2'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: backend-laravel/coverage.xml
+
+  security:
+    name: Security audit
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: backend-laravel } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '8.2', tools: composer:v2 }
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: composer audit --format=json || true       # advisory only — does not fail the build

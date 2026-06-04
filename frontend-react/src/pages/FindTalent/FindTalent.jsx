@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { resolveFooter } from '../../utils/footerLinks';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -201,7 +202,7 @@ function FreelancerCard({ f, delay }) {
       </div>
 
       <Link
-        to="/freelancers"
+        to={`/freelancers/${(f.username || f.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`}
         className="block w-full text-center py-2.5 rounded-full bg-primary-500 text-white text-xs font-semibold hover:bg-primary-600 hover:shadow-glow transition-all"
       >
         See profile
@@ -378,7 +379,7 @@ export default function FindTalent() {
             {FOOTER_COLS.map((col) => (
               <div key={col.title}>
                 <h4 className="text-xs font-bold text-dark-100 mb-4 tracking-wide">{col.title}</h4>
-                <ul className="space-y-2.5">{col.items.map((l) => <li key={l}><a href="#" className="text-xs text-dark-400 hover:text-dark-100 transition-colors">{l}</a></li>)}</ul>
+                <ul className="space-y-2.5">{col.items.map((l) => <li key={l}><Link to={resolveFooter(l)} className="text-xs text-dark-400 hover:text-dark-100 transition-colors" >{l}</Link></li>)}</ul>
               </div>
             ))}
           </div>

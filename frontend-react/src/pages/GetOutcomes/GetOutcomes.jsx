@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { resolveFooter } from '../../utils/footerLinks';
 import { motion } from 'framer-motion';
 import {
   Globe, Sparkles, MessageSquare, Palette, Zap, TrendingUp,
@@ -268,7 +269,7 @@ export default function GetOutcomes() {
                 <h4 className="text-xs font-bold text-dark-100 mb-4 tracking-wide">{col.title}</h4>
                 <ul className="space-y-2.5">
                   {col.items.map((l) => (
-                    <li key={l}><a href="#" className="text-xs text-dark-400 hover:text-dark-100 transition-colors">{l}</a></li>
+                    <li key={l}><Link to={resolveFooter(l)} className="text-xs text-dark-400 hover:text-dark-100 transition-colors" >{l}</Link></li>
                   ))}
                 </ul>
               </div>

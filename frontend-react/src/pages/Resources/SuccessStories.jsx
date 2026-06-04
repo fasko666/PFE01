@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { resolveFooter } from '../../utils/footerLinks';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -385,7 +386,7 @@ export default function SuccessStories() {
                 <ul className="space-y-2.5">
                   {col.links.map((l) => (
                     <li key={l}>
-                      <a href="#" className="text-xs text-dark-500 hover:text-dark-300 transition-colors">{l}</a>
+                      <Link to={resolveFooter(l)} className="text-xs text-dark-500 hover:text-dark-300 transition-colors" >{l}</Link>
                     </li>
                   ))}
                 </ul>
@@ -396,7 +397,7 @@ export default function SuccessStories() {
             <p className="text-xs text-dark-600">© 2026 PANDA. All rights reserved.</p>
             <div className="flex gap-5">
               {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((l) => (
-                <a key={l} href="#" className="text-xs text-dark-600 hover:text-dark-400 transition-colors">{l}</a>
+                <Link key={l} to={resolveFooter(l)} className="text-xs text-dark-600 hover:text-dark-400 transition-colors" >{l}</Link>
               ))}
             </div>
           </div>

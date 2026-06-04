@@ -11,50 +11,70 @@ title Use Case -- Client (Detail)
 actor "Client" as CL #LightBlue
 
 rectangle "Espace Client" {
-  package "Compte" {
-    (S'inscrire) as REG
-    (Se connecter) as LOGIN
-    (Profil entreprise) as CPRO
+  package "Compte et Securite" {
+    (S'inscrire)                  as REG
+    (Se connecter)                as LOGIN
+    (Mot de passe oublie)         as FORGOT
+    (Activer 2FA TOTP)            as TFA
+    (Verification KYC)            as KYC
+    (Profil entreprise)           as CPRO
   }
-  package "Gestion Offres" {
-    (Creer une offre) as CREATE
-    (Definir budget et comp.) as SETDET
-    (Publier l'offre) as PUB
-    (Modifier offre) as EDIT
-    (Voir mes offres) as MYJOBS
-    (Cloturer offre) as CLOSE
+  package "Gestion des Offres" {
+    (Creer une offre)             as CREATE
+    (Definir budget & comp.)      as SETDET
+    (Publier l'offre)             as PUB
+    (Modifier offre)              as EDIT
+    (Voir mes offres)             as MYJOBS
+    (Cloturer offre)              as CLOSE
   }
-  package "Recrutement" {
-    (Parcourir freelancers) as BROWSE
-    (Voir profil freelancer) as VIEW
-    (Voir portfolio) as PORT
-    (Consulter propositions) as PROPS
-    (Accepter proposition) as ACCEPT
-    (Rejeter proposition) as REJECT
-    (Matching IA) as MATCH
+  package "Recrutement & Talents" {
+    (Parcourir freelancers)       as BROWSE
+    (Recherche globale)           as SEARCH
+    (Voir profil freelancer)      as VIEW
+    (Voir portfolio)              as PORT
+    (Sauvegarder freelancer)      as SAVEF
+    (Creer liste de talents)      as TLIST
+    (Ajouter a une liste)         as ADDL
+    (Matching IA)                 as MATCH
+    (Consulter propositions)      as PROPS
+    (Mettre en shortlist)         as SHORT
+    (Accepter proposition)        as ACCEPT
+    (Rejeter proposition)         as REJECT
   }
-  package "Contrats et Jalons" {
-    (Creer contrat) as CON
-    (Definir jalons) as DEFMIL
-    (Reviser le travail) as REV
-    (Approuver jalon) as APR
-    (Demander corrections) as CORR
-    (Ouvrir un litige) as DISP
+  package "Contrats, Jalons & Litiges" {
+    (Creer contrat)               as CON
+    (Definir jalons)              as DEFMIL
+    (Reviser le travail)          as REV
+    (Approuver jalon)             as APR
+    (Rejeter jalon)               as CORR
+    (Ajouter fichiers)            as CFILE
+    (Demander prolongation)       as EXT
+    (Ouvrir un litige)            as DISP
+    (Telecharger contrat PDF)     as PDF
+    (Telecharger litige PDF)      as DPDF
+    (Archiver contrat)            as ARCH
   }
-  package "Finance" {
-    (Deposer des fonds) as DEP
-    (Financer l'escrow) as ESC
-    (Liberer paiement) as REL
-    (Historique transactions) as HIST
+  package "Finances" {
+    (Deposer des fonds)           as DEP
+    (Financer l'escrow)           as ESC
+    (Liberer paiement)            as REL
+    (Historique transactions)     as HIST
+    (Soumettre W-9 / VAT)         as TAX
   }
   package "Communication" {
-    (Messagerie) as MSG
-    (Evaluer freelancer) as REVI
+    (Messagerie temps reel)       as MSG
+    (Reactions et fichiers)       as MEDIA
+    (Evaluer freelancer)          as REVI
+    (Notifications)               as NOTIF
+    (Activer push)                as PUSH
   }
 }
 
 CL --> REG
 CL --> LOGIN
+CL --> FORGOT
+CL --> TFA
+CL --> KYC
 CL --> CPRO
 CL --> CREATE
 CL --> SETDET
@@ -63,25 +83,40 @@ CL --> EDIT
 CL --> MYJOBS
 CL --> CLOSE
 CL --> BROWSE
+CL --> SEARCH
 CL --> VIEW
 CL --> PORT
+CL --> SAVEF
+CL --> TLIST
+CL --> ADDL
+CL --> MATCH
 CL --> PROPS
+CL --> SHORT
 CL --> ACCEPT
 CL --> REJECT
-CL --> MATCH
 CL --> CON
 CL --> DEFMIL
 CL --> REV
 CL --> APR
 CL --> CORR
+CL --> CFILE
+CL --> EXT
 CL --> DISP
+CL --> PDF
+CL --> DPDF
+CL --> ARCH
 CL --> DEP
 CL --> ESC
 CL --> REL
 CL --> HIST
+CL --> TAX
 CL --> MSG
+CL --> MEDIA
 CL --> REVI
+CL --> NOTIF
+CL --> PUSH
 
-ACCEPT .> CON : <<include>>
-APR    .> REL : <<include>>
+ACCEPT  .> CON  : <<include>>
+APR     .> REL  : <<include>>
+TLIST   .> ADDL : <<include>>
 @enduml

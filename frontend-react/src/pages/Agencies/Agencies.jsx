@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { resolveFooter } from '../../utils/footerLinks';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -347,7 +348,7 @@ export default function Agencies() {
             {FOOTER_COLS.map((col) => (
               <div key={col.title}>
                 <h4 className="text-xs font-bold text-dark-100 mb-4 tracking-wide">{col.title}</h4>
-                <ul className="space-y-2.5">{col.items.map((l) => <li key={l}><a href="#" className="text-xs text-dark-400 hover:text-dark-100 transition-colors">{l}</a></li>)}</ul>
+                <ul className="space-y-2.5">{col.items.map((l) => <li key={l}><Link to={resolveFooter(l)} className="text-xs text-dark-400 hover:text-dark-100 transition-colors" >{l}</Link></li>)}</ul>
               </div>
             ))}
           </div>
@@ -355,7 +356,7 @@ export default function Agencies() {
             <div className="flex items-center gap-4">
               <span className="text-xs text-dark-500">Follow us</span>
               {SOCIAL.map((s) => (
-                <a key={s.label} href="#" aria-label={s.label}
+                <a key={s.label} onClick={(e) => e.preventDefault()} href="#" aria-label={s.label}
                    className="w-7 h-7 rounded-full border border-dark-700 flex items-center justify-center text-dark-400 hover:text-dark-100 hover:border-dark-500 transition-colors">
                   <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d={s.d} /></svg>
                 </a>

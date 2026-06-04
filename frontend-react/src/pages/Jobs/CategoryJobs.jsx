@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { resolveFooter } from '../../utils/footerLinks';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -328,7 +329,7 @@ export default function CategoryJobs() {
         <h2 className="text-lg font-bold font-display text-dark-100 mb-6">Find jobs for other in-demand skills</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-3">
           {preset.inDemand.map((s) => (
-            <a key={s} href="#" className="text-xs text-primary-400 hover:text-primary-300 underline underline-offset-4">
+            <a key={s} onClick={(e) => e.preventDefault()} href="#" className="text-xs text-primary-400 hover:text-primary-300 underline underline-offset-4">
               {s} jobs
             </a>
           ))}
@@ -340,9 +341,7 @@ export default function CategoryJobs() {
         <h2 className="text-lg font-bold font-display text-dark-100 mb-6">Similar {preset.title} Skills</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-3">
           {preset.similar.map((s) => (
-            <a key={s} href="#" className="text-xs text-primary-400 hover:text-primary-300 underline underline-offset-4">
-              {s}
-            </a>
+            <Link key={s} to={resolveFooter(s)} className="text-xs text-primary-400 hover:text-primary-300 underline underline-offset-4" >{s}</Link>
           ))}
         </div>
       </section>

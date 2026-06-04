@@ -64,9 +64,11 @@ export default function Login() {
   }, []);
 
   const redirect = (u) => {
-    if (u.role === 'admin')       navigate('/admin/dashboard');
-    else if (u.role === 'client') navigate('/client/dashboard');
-    else                          navigate('/freelancer/dashboard');
+    if (u.role === 'admin')              navigate('/admin/dashboard');
+    else if (u.role === 'client')        navigate('/client/dashboard');
+    // Freelancer: send through onboarding (steps 1→10) until completed
+    else if (!u.onboarding_completed)    navigate('/onboarding');
+    else                                 navigate('/freelancer/dashboard');
   };
 
   const handleContinue = (e) => {

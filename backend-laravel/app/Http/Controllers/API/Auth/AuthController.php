@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Wallet;
-use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -61,7 +60,7 @@ class AuthController extends Controller
         }
 
         Wallet::create(['user_id' => $user->id]);
-        Subscription::create(['user_id' => $user->id, 'plan' => 'free', 'connects_balance' => 10]);
+        // connects_balance defaults to 10 via the users migration; nothing else needed for the free tier
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -95,6 +94,35 @@ class AuthController extends Controller
         if (!$user->is_active) {
             Auth::logout();
             return response()->json(['message' => 'This account has been suspended. Contact support.'], 403);
+        }
+
+        // 2FA gate — if enabled, require a TOTP/recovery code in the same request
+        if ($user->two_factor_confirmed_at) {
+            $code = (string) $request->input('two_factor_code', '');
+            if ($code === '') {
+                Auth::logout();
+                return response()->json([
+                    'message'             => 'Two-factor code required.',
+                    'requires_two_factor' => true,
+                ], 422);
+            }
+            $totp   = app(\App\Services\TotpService::class);
+            $secret = \Illuminate\Support\Facades\Crypt::decryptString($user->two_factor_secret);
+            $valid  = $totp->verify($secret, $code);
+            if (! $valid) {
+                // Try recovery code as fallback
+                $codes = $user->two_factor_recovery_codes
+                    ? (json_decode(\Illuminate\Support\Facades\Crypt::decryptString($user->two_factor_recovery_codes), true) ?: [])
+                    : [];
+                $idx = array_search(strtoupper(trim($code)), array_map('strtoupper', $codes), true);
+                if ($idx === false) {
+                    Auth::logout();
+                    return response()->json(['message' => 'Invalid two-factor code.', 'requires_two_factor' => true], 422);
+                }
+                // consume recovery code
+                unset($codes[$idx]);
+                $user->forceFill(['two_factor_recovery_codes' => \Illuminate\Support\Facades\Crypt::encryptString(json_encode(array_values($codes)))])->save();
+            }
         }
 
         $user->update(['is_online' => true, 'last_seen_at' => now()]);
@@ -378,6 +406,7 @@ class AuthController extends Controller
             'is_online'        => $user->is_online,
             'email_verified'   => !is_null($user->email_verified_at),
             'phone_verified'   => (bool) $user->phone_verified,
+            'connects_balance' => (int) $user->connects_balance,
             'google_connected' => !is_null($user->google_id),
             'created_at'       => $user->created_at,
             'onboarding_completed' => (bool) optional($user->freelancerProfile)->onboarding_completed,

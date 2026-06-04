@@ -9,87 +9,151 @@ skinparam packageStyle rectangle
 left to right direction
 title Use Case -- FreeNest (Vue Globale)
 
-actor "Freelancer" as FL #LightGreen
-actor "Client"     as CL #LightBlue
-actor "Admin"      as ADM #LightCoral
-actor "Google OAuth" as G <<external>>
-actor "Ollama IA"    as AI <<external>>
+actor "Freelancer"   as FL  #LightGreen
+actor "Client"       as CL  #LightBlue
+actor "Admin"        as ADM #LightCoral
+actor "Google OAuth" as G   <<external>>
+actor "Stripe"       as STR <<external>>
+actor "Reverb WS"    as RVB <<external>>
+actor "Ollama IA"    as AI  <<external>>
 
 rectangle "FreeNest" {
-  package "Authentification" {
-    (S'inscrire) as REG
-    (Se connecter) as LOGIN
-    (OAuth Google) as GOAUTH
-    (Onboarding) as ONBOARD
+  package "Authentification & Securite" {
+    (S'inscrire)              as REG
+    (Se connecter)            as LOGIN
+    (OAuth Google)            as GOAUTH
+    (Mot de passe oublie)     as FORGOT
+    (2FA TOTP)                as TFA
+    (KYC Verification)        as KYC
+    (Onboarding)              as ONBOARD
   }
   package "Marketplace Offres" {
-    (Publier une offre) as POST
-    (Parcourir les offres) as BROWSE
-    (Rechercher offres) as SEARCH
-    (Sauvegarder offre) as SAVE
+    (Publier une offre)       as POST
+    (Parcourir les offres)    as BROWSE
+    (Recherche globale)       as SEARCH
+    (Sauvegarder une offre)   as SAVEJ
+    (Sauvegarder freelancer)  as SAVEF
+    (Listes de talents)       as TLIST
   }
   package "Propositions & Contrats" {
-    (Soumettre proposition) as SUBMIT
-    (Generer via IA) as AIPR
-    (Accepter / Rejeter) as ACCEPT
-    (Gerer les jalons) as MILE
+    (Soumettre proposition)   as SUBMIT
+    (Generer via IA)          as AIPR
+    (Accepter / Rejeter)      as ACCEPT
+    (Gerer les jalons)        as MILE
+    (Suivi du temps)          as TIME
+    (Fichiers de contrat)     as CFILE
+    (Prolonger contrat)       as EXT
+    (Ouvrir litige)           as DISP
+    (Resoudre litige)         as RDISP
   }
-  package "Paiements Escrow" {
-    (Deposer des fonds) as DEP
-    (Financer l'escrow) as ESC
-    (Liberer paiement) as REL
-    (Portefeuille) as WAL
+  package "Paiements & Escrow" {
+    (Deposer des fonds)       as DEP
+    (Financer l'escrow)       as ESC
+    (Liberer paiement)        as REL
+    (Portefeuille)            as WAL
+    (Retirer mes gains)       as WD
+    (Stripe Connect)          as SC
+    (Documents fiscaux)       as TAX
   }
   package "Communication" {
-    (Messagerie temps reel) as MSG
-    (Notifications) as NOTIF
+    (Messagerie temps reel)   as MSG
+    (Notifications)           as NOTIF
+    (Notifications push)      as PUSH
   }
   package "IA Assistant" {
-    (Generation proposition) as GEN
-    (Matching freelancers) as MATCH
-    (Analyser profil) as ANAL
-    (Chat IA) as CHAT
+    (Generation proposition)  as GEN
+    (Matching freelancers)    as MATCH
+    (Analyser profil)         as ANAL
+    (Chat IA)                 as CHAT
   }
   package "Administration" {
-    (Dashboard admin) as DASH
-    (Gerer utilisateurs) as USERS
-    (Analytics) as ANALY
+    (Dashboard admin)         as DASH
+    (Gerer utilisateurs)      as USERS
+    (File KYC)                as KYCQ
+    (File des retraits)       as WDQ
+    (Resoudre litiges)        as DRES
+    (Reglages financiers)     as FSET
+    (Analytics)               as ANALY
+    (Journal d'audit)         as AUDIT
   }
 }
 
+' Freelancer
 FL --> REG
 FL --> LOGIN
 FL --> GOAUTH
+FL --> FORGOT
+FL --> TFA
+FL --> KYC
 FL --> ONBOARD
 FL --> BROWSE
 FL --> SEARCH
-FL --> SAVE
+FL --> SAVEJ
 FL --> SUBMIT
 FL --> AIPR
 FL --> MILE
+FL --> TIME
+FL --> CFILE
+FL --> EXT
+FL --> DISP
 FL --> WAL
+FL --> WD
+FL --> SC
+FL --> TAX
 FL --> MSG
+FL --> NOTIF
+FL --> PUSH
 FL --> GEN
 FL --> ANAL
 FL --> CHAT
 
+' Client
 CL --> REG
 CL --> LOGIN
+CL --> GOAUTH
+CL --> FORGOT
+CL --> TFA
+CL --> KYC
 CL --> POST
+CL --> SEARCH
+CL --> SAVEF
+CL --> TLIST
 CL --> ACCEPT
 CL --> MILE
+CL --> CFILE
+CL --> EXT
+CL --> DISP
 CL --> DEP
 CL --> ESC
 CL --> REL
+CL --> WAL
+CL --> TAX
 CL --> MSG
+CL --> NOTIF
+CL --> PUSH
 CL --> MATCH
 
+' Admin
 ADM --> DASH
 ADM --> USERS
+ADM --> KYCQ
+ADM --> WDQ
+ADM --> DRES
+ADM --> RDISP
+ADM --> FSET
 ADM --> ANALY
+ADM --> AUDIT
 
-GOAUTH ..> G  : <<uses>>
-AIPR   ..> AI : <<uses>>
-MATCH  ..> AI : <<uses>>
-GEN    ..> AI : <<uses>>
+' External actors
+GOAUTH ..> G   : <<uses>>
+DEP    ..> STR : <<uses>>
+WD     ..> STR : <<uses>>
+SC     ..> STR : <<uses>>
+MSG    ..> RVB : <<uses>>
+NOTIF  ..> RVB : <<uses>>
+AIPR   ..> AI  : <<uses>>
+MATCH  ..> AI  : <<uses>>
+GEN    ..> AI  : <<uses>>
+CHAT   ..> AI  : <<uses>>
+ANAL   ..> AI  : <<uses>>
 @enduml

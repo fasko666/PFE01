@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { auth as authApi } from '../api';
+import { disconnectEcho, refreshEcho } from '../lib/echo';
+import useChatStore from './chatStore';
 
 const useAuthStore = create(
   persist(
@@ -22,6 +24,7 @@ const useAuthStore = create(
           const { data } = await authApi.login(credentials);
           localStorage.setItem('panda_token', data.token);
           set({ user: data.user, token: data.token, loading: false });
+          refreshEcho(); // tell Echo about the new Bearer token
           return data;
         } catch (err) {
           const msg = err.response?.data?.message || 'Login failed';
@@ -46,7 +49,9 @@ const useAuthStore = create(
       },
 
       logout: async () => {
-        try { await authApi.logout(); } catch {}
+        try { await authApi.logout(); } catch { /* offline-safe logout */ }
+        disconnectEcho();
+        useChatStore.getState().reset();
         localStorage.removeItem('panda_token');
         set({ user: null, token: null });
       },

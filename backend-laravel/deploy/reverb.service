@@ -1,0 +1,31 @@
+# systemd alternative to Supervisor for the Reverb websocket server.
+# Install:    sudo cp reverb.service /etc/systemd/system/panda-reverb.service
+# Enable:     sudo systemctl daemon-reload && sudo systemctl enable --now panda-reverb
+# Status:     sudo systemctl status panda-reverb
+# Logs:       sudo journalctl -u panda-reverb -f
+
+[Unit]
+Description=PANDA Reverb websocket server
+After=network.target redis-server.service
+Requires=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/panda
+ExecStart=/usr/bin/php /var/www/panda/artisan reverb:start --host=0.0.0.0 --port=8080 --no-interaction
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/panda/storage /var/www/panda/bootstrap/cache
+
+[Install]
+WantedBy=multi-user.target

@@ -41,4 +41,14 @@ return [
         'redirect'      => env('GOOGLE_REDIRECT_URI', 'http://localhost:8000/auth/google/callback'),
     ],
 
+    'stripe' => [
+        'secret'         => env('STRIPE_SECRET'),                     // sk_test_... or sk_live_...
+        'publishable'    => env('STRIPE_PUBLISHABLE'),                // pk_test_... or pk_live_...
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),             // whsec_...
+        'success_url'    => env('STRIPE_SUCCESS_URL', env('FRONTEND_URL').'/payments/success?session_id={CHECKOUT_SESSION_ID}'),
+        'cancel_url'     => env('STRIPE_CANCEL_URL',  env('FRONTEND_URL').'/payments/cancel'),
+        'connect_refresh_url' => env('STRIPE_CONNECT_REFRESH_URL', env('FRONTEND_URL').'/payments/connect/refresh'),
+        'connect_return_url'  => env('STRIPE_CONNECT_RETURN_URL',  env('FRONTEND_URL').'/payments/connect/return'),
+    ],
+
 ];

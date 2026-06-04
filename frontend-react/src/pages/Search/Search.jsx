@@ -1,12 +1,55 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { resolveFooter } from '../../utils/footerLinks';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import useAuthStore from '../../store/authStore';
+import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search as SearchIcon, X, ChevronDown, Check, MapPin, BadgeCheck,
   Calendar, DollarSign, Briefcase, ThumbsUp, Sparkles, HelpCircle,
   ArrowLeft, ExternalLink, Star, Play, ChevronLeft, ChevronRight, Plus,
+  SlidersHorizontal,
 } from 'lucide-react';
 import PandaLogo from '../../components/ui/PandaLogo';
+import { api } from '../../api';
+
+/* ─── Map API freelancer → card shape ──────────────────────── */
+function mapApiFreelancer(u) {
+  const fp = u.freelancer_profile || {};
+  const skillNames = (u.skills || []).map((s) => s.name || s).filter(Boolean);
+  const visibleSkills = skillNames.slice(0, 5);
+  if (skillNames.length > 5) visibleSkills.push(`+${skillNames.length - 5}`);
+  const earned = fp.total_earnings ? `$${Math.round(fp.total_earnings / 1000)}K+` : '';
+  return {
+    id:           u.id,
+    name:         u.name,
+    username:     u.username,
+    title:        fp.title || '',
+    country:      u.country || '',
+    jobSuccess:   Math.round(fp.job_success_score || fp.avg_rating * 20 || 0),
+    earned,
+    available:    fp.availability === 'available',
+    consultations: !!fp.offers_consultations,
+    skills:       visibleSkills.length ? visibleSkills : ['—'],
+    bio:          fp.bio || '',
+    avatar:       u.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'U')}&background=4361ff&color=fff&size=120&bold=true`,
+  };
+}
+
+/* ─── Map API job → card shape ─────────────────────────────── */
+function mapApiJob(j) {
+  const skillList = Array.isArray(j.skills) ? j.skills : [];
+  const visibleSkills = skillList.slice(0, 6);
+  if (skillList.length > 6) visibleSkills.push(`+${skillList.length - 6}`);
+  return {
+    id:     j.id,
+    posted: j.created_at ? new Date(j.created_at).toLocaleDateString() : '',
+    title:  j.title,
+    type:   [j.type === 'hourly' ? 'Hourly' : 'Fixed price', j.experience_level || ''].filter(Boolean).join(' · '),
+    desc:   j.description || '',
+    skills: visibleSkills,
+  };
+}
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 14 },
@@ -712,7 +755,7 @@ function SearchOtherTalentBlock({ items }) {
       <div className="text-sm font-bold text-dark-100 mb-3">Browse similar freelancers</div>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
         {(items || ['Data Entry Specialists', 'Excel Experts', 'Administrative Assistants', 'Google Docs Experts', 'Verification Specialists']).map((s) => (
-          <a key={s} href="#" className="text-xs text-primary-400 hover:text-primary-300 underline underline-offset-2">{s}</a>
+          <Link key={s} to={resolveFooter(s)} className="text-xs text-primary-400 hover:text-primary-300 underline underline-offset-2" >{s}</Link>
         ))}
       </div>
     </section>
@@ -722,6 +765,37 @@ function SearchOtherTalentBlock({ items }) {
 function ProfilePanel({ talent, onClose }) {
   const [tab, setTab] = useState('About');
   const [fbPage, setFbPage] = useState(1);
+  const [messaging, setMessaging] = useState(false);
+  const navigate = useNavigate();
+  const { token, user: me } = useAuthStore();
+
+  const handleMessage = async () => {
+    if (!token) {
+      toast.error('Please log in to message this talent');
+      navigate('/login');
+      return;
+    }
+    if (!talent.id) {
+      toast.error('This profile preview is read-only — open the full profile to message.');
+      return;
+    }
+    if (me && talent.id === me.id) {
+      toast('That\'s you 😄', { icon: '👤' });
+      return;
+    }
+    setMessaging(true);
+    try {
+      const res = await api.chat.start({ user_id: talent.id });
+      const convId = res.data?.data?.id || res.data?.id;
+      onClose?.();
+      if (convId) navigate(`/messages/${convId}`);
+      else        navigate('/messages');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Could not start conversation');
+    } finally {
+      setMessaging(false);
+    }
+  };
 
   /* lock body scroll when panel is open */
   useEffect(() => {
@@ -763,7 +837,7 @@ function ProfilePanel({ talent, onClose }) {
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <a href="#" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-400 hover:text-primary-300">
+          <a onClick={(e) => e.preventDefault()} href="#" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-400 hover:text-primary-300">
             Open profile in a new window <ExternalLink className="w-3 h-3" />
           </a>
         </div>
@@ -814,8 +888,12 @@ function ProfilePanel({ talent, onClose }) {
                 </div>
               </div>
 
-              <button className="w-full py-2.5 rounded-full bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 hover:shadow-glow transition-all">
-                Message
+              <button
+                onClick={handleMessage}
+                disabled={messaging}
+                className="w-full py-2.5 rounded-full bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 hover:shadow-glow transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {messaging ? 'Starting…' : 'Message'}
               </button>
             </div>
           </div>
@@ -1079,7 +1157,39 @@ export default function Search() {
   const [selectedTalent, setSelectedTalent] = useState(null);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [apiTalent, setApiTalent] = useState([]);
+  const [apiJobs, setApiJobs]     = useState([]);
+  const [loading, setLoading]     = useState(false);
   const clearFilters = () => setFilters(DEFAULT_FILTERS);
+
+  /* ─── Fetch real data from backend when query/tab changes ─── */
+  useEffect(() => {
+    let cancelled = false;
+    const q = query.trim();
+
+    setLoading(true);
+    const fetchPromise = tab === 'jobs'
+      ? api.jobs.list({ search: q, per_page: 24 }).then((r) => ({
+          jobs: (r.data?.data?.data ?? r.data?.data ?? []).map(mapApiJob),
+        }))
+      : api.freelancers.list({ search: q, per_page: 24 }).then((r) => ({
+          talent: (r.data?.data?.data ?? r.data?.data ?? []).map(mapApiFreelancer),
+        }));
+
+    fetchPromise
+      .then((res) => {
+        if (cancelled) return;
+        if (res.talent) setApiTalent(res.talent);
+        if (res.jobs)   setApiJobs(res.jobs);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        if (tab === 'jobs') setApiJobs([]); else setApiTalent([]);
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [query, tab]);
 
   useEffect(() => {
     const t = params.get('type');
@@ -1104,8 +1214,10 @@ export default function Search() {
   };
 
   const filteredTalent = useMemo(() => {
+    // Use real API data when present; fall back to hardcoded mock TALENT only as a last resort
+    const source = apiTalent.length > 0 ? apiTalent : (query.trim() ? [] : TALENT);
     const q = (query || '').toLowerCase().trim();
-    return TALENT.filter((t) => {
+    return source.filter((t) => {
       /* Text query — name / title / skills / bio */
       if (q) {
         const blob = `${t.name} ${t.title} ${t.skills.join(' ')} ${t.bio}`.toLowerCase();
@@ -1143,7 +1255,7 @@ export default function Search() {
 
       return true;
     });
-  }, [query, filters]);
+  }, [apiTalent, query, filters]);
 
   /* Active filter chip list — for the strip under the tabs */
   const activeChips = useMemo(() => {
@@ -1160,14 +1272,15 @@ export default function Search() {
   }, [filters]);
 
   const filteredJobs = useMemo(() => {
+    const source = apiJobs.length > 0 ? apiJobs : (query.trim() ? [] : JOBS);
     const q = (query || '').toLowerCase().trim();
-    if (!q) return JOBS;
-    return JOBS.filter((j) =>
+    if (!q) return source;
+    return source.filter((j) =>
       j.title.toLowerCase().includes(q) ||
-      j.desc.toLowerCase().includes(q) ||
-      j.skills.join(' ').toLowerCase().includes(q)
+      (j.desc || '').toLowerCase().includes(q) ||
+      (j.skills || []).join(' ').toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [apiJobs, query]);
 
   return (
     <div className="min-h-screen bg-dark-950" style={{ paddingTop: 60 }}>

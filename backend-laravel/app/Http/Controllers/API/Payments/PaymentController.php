@@ -3,132 +3,182 @@
 namespace App\Http\Controllers\API\Payments;
 
 use App\Http\Controllers\Controller;
-use App\Models\Transaction;
-use App\Models\Wallet;
 use App\Models\Contract;
 use App\Models\Milestone;
-use Illuminate\Http\Request;
+use App\Models\PlatformSetting;
+use App\Models\Transaction;
+use App\Models\Wallet;
+use App\Models\Withdrawal;
+use App\Services\LedgerService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Throwable;
 
+/**
+ * Thin controller — all money movement delegated to LedgerService.
+ * Each endpoint:
+ *   - validates input
+ *   - validates ownership / authorization
+ *   - asks the service to perform the operation atomically
+ *   - returns the resulting state
+ */
 class PaymentController extends Controller
 {
+    public function __construct(private LedgerService $ledger) {}
+
+    /* ──────────────────────────────────────────────────────────────────────
+     *  GET /payments/wallet — current user's wallet + recent transactions
+     * ────────────────────────────────────────────────────────────────────── */
     public function wallet(Request $request): JsonResponse
     {
-        $wallet = $request->user()->wallet ?? Wallet::create(['user_id' => $request->user()->id]);
-        $transactions = Transaction::where('user_id', $request->user()->id)
+        $user   = $request->user();
+        $wallet = Wallet::firstOrCreate(['user_id' => $user->id], ['balance' => 0]);
+
+        $transactions = Transaction::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->limit(30)
+            ->limit(50)
             ->get();
 
         return response()->json([
-            'data' => array_merge($wallet->toArray(), ['transactions' => $transactions]),
+            'data' => array_merge($wallet->toArray(), [
+                'transactions' => $transactions,
+            ]),
         ]);
     }
 
+    /* ──────────────────────────────────────────────────────────────────────
+     *  POST /payments/deposit — top up wallet
+     *    body: { amount, idempotency_key?, payment_method?, stripe_payment_id? }
+     * ────────────────────────────────────────────────────────────────────── */
     public function deposit(Request $request): JsonResponse
     {
-        $request->validate(['amount' => 'required|numeric|min:10']);
+        $request->validate([
+            'amount'            => 'required|numeric|min:1|max:100000',
+            'idempotency_key'   => 'nullable|string|max:100',
+            'payment_method'    => 'nullable|string|max:50',
+            'stripe_payment_id' => 'nullable|string|max:100',
+        ]);
 
-        $wallet = $request->user()->wallet ?? Wallet::create(['user_id' => $request->user()->id]);
-        $amount = (float) $request->amount;
-        $fee    = round($amount * 0.03, 2);
-        $net    = $amount - $fee;
-
-        DB::transaction(function () use ($wallet, $amount, $fee, $net, $request) {
-            Transaction::create([
-                'wallet_id'   => $wallet->id,
-                'user_id'     => $request->user()->id,
-                'reference'   => 'DEP-' . strtoupper(Str::random(10)),
-                'type'        => 'credit',
-                'amount'      => $net,
-                'fee'         => $fee,
-                'status'      => 'completed',
-                'description' => $request->description ?? 'Wallet top-up',
-            ]);
-            $wallet->increment('balance', $net);
-        });
-
-        return response()->json(['data' => ['message' => 'Funds added', 'amount' => $net]]);
+        try {
+            $tx = $this->ledger->deposit(
+                $request->user(),
+                (float) $request->amount,
+                $request->input('idempotency_key'),
+                array_filter([
+                    'description'       => 'Wallet deposit',
+                    'payment_method'    => $request->input('payment_method'),
+                    'stripe_payment_id' => $request->input('stripe_payment_id'),
+                ]),
+            );
+            return response()->json(['data' => ['transaction' => $tx]], 201);
+        } catch (Throwable $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
+    /* ──────────────────────────────────────────────────────────────────────
+     *  POST /payments/contracts/{contract}/fund-escrow
+     *    body: { amount, idempotency_key? }
+     * ────────────────────────────────────────────────────────────────────── */
     public function fundEscrow(Request $request, Contract $contract): JsonResponse
     {
-        $request->validate(['amount' => 'required|numeric|min:1']);
+        $request->validate([
+            'amount'          => 'required|numeric|min:1',
+            'idempotency_key' => 'nullable|string|max:100',
+        ]);
 
-        if ($contract->client_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        DB::transaction(function () use ($request, $contract) {
-            $wallet = $request->user()->wallet;
-            $amount = (float) $request->amount;
-
-            Transaction::create([
-                'wallet_id'   => $wallet->id,
-                'user_id'     => $request->user()->id,
-                'contract_id' => $contract->id,
-                'reference'   => 'ESC-' . strtoupper(Str::random(10)),
-                'type'        => 'escrow',
-                'amount'      => $amount,
-                'fee'         => $amount * 0.03,
-                'status'      => 'completed',
-                'description' => "Escrow funded for: {$contract->title}",
+        try {
+            $tx = $this->ledger->fundEscrow(
+                $request->user(),
+                $contract,
+                (float) $request->amount,
+                $request->input('idempotency_key'),
+            );
+            return response()->json([
+                'data' => [
+                    'message'        => 'Escrow funded successfully',
+                    'transaction'    => $tx,
+                    'escrow_balance' => $contract->fresh()->escrow_amount,
+                ],
             ]);
-
-            $contract->increment('escrow_amount', $amount);
-        });
-
-        return response()->json(['data' => ['message' => 'Escrow funded successfully']]);
+        } catch (Throwable $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
+    /* ──────────────────────────────────────────────────────────────────────
+     *  POST /payments/milestones/{milestone}/release
+     *    body: { idempotency_key? }
+     * ────────────────────────────────────────────────────────────────────── */
     public function releaseMilestone(Request $request, Milestone $milestone): JsonResponse
     {
-        $contract = $milestone->contract;
-        if ($contract->client_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $request->validate([
+            'idempotency_key' => 'nullable|string|max:100',
+        ]);
 
-        if ($milestone->status !== 'submitted') {
-            return response()->json(['message' => 'Milestone is not ready for release'], 400);
-        }
-
-        DB::transaction(function () use ($milestone, $contract) {
-            $milestone->update(['status' => 'paid', 'approved_at' => now()]);
-
-            $freelancerWallet = $contract->freelancer->wallet;
-            $platformFee = $milestone->amount * 0.1;
-            $netAmount   = $milestone->amount - $platformFee;
-
-            Transaction::create([
-                'wallet_id'    => $freelancerWallet->id,
-                'user_id'      => $contract->freelancer_id,
-                'contract_id'  => $contract->id,
-                'milestone_id' => $milestone->id,
-                'reference'    => 'PAY-' . strtoupper(Str::random(10)),
-                'type'         => 'credit',
-                'amount'       => $netAmount,
-                'fee'          => $platformFee,
-                'status'       => 'completed',
-                'description'  => "Payment for milestone: {$milestone->title}",
+        try {
+            $result = $this->ledger->releaseMilestone(
+                $request->user(),
+                $milestone,
+                $request->input('idempotency_key'),
+            );
+            return response()->json([
+                'data' => [
+                    'message'    => 'Payment released to freelancer',
+                    'amount'     => $result['amount'],
+                    'commission' => $result['commission'],
+                    'payout'     => $result['payout'],
+                ],
             ]);
-
-            $freelancerWallet->increment('balance', $netAmount);
-        });
-
-        return response()->json(['data' => ['message' => 'Payment released to freelancer']]);
+        } catch (Throwable $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
+    /* ──────────────────────────────────────────────────────────────────────
+     *  POST /payments/withdrawals — freelancer requests payout
+     *    body: { amount, method, payout_details: {...} }
+     * ────────────────────────────────────────────────────────────────────── */
+    public function requestWithdrawal(Request $request): JsonResponse
+    {
+        $request->validate([
+            'amount'             => 'required|numeric|min:1',
+            'method'             => 'required|in:bank,paypal,wise,stripe,crypto',
+            'payout_details'     => 'required|array',
+        ]);
+
+        try {
+            $withdrawal = $this->ledger->requestWithdrawal(
+                $request->user(),
+                (float) $request->amount,
+                $request->input('method'),
+                (array) $request->input('payout_details'),
+            );
+            return response()->json(['data' => $withdrawal], 201);
+        } catch (Throwable $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────
+     *  GET /payments/withdrawals — freelancer's own withdrawal history
+     * ────────────────────────────────────────────────────────────────────── */
+    public function myWithdrawals(Request $request): JsonResponse
+    {
+        $rows = Withdrawal::where('user_id', $request->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate($request->per_page ?? 20);
+
+        return response()->json(['data' => $rows]);
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────
+     *  GET /payments/overview — wallet summary
+     * ────────────────────────────────────────────────────────────────────── */
     public function overview(Request $request): JsonResponse
     {
         $user   = $request->user();
-        $wallet = $user->wallet;
-
-        $inEscrow = Transaction::where('user_id', $user->id)
-            ->where('type', 'escrow')
-            ->where('status', 'completed')
-            ->sum('amount');
+        $wallet = Wallet::firstOrCreate(['user_id' => $user->id], ['balance' => 0]);
 
         $totalEarned = Transaction::where('user_id', $user->id)
             ->where('type', 'credit')
@@ -136,16 +186,22 @@ class PaymentController extends Controller
             ->sum('amount');
 
         $totalSpent = Transaction::where('user_id', $user->id)
-            ->whereIn('type', ['escrow', 'debit'])
+            ->whereIn('type', ['escrow', 'withdrawal'])
             ->where('status', 'completed')
             ->sum('amount');
 
+        $pendingWithdrawals = Withdrawal::where('user_id', $user->id)
+            ->where('status', 'pending')->sum('amount');
+
         return response()->json([
             'data' => [
-                'in_escrow'    => $inEscrow,
-                'total_earned' => $totalEarned,
-                'total_spent'  => $totalSpent,
-                'available'    => $wallet?->balance ?? 0,
+                'available'           => (float) $wallet->balance,
+                'pending'             => (float) $wallet->pending_balance,
+                'in_escrow'           => (float) $wallet->escrow_balance,
+                'total_earned'        => (float) $totalEarned,
+                'total_spent'         => (float) $totalSpent,
+                'pending_withdrawals' => (float) $pendingWithdrawals,
+                'currency'            => $wallet->currency,
             ],
         ]);
     }

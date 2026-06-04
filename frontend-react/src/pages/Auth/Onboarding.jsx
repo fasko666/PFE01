@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import PandaLogo from '../../components/ui/PandaLogo';
 import UserAvatar from '../../components/ui/UserAvatar';
 
-const TOTAL = 10;
+const TOTAL = 9;
 
 /* ─── Step 2 categories + specialties ─────────────────────── */
 const CATEGORIES = [
@@ -142,7 +142,7 @@ function PillButton({ active, onClick, children, className = '' }) {
 export default function Onboarding() {
   const navigate = useNavigate();
   const { user, logout, setUser } = useAuthStore();
-  const [step, setStep] = useState(2);
+  const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialState);
   const [submitting, setSubmitting] = useState(false);
 
@@ -190,7 +190,7 @@ export default function Onboarding() {
         avatar:        form.photoUrl || null,
       };
 
-      const { data } = await api.post('/freelancer/onboarding', payload);
+      const { data } = await api.freelancers.onboarding(payload);
 
       // Update local store with fresh user (and the new avatar_url if backend stored a new file)
       const freshUser = data?.data;
@@ -238,7 +238,7 @@ export default function Onboarding() {
   const renderStep = () => {
     switch (step) {
       /* ─── Step 2: Category + Specialties ─── */
-      case 2:
+      case 1:
         return (
           <>
             <h1 className="text-3xl md:text-4xl font-bold font-display text-dark-100 mb-2 leading-tight">
@@ -291,7 +291,7 @@ export default function Onboarding() {
         );
 
       /* ─── Step 3: Skills ─── */
-      case 3:
+      case 2:
         return (
           <div className="grid md:grid-cols-[1fr_280px] gap-10">
             <div>
@@ -364,7 +364,7 @@ export default function Onboarding() {
         );
 
       /* ─── Step 4: Title ─── */
-      case 4:
+      case 3:
         return (
           <>
             <h1 className="text-3xl md:text-4xl font-bold font-display text-dark-100 mb-2 leading-tight">
@@ -393,7 +393,7 @@ export default function Onboarding() {
         );
 
       /* ─── Step 5: Experience ─── */
-      case 5:
+      case 4:
         return (
           <>
             <h1 className="text-3xl md:text-4xl font-bold font-display text-dark-100 mb-2 leading-tight">
@@ -436,7 +436,7 @@ export default function Onboarding() {
         );
 
       /* ─── Step 6: Education ─── */
-      case 6:
+      case 5:
         return (
           <>
             <h1 className="text-3xl md:text-4xl font-bold font-display text-dark-100 mb-2 leading-tight">
@@ -479,7 +479,7 @@ export default function Onboarding() {
         );
 
       /* ─── Step 7: Languages ─── */
-      case 7: {
+      case 6: {
         const update = (i, patch) => {
           const next = [...form.languages];
           next[i] = { ...next[i], ...patch };
@@ -540,7 +540,7 @@ export default function Onboarding() {
       }
 
       /* ─── Step 8: Bio ─── */
-      case 8:
+      case 7:
         return (
           <div className="grid md:grid-cols-[1fr_320px] gap-10">
             <div>
@@ -581,7 +581,7 @@ export default function Onboarding() {
         );
 
       /* ─── Step 9: Hourly rate ─── */
-      case 9: {
+      case 8: {
         const rate = parseFloat(form.hourlyRate || 0);
         const fee = +(rate * SERVICE_FEE_PCT).toFixed(2);
         const youGet = +(rate - fee).toFixed(2);
@@ -656,7 +656,7 @@ export default function Onboarding() {
       }
 
       /* ─── Step 10: Personal details ─── */
-      case 10:
+      case 9:
         return (
           <>
             <h1 className="text-3xl md:text-4xl font-bold font-display text-dark-100 mb-2 leading-tight">
@@ -786,11 +786,11 @@ export default function Onboarding() {
         );
 
       /* ─── Step 11: Profile review ─── */
-      case 11:
+      case 10:
         return <ProfileReview form={form} user={user} onSubmit={handleSubmit} submitting={submitting} onEdit={(s) => setStep(s)} />;
 
       /* ─── Step 12: Connects ─── */
-      case 12:
+      case 11:
         return <ConnectsScreen onContinue={() => navigate('/freelancer/dashboard')} />;
 
       default:
@@ -815,13 +815,13 @@ export default function Onboarding() {
 
   /* Validation per step */
   const canProceed = (() => {
-    if (step === 2)  return form.category && form.specialties.length >= 1;
-    if (step === 3)  return form.skills.length >= 1;
-    if (step === 4)  return form.title.trim().length > 0;
-    if (step === 7)  return form.languages[0]?.level;
-    if (step === 8)  return form.bio.trim().length > 0;
-    if (step === 9)  return parseFloat(form.hourlyRate) >= 3 && parseFloat(form.hourlyRate) <= 999;
-    if (step === 10) return form.dob && form.street && form.city && form.phone;
+    if (step === 1)  return form.category && form.specialties.length >= 1;
+    if (step === 2)  return form.skills.length >= 1;
+    if (step === 3)  return form.title.trim().length > 0;
+    if (step === 6)  return form.languages[0]?.level;
+    if (step === 7)  return form.bio.trim().length > 0;
+    if (step === 8)  return parseFloat(form.hourlyRate) >= 3 && parseFloat(form.hourlyRate) <= 999;
+    if (step === 9) return form.dob && form.street && form.city && form.phone;
     return true;
   })();
 
@@ -830,7 +830,7 @@ export default function Onboarding() {
       <TopBar user={user} onLogout={handleLogout} />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10 pb-32">
-        {step <= 10 && <Progress step={step} />}
+        {step <= 9 && <Progress step={step} />}
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -844,11 +844,11 @@ export default function Onboarding() {
         </AnimatePresence>
       </main>
 
-      {step <= 10 && (
+      {step <= 9 && (
         <footer className="fixed bottom-0 inset-x-0 bg-dark-950/95 backdrop-blur border-t border-dark-800 z-30">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
             <button onClick={back}
-              disabled={step <= 2}
+              disabled={step <= 1}
               className="px-4 sm:px-6 py-2.5 rounded-full border border-dark-700 text-xs font-semibold text-dark-200 hover:border-dark-500 hover:text-dark-100 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
               Back
             </button>
@@ -860,7 +860,7 @@ export default function Onboarding() {
                 </button>
               )}
               <button
-                onClick={step === 10 ? () => setStep(11) : next}
+                onClick={step === 9 ? () => setStep(10) : next}
                 disabled={!canProceed}
                 className="px-4 sm:px-6 py-2.5 rounded-full bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >

@@ -7,153 +7,370 @@ skinparam class {
   HeaderFontColor white
 }
 skinparam linetype ortho
-title ERD -- FreeNest (19 tables)
+title ERD -- FreeNest (32 tables — modele complet)
 
+' ─── Auth & Security ─────────────────────────────────────────
 entity "users" as U {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  name: VARCHAR
-  email: VARCHAR UNIQUE
-  role: ENUM
-  google_id: VARCHAR
+  name : VARCHAR
+  email : VARCHAR UNIQUE
+  role : ENUM
+  google_id : VARCHAR
+  stripe_customer_id : VARCHAR
+  stripe_account_id : VARCHAR
+  two_factor_secret : TEXT
+  two_factor_recovery_codes : TEXT
+  two_factor_confirmed_at : TIMESTAMP
+  is_active : BOOL
+  is_verified : BOOL
+  is_platform : BOOL
+}
+entity "personal_access_tokens" as PAT {
+  * id <<PK>>
+  --
+  tokenable_id : INT
+  token : VARCHAR UNIQUE
+}
+entity "password_reset_tokens" as PRT {
+  * email <<PK>>
+  --
+  token : VARCHAR
+}
+entity "identity_verifications" as KYC {
+  * id <<PK>>
+  --
+  user_id <<FK>>
+  document_type : ENUM
+  id_front_path : VARCHAR
+  id_back_path : VARCHAR
+  selfie_path : VARCHAR
+  status : ENUM
+}
+entity "tax_documents" as TAX {
+  * id <<PK>>
+  --
+  user_id <<FK>>
+  form_type : ENUM
+  legal_name : VARCHAR
+  tax_id_last4 : VARCHAR
+  status : ENUM
 }
 
+' ─── Profiles & Catalog ──────────────────────────────────────
 entity "freelancer_profiles" as FP {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  user_id: INT <<FK>>
-  title: VARCHAR
-  hourly_rate: DECIMAL
-  avg_rating: DECIMAL
+  user_id <<FK>>
+  title : VARCHAR
+  hourly_rate : DECIMAL
+  avg_rating : DECIMAL
 }
-
 entity "client_profiles" as CP {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  user_id: INT <<FK>>
-  company_name: VARCHAR
-  total_spent: DECIMAL
+  user_id <<FK>>
+  company_name : VARCHAR
+  total_spent : DECIMAL
 }
-
 entity "categories" as CAT {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  parent_id: INT <<FK>>
-  name: VARCHAR
-  slug: VARCHAR
+  parent_id <<FK>>
+  name : VARCHAR
+  slug : VARCHAR
 }
-
 entity "skills" as SK {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  category_id: INT <<FK>>
-  name: VARCHAR
+  category_id <<FK>>
+  name : VARCHAR
+}
+entity "freelancer_skills" as FSK {
+  user_id <<FK>>
+  skill_id <<FK>>
+  level : ENUM
+}
+entity "portfolios" as PO {
+  * id <<PK>>
+  --
+  user_id <<FK>>
+  title : VARCHAR
+  images : JSON
+}
+entity "talent_lists" as TL {
+  * id <<PK>>
+  --
+  user_id <<FK>>
+  name : VARCHAR
+}
+entity "talent_list_freelancers" as TLF {
+  talent_list_id <<FK>>
+  freelancer_id <<FK>>
+  note : TEXT
+}
+entity "saved_freelancers" as SF {
+  user_id <<FK>>
+  freelancer_id <<FK>>
 }
 
+' ─── Marketplace ─────────────────────────────────────────────
 entity "job_postings" as JP {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  client_id: INT <<FK>>
-  category_id: INT <<FK>>
-  title: VARCHAR
-  budget_min: DECIMAL
-  status: ENUM
+  client_id <<FK>>
+  category_id <<FK>>
+  title : VARCHAR
+  budget_min : DECIMAL
+  budget_max : DECIMAL
+  status : ENUM
+  visibility : ENUM
 }
-
+entity "saved_jobs" as SJ {
+  user_id <<FK>>
+  job_id <<FK>>
+}
 entity "proposals" as PR {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  job_id: INT <<FK>>
-  freelancer_id: INT <<FK>>
-  bid_amount: DECIMAL
-  status: ENUM
+  job_id <<FK>>
+  freelancer_id <<FK>>
+  bid_amount : DECIMAL
+  status : ENUM
+  connects_used : INT
 }
 
+' ─── Contracts ───────────────────────────────────────────────
 entity "contracts" as CO {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  job_id: INT <<FK>>
-  proposal_id: INT <<FK>>
-  client_id: INT <<FK>>
-  freelancer_id: INT <<FK>>
-  amount: DECIMAL
-  status: ENUM
+  job_id <<FK>>
+  proposal_id <<FK>>
+  client_id <<FK>>
+  freelancer_id <<FK>>
+  amount : DECIMAL
+  escrow_amount : DECIMAL
+  status : ENUM
+  disputed_at : TIMESTAMP
+  resolved_at : TIMESTAMP
+  archived_at : TIMESTAMP
 }
-
 entity "milestones" as MI {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  contract_id: INT <<FK>>
-  title: VARCHAR
-  amount: DECIMAL
-  status: ENUM
+  contract_id <<FK>>
+  created_by <<FK>>
+  submitted_by <<FK>>
+  amount : DECIMAL
+  status : ENUM
+  rejection_reason : TEXT
 }
-
+entity "contract_files" as CF {
+  * id <<PK>>
+  --
+  contract_id <<FK>>
+  parent_id <<FK>>
+  version : INT
+  stored_path : VARCHAR
+}
+entity "contract_activities" as CA {
+  * id <<PK>>
+  --
+  contract_id <<FK>>
+  actor_id <<FK>>
+  type : VARCHAR
+  data : JSON
+}
+entity "contract_extensions" as CE {
+  * id <<PK>>
+  --
+  contract_id <<FK>>
+  requested_by <<FK>>
+  status : ENUM
+}
+entity "time_logs" as TLG {
+  * id <<PK>>
+  --
+  contract_id <<FK>>
+  user_id <<FK>>
+  started_at : TIMESTAMP
+  duration_seconds : INT
+}
 entity "reviews" as RV {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  contract_id: INT <<FK>>
-  reviewer_id: INT <<FK>>
-  rating: DECIMAL
+  contract_id <<FK>>
+  reviewer_id <<FK>>
+  reviewee_id <<FK>>
+  rating : DECIMAL
 }
 
+' ─── Money ──────────────────────────────────────────────────
 entity "wallets" as WA {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  user_id: INT <<FK>>
-  balance: DECIMAL
-  escrow_balance: DECIMAL
+  user_id <<FK>>
+  balance : DECIMAL
+  pending_balance : DECIMAL
+  escrow_balance : DECIMAL
 }
-
 entity "transactions" as TR {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  wallet_id: INT <<FK>>
-  type: ENUM
-  amount: DECIMAL
-  fee: DECIMAL
+  wallet_id <<FK>>
+  user_id <<FK>>
+  contract_id <<FK>>
+  milestone_id <<FK>>
+  withdrawal_id <<FK>>
+  type : ENUM
+  direction : ENUM
+  amount : DECIMAL
+  fee : DECIMAL
+  balance_after : DECIMAL
+  idempotency_key : VARCHAR UNIQUE
+}
+entity "withdrawals" as WD {
+  * id <<PK>>
+  --
+  user_id <<FK>>
+  wallet_id <<FK>>
+  amount : DECIMAL
+  fee : DECIMAL
+  net : DECIMAL
+  method : ENUM
+  status : ENUM
+  stripe_transfer_id : VARCHAR
+}
+entity "platform_settings" as PSE {
+  key : VARCHAR UNIQUE
+  value : TEXT
+}
+entity "subscriptions" as SUB {
+  * id <<PK>>
+  --
+  user_id <<FK>>
+  plan : ENUM
+  connects_balance : INT
+}
+entity "stripe_webhook_events" as SWE {
+  * id <<PK>>
+  --
+  stripe_event_id : VARCHAR UNIQUE
+  type : VARCHAR
+  status : ENUM
 }
 
+' ─── Chat & Notifications ───────────────────────────────────
 entity "conversations" as CV {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  type: ENUM
-  contract_id: INT <<FK>>
+  type : ENUM
+  contract_id <<FK>>
 }
-
+entity "conversation_participants" as CVP {
+  conversation_id <<FK>>
+  user_id <<FK>>
+  last_read_at : TIMESTAMP
+}
 entity "messages" as MSG {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  conversation_id: INT <<FK>>
-  sender_id: INT <<FK>>
-  body: TEXT
+  conversation_id <<FK>>
+  sender_id <<FK>>
+  body : TEXT
+  type : ENUM
+  is_read : BOOL
+  delivered_at : TIMESTAMP
+  edited_at : TIMESTAMP
+  reply_to_id <<FK>>
+}
+entity "message_reactions" as MR {
+  * id <<PK>>
+  --
+  message_id <<FK>>
+  user_id <<FK>>
+  emoji : VARCHAR
+}
+entity "notifications" as NO {
+  * id : UUID <<PK>>
+  --
+  notifiable_id <<FK>>
+  data : TEXT
+  read_at : TIMESTAMP
+}
+entity "push_subscriptions" as PSU {
+  * id <<PK>>
+  --
+  user_id <<FK>>
+  endpoint : VARCHAR UNIQUE
+  p256dh : VARCHAR
+  auth : VARCHAR
 }
 
+' ─── AI & Audit ─────────────────────────────────────────────
 entity "ai_histories" as AI {
-  * id: INT <<PK>>
+  * id <<PK>>
   --
-  user_id: INT <<FK>>
-  type: ENUM
-  tokens_used: INT
+  user_id <<FK>>
+  type : ENUM
+  tokens_used : INT
+}
+entity "audit_logs" as AUDIT {
+  * id <<PK>>
+  --
+  actor_id <<FK>>
+  action : VARCHAR
+  target_type : VARCHAR
+  target_id : INT
+  payload : JSON
 }
 
-U ||--o| FP  : "1..1"
-U ||--o| CP  : "1..1"
-U ||--|| WA  : "1..1"
-U ||--o{ JP  : "publie"
-U ||--o{ PR  : "soumet"
-U ||--o{ AI  : "genere"
+' ─── Relations ──────────────────────────────────────────────
+U ||--o| FP    : "1..1"
+U ||--o| CP    : "1..1"
+U ||--|| WA    : "1..1"
+U ||--o{ KYC
+U ||--o{ TAX
+U ||--o{ PAT
+U ||--o{ PO
+U ||--o{ TL
+U ||--o{ SF
+U ||--o{ SJ
+U ||--o{ JP    : "publie"
+U ||--o{ PR    : "soumet"
+U ||--o{ AI
+U ||--o{ AUDIT
+U ||--o{ SUB
+U ||--o{ PSU
+U ||--o{ NO
 
-CAT ||--o{ JP : "categorise"
-CAT ||--o{ SK : "groupe"
+CAT ||--o{ JP
+CAT ||--o{ SK
+SK  ||--o{ FSK
+U   ||--o{ FSK
 
-JP ||--o{ PR : "recoit"
-PR ||--o| CO : "genere"
+TL  ||--o{ TLF
+U   ||--o{ TLF
 
-CO ||--o{ MI : "contient"
-CO ||--o{ RV : "evalue"
+JP ||--o{ PR
+PR ||--o| CO   : "genere"
 
-WA ||--o{ TR : "enregistre"
+CO ||--o{ MI
+CO ||--o{ CF
+CO ||--o{ CA
+CO ||--o{ CE
+CO ||--o{ TLG
+CO ||--o{ RV
+CO ||--o| CV   : "contract chat"
 
-CV ||--o{ MSG : "contient"
+WA  ||--o{ TR
+WD  ||--o{ TR
+U   ||--o{ WD
+CO  ||--o{ TR
+MI  ||--o{ TR
+
+CV  ||--o{ CVP
+U   ||--o{ CVP
+CV  ||--o{ MSG
+MSG ||--o{ MR
 @enduml

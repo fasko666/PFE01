@@ -1,0 +1,91 @@
+# Production-ready docker-compose for PANDA.
+#   docker compose up -d
+#
+# Services:
+#   app    Laravel + Reverb + nginx + queue worker (in one container via Supervisor)
+#   mysql  MySQL 8
+#   redis  Redis 7 (cache + queue + Reverb pub/sub)
+#   web    React build served by nginx-alpine
+#
+# Override anything via .env at the repo root.
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: ./backend-laravel
+      dockerfile: Dockerfile
+    container_name: panda-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL:-http://localhost:8000}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-panda}
+      DB_USERNAME: ${DB_USERNAME:-panda}
+      DB_PASSWORD: ${DB_PASSWORD:-panda}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      BROADCAST_CONNECTION: reverb
+      REVERB_HOST: ${REVERB_HOST:-localhost}
+      REVERB_PORT: ${REVERB_PORT:-8080}
+      REVERB_SCHEME: ${REVERB_SCHEME:-http}
+      REVERB_APP_ID: ${REVERB_APP_ID:-panda}
+      REVERB_APP_KEY: ${REVERB_APP_KEY:-panda-key}
+      REVERB_APP_SECRET: ${REVERB_APP_SECRET:-panda-secret}
+    volumes:
+      - app-storage:/var/www/html/storage
+    ports:
+      - "8000:80"
+      - "8080:8080"
+
+  mysql:
+    image: mysql:8.0
+    container_name: panda-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-panda}
+      MYSQL_USER: ${DB_USERNAME:-panda}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-panda}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootroot}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootroot}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    container_name: panda-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "yes"]
+
+  web:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
+    container_name: panda-web
+    restart: unless-stopped
+    depends_on: [app]
+    ports:
+      - "5173:80"
+
+volumes:
+  mysql-data:
+  redis-data:
+  app-storage:

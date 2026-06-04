@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DollarSign, Clock, RotateCcw, ArrowUpRight, ArrowDownLeft,
@@ -49,16 +50,29 @@ export default function Payments() {
 
   const handleAddFunds = async (e) => {
     e.preventDefault();
-    if (!amount || Number(amount) < 10) return toast.error('Minimum deposit is $10');
+    if (!amount || Number(amount) < 5) return toast.error('Minimum deposit is $5');
     setAdding(true);
     try {
-      await api.payments.fundEscrow({ amount: Number(amount), description: 'Wallet top-up' });
-      toast.success(`$${amount} added to wallet!`);
-      setAddModal(false);
-      setAmount('');
-      load();
-    } catch {
-      toast.error('Payment failed. (Demo mode — no real charges)');
+      // 1. Try Stripe Checkout (production-ready when STRIPE_SECRET is configured).
+      // 2. Falls back to direct wallet credit (dev mode) if Stripe isn't set up.
+      const res = await api.payments.stripeDepositSession(Number(amount));
+      const url = res.data?.data?.checkout_url;
+      if (url) {
+        window.location.href = url;
+        return;
+      }
+      throw new Error('no_url');
+    } catch (err) {
+      // Stripe not configured — fall back to direct deposit so dev/staging still works.
+      try {
+        await api.payments.deposit({ amount: Number(amount), description: 'Wallet top-up (dev mode)' });
+        toast.success(`$${amount} added to wallet (dev mode)`);
+        setAddModal(false);
+        setAmount('');
+        load();
+      } catch (e) {
+        toast.error(e?.response?.data?.message || 'Payment failed.');
+      }
     } finally {
       setAdding(false);
     }
@@ -145,9 +159,9 @@ export default function Payments() {
           }
           <div className="flex items-center gap-2 mt-2">
             {isFreelancer ? (
-              <button className="px-3 py-1 bg-primary-500/10 text-primary-400 text-xs font-medium rounded-lg hover:bg-primary-500/20 transition-colors">
+              <Link to="/payments/withdraw" className="px-3 py-1 bg-primary-500/10 text-primary-400 text-xs font-medium rounded-lg hover:bg-primary-500/20 transition-colors">
                 Withdraw funds
-              </button>
+              </Link>
             ) : (
               <button onClick={() => setAddModal(true)} className="px-3 py-1 bg-primary-500/10 text-primary-400 text-xs font-medium rounded-lg hover:bg-primary-500/20 transition-colors">
                 Add funds
