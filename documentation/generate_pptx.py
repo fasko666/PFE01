@@ -1,1090 +1,764 @@
 """
-Genere la presentation FreeNest au format PowerPoint (.pptx)
-20 slides professionnelles avec design moderne
+Genere la presentation PowerPoint FreeNest — version maj. juin 2026
 """
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
 from pptx.util import Cm
-from pptx.enum.dml import MSO_THEME_COLOR
 import os
 
-UML = r"C:\Users\Pro\Desktop\PFE O1\documentation\uml_diagrams"
+# ── Palette ──────────────────────────────────────────────────
+BLUE_DARK  = RGBColor(0,  52, 102)
+BLUE_MAIN  = RGBColor(0,  82, 136)
+BLUE_LIGHT = RGBColor(0, 120, 215)
+ORANGE     = RGBColor(230,126,  34)
+GREEN      = RGBColor(39, 174,  96)
+RED        = RGBColor(192,  57,  43)
+WHITE      = RGBColor(255,255,255)
+GREY_LIGHT = RGBColor(245,247,250)
+GREY_TEXT  = RGBColor(100,100,100)
 
-# ── Palette couleurs FreeNest ─────────────────────────────────
-BLUE_DARK   = RGBColor(0,   52,  102)   # #003466
-BLUE_MAIN   = RGBColor(0,   82,  136)   # #005288
-BLUE_LIGHT  = RGBColor(0,  120,  215)   # #0078D7
-BLUE_PALE   = RGBColor(235, 245, 255)   # #EBF5FF
-ORANGE      = RGBColor(230, 126,  34)   # #E67E22
-GREEN       = RGBColor( 39, 174,  96)   # #27AE60
-WHITE       = RGBColor(255, 255, 255)
-GREY_DARK   = RGBColor( 60,  60,  60)
-GREY_MED    = RGBColor(100, 100, 100)
-GREY_LIGHT  = RGBColor(245, 247, 250)   # #F5F7FA
-
-W = Inches(13.33)   # widescreen 16:9
-H = Inches(7.5)
-
+W  = Inches(13.33)
+H  = Inches(7.5)
 prs = Presentation()
 prs.slide_width  = W
 prs.slide_height = H
 
-BLANK = prs.slide_layouts[6]   # blank
+BLANK = prs.slide_layouts[6]
 
-# ══════════════════════════════════════════════════════════════
-#  HELPERS
-# ══════════════════════════════════════════════════════════════
-def rgb_hex(r,g,b): return RGBColor(r,g,b)
+BASE    = r"C:\Users\Pro\Desktop\PFE O1\documentation"
+UML_DIR = os.path.join(BASE, "uml_diagrams")
 
-def add_rect(slide, x, y, w, h, fill_rgb, alpha=None):
-    shape = slide.shapes.add_shape(1, x, y, w, h)  # MSO_SHAPE_TYPE.RECTANGLE=1
+def add_rect(slide, x, y, w, h, fill=BLUE_MAIN, alpha=None):
+    shape = slide.shapes.add_shape(1, x, y, w, h)
     shape.fill.solid()
-    shape.fill.fore_color.rgb = fill_rgb
+    shape.fill.fore_color.rgb = fill
     shape.line.fill.background()
     return shape
 
-def add_text(slide, text, x, y, w, h,
-             font_size=18, bold=False, color=WHITE,
-             align=PP_ALIGN.LEFT, wrap=True, font="Calibri"):
-    txBox = slide.shapes.add_textbox(x, y, w, h)
-    tf    = txBox.text_frame
+def add_text(slide, text, x, y, w, h, size=18, bold=False, color=WHITE,
+             align=PP_ALIGN.LEFT, wrap=True):
+    txb = slide.shapes.add_textbox(x, y, w, h)
+    tf  = txb.text_frame
     tf.word_wrap = wrap
-    p     = tf.paragraphs[0]
+    p   = tf.paragraphs[0]
     p.alignment = align
-    run   = p.add_run()
-    run.text      = text
-    run.font.name = font
-    run.font.size = Pt(font_size)
+    run = p.add_run()
+    run.text = text
+    run.font.size = Pt(size)
     run.font.bold = bold
     run.font.color.rgb = color
-    return txBox
+    return txb
 
 def add_img(slide, path, x, y, w, h=None):
-    if not os.path.exists(path):
-        return None
-    if h:
-        return slide.shapes.add_picture(path, x, y, w, h)
-    else:
-        return slide.shapes.add_picture(path, x, y, w)
-
-def bullet_list(slide, items, x, y, w, h,
-                font_size=16, color=GREY_DARK, icon="  •  "):
-    txBox = slide.shapes.add_textbox(x, y, w, h)
-    tf    = txBox.text_frame
-    tf.word_wrap = True
-    first = True
-    for item in items:
-        if first:
-            p = tf.paragraphs[0]
-            first = False
+    if os.path.exists(path):
+        if h:
+            slide.shapes.add_picture(path, x, y, w, h)
         else:
-            p = tf.add_paragraph()
-        p.space_before = Pt(3)
-        run = p.add_run()
-        run.text      = icon + item
-        run.font.size = Pt(font_size)
-        run.font.name = "Calibri"
-        run.font.color.rgb = color
-    return txBox
+            slide.shapes.add_picture(path, x, y, w)
 
-def two_col_list(slide, items, x, y, w, h, font_size=14, color=GREY_DARK):
-    """Split list into 2 columns."""
-    half = len(items) // 2 + len(items) % 2
-    col_w = w // 2 - Inches(0.1)
-    bullet_list(slide, items[:half], x,        y, col_w, h, font_size, color)
-    bullet_list(slide, items[half:], x+col_w+Inches(0.2), y, col_w, h, font_size, color)
-
-def slide_header(slide, title, subtitle=None,
-                 bar_color=BLUE_MAIN, title_color=WHITE,
-                 bar_h=Inches(1.15)):
-    """Top bar with title."""
-    add_rect(slide, 0, 0, W, bar_h, bar_color)
-    add_text(slide, title,
-             Inches(0.4), Inches(0.12), Inches(12), Inches(0.7),
-             font_size=28, bold=True, color=title_color)
-    if subtitle:
-        add_text(slide, subtitle,
-                 Inches(0.4), Inches(0.78), Inches(12), Inches(0.4),
-                 font_size=15, bold=False, color=RGBColor(200,220,255))
-    add_rect(slide, 0, bar_h, W, Inches(0.04), ORANGE)
+def bullet_list(slide, items, x, y, w, h, size=14, color=BLUE_DARK, indent=False):
+    txb = slide.shapes.add_textbox(x, y, w, h)
+    tf  = txb.text_frame
+    tf.word_wrap = True
+    for i, item in enumerate(items):
+        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+        p.text = ("    " if indent else "  ") + item
+        p.font.size = Pt(size)
+        p.font.color.rgb = color
+        p.space_after = Pt(4)
 
 def slide_bg(slide, color=GREY_LIGHT):
-    add_rect(slide, 0, 0, W, H, color)
+    bg = slide.background
+    fill = bg.fill
+    fill.solid()
+    fill.fore_color.rgb = color
 
-def divider(slide, y, color=BLUE_LIGHT, h=Inches(0.03)):
-    add_rect(slide, Inches(0.4), y, Inches(12.5), h, color)
+def slide_header(slide, title, subtitle=None, accent=BLUE_LIGHT):
+    add_rect(slide, 0, 0, W, Inches(1.1), fill=BLUE_DARK)
+    add_text(slide, title, Inches(0.4), Inches(0.12), Inches(10), Inches(0.7),
+             size=26, bold=True, color=WHITE)
+    add_rect(slide, 0, Inches(1.1), W, Inches(0.06), fill=accent)
+    if subtitle:
+        add_text(slide, subtitle, Inches(0.4), Inches(1.2), Inches(10), Inches(0.5),
+                 size=14, color=GREY_TEXT)
 
-def badge(slide, text, x, y, bg=BLUE_LIGHT, fg=WHITE, font_size=13):
-    bw = Inches(2.2)
-    bh = Inches(0.38)
-    r  = slide.shapes.add_shape(5, x, y, bw, bh)  # rounded rect
-    r.fill.solid()
-    r.fill.fore_color.rgb = bg
-    r.line.fill.background()
-    tf = r.text_frame
-    tf.paragraphs[0].alignment = PP_ALIGN.CENTER
-    run = tf.paragraphs[0].add_run()
-    run.text      = text
-    run.font.size = Pt(font_size)
-    run.font.bold = True
-    run.font.color.rgb = fg
-    run.font.name = "Calibri"
-    return r
+def divider(slide, y, color=BLUE_LIGHT):
+    add_rect(slide, Inches(0.4), y, Inches(12.5), Inches(0.04), fill=color)
 
-def stat_box(slide, number, label, x, y, bg=BLUE_MAIN):
-    bw, bh = Inches(2.0), Inches(1.4)
-    add_rect(slide, x, y, bw, bh, bg)
-    add_text(slide, number, x, y+Inches(0.18), bw, Inches(0.7),
-             font_size=30, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(slide, label,  x, y+Inches(0.82), bw, Inches(0.55),
-             font_size=12,  bold=False, color=RGBColor(200,225,255),
-             align=PP_ALIGN.CENTER)
+def stat_box(slide, label, value, x, y, w=Inches(2.8), h=Inches(1.3), bg=BLUE_MAIN):
+    add_rect(slide, x, y, w, h, fill=bg)
+    add_text(slide, value, x, y+Inches(0.12), w, Inches(0.7),
+             size=26, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+    add_text(slide, label, x, y+Inches(0.75), w, Inches(0.45),
+             size=11, color=WHITE, align=PP_ALIGN.CENTER)
 
-def info_row(slide, label, value, x, y, label_w=Inches(3.5), total_w=Inches(9)):
-    add_text(slide, label+"  :", x, y, label_w, Inches(0.38),
-             font_size=14, bold=True, color=BLUE_MAIN)
-    add_text(slide, value, x+label_w, y, total_w-label_w, Inches(0.38),
-             font_size=14, bold=False, color=GREY_DARK)
+def badge(slide, text, x, y, bg=ORANGE):
+    add_rect(slide, x, y, Inches(2.1), Inches(0.38), fill=bg)
+    add_text(slide, text, x+Inches(0.05), y+Inches(0.05), Inches(2.0), Inches(0.3),
+             size=11, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
 
-def tech_pill(slide, label, x, y, bg=BLUE_MAIN):
-    w, h = Inches(1.9), Inches(0.4)
-    r = slide.shapes.add_shape(5, x, y, w, h)
-    r.fill.solid()
-    r.fill.fore_color.rgb = bg
-    r.line.fill.background()
-    tf = r.text_frame
-    tf.paragraphs[0].alignment = PP_ALIGN.CENTER
-    run = tf.paragraphs[0].add_run()
-    run.text      = label
-    run.font.size = Pt(12)
-    run.font.bold = True
-    run.font.color.rgb = WHITE
-    run.font.name = "Calibri"
+def two_col(slide, left_items, right_items, y_start=Inches(2.0), size=13):
+    bullet_list(slide, left_items,  Inches(0.5), y_start, Inches(6.0), Inches(4.5), size=size)
+    bullet_list(slide, right_items, Inches(6.8), y_start, Inches(6.0), Inches(4.5), size=size)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 1 — PAGE DE TITRE
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-# Fond degrade simule : partie gauche sombre, droite claire
-add_rect(sl, 0,        0, W,            H, BLUE_DARK)
-add_rect(sl, Inches(7),0, Inches(6.33), H, BLUE_MAIN)
-# Bande orange verticale
-add_rect(sl, Inches(7)-Inches(0.08), 0, Inches(0.08), H, ORANGE)
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 1 — TITRE
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+add_rect(s, 0, 0, W, H, fill=BLUE_DARK)
+add_rect(s, 0, Inches(2.8), W, Inches(2.2), fill=BLUE_MAIN)
+add_text(s, "FreeNest", 0, Inches(0.6), W, Inches(1.2),
+         size=64, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+add_text(s, "Marketplace Freelance Full-Stack avec IA", 0, Inches(1.7), W, Inches(0.8),
+         size=20, color=RGBColor(160,200,255), align=PP_ALIGN.CENTER)
+add_text(s, "Laravel 12  |  React 19  |  Stripe  |  Docker  |  Ollama/Mistral 7B",
+         0, Inches(2.9), W, Inches(0.6), size=15, color=WHITE, align=PP_ALIGN.CENTER)
+add_text(s, "Projet de Fin d'Etudes — Ayoub Elmernissi — Juin 2026",
+         0, Inches(3.6), W, Inches(0.5), size=13, color=RGBColor(180,220,255), align=PP_ALIGN.CENTER)
+add_rect(s, Inches(4), Inches(4.5), Inches(5.33), Inches(0.05), fill=ORANGE)
+add_text(s, "ayoubelmerniss55@gmail.com",
+         0, Inches(4.8), W, Inches(0.5), size=13, color=RGBColor(200,200,200), align=PP_ALIGN.CENTER)
 
-add_text(sl, "FREENEST", Inches(0.6), Inches(0.9), Inches(6), Inches(1.2),
-         font_size=60, bold=True, color=WHITE, font="Calibri")
-add_text(sl, "Marketplace Freelance Full-Stack", Inches(0.6), Inches(2.0),
-         Inches(6.2), Inches(0.6),
-         font_size=22, bold=False, color=RGBColor(180,210,255))
-add_text(sl, "avec Intelligence Artificielle",   Inches(0.6), Inches(2.55),
-         Inches(6.2), Inches(0.6),
-         font_size=22, bold=False, color=ORANGE)
-
-add_rect(sl, Inches(0.6), Inches(3.3), Inches(5.5), Inches(0.04), ORANGE)
-
-rows = [
-    ("Realise par",  "Ayoub Elmernissi"),
-    ("Email",        "ayoubelmerniss55@gmail.com"),
-    ("Etablissement","[Nom de l'etablissement]"),
-    ("Filiere",      "Developpement Web / Informatique"),
-    ("Annee",        "2025 – 2026"),
-]
-for i,(l,v) in enumerate(rows):
-    yy = Inches(3.55) + i*Inches(0.62)
-    add_text(sl, l+" :", Inches(0.6), yy, Inches(1.7), Inches(0.55),
-             font_size=13, bold=True, color=ORANGE)
-    add_text(sl, v,     Inches(2.35), yy, Inches(4.5), Inches(0.55),
-             font_size=13, bold=False, color=RGBColor(200,220,255))
-
-# Panneau droit - infos clés
-add_text(sl, "Technologies Cles", Inches(7.3), Inches(0.7), Inches(5.5), Inches(0.55),
-         font_size=18, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-techs = ["Laravel 12","React 19","MySQL","Ollama / Mistral",
-         "Socket.IO","Three.js","Sanctum","TailwindCSS","Framer Motion","Stripe Ready"]
-for i,t in enumerate(techs):
-    row, col = divmod(i,2)
-    tech_pill(sl, t, Inches(7.4)+col*Inches(2.1), Inches(1.35)+row*Inches(0.56),
-              bg=BLUE_DARK if i%3==0 else (GREEN if i%3==1 else ORANGE))
-
-add_text(sl, "Rapport de PFE  |  Ayoub Elmernissi",
-         0, H-Inches(0.4), W, Inches(0.4),
-         font_size=11, color=RGBColor(120,150,200), align=PP_ALIGN.CENTER)
-
-# ══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════
 #  SLIDE 2 — PLAN
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Plan de la Presentation",
-             "FreeNest — Marketplace Freelance avec IA")
-
-items_plan = [
-    ("1.",  "Contexte et Problematique"),
-    ("2.",  "Presentation de FreeNest"),
-    ("3.",  "Technologies utilisees"),
-    ("4.",  "Architecture du systeme"),
-    ("5.",  "Module Authentification & Onboarding"),
-    ("6.",  "Module Marketplace et Offres"),
-    ("7.",  "Module Propositions et Contrats"),
-    ("8.",  "Module Paiements & Escrow"),
-    ("9.",  "Module Messagerie Temps Reel"),
-    ("10.", "Module Intelligence Artificielle"),
-    ("11.", "Base de donnees"),
-    ("12.", "Securite"),
-    ("13.", "Demonstration Live"),
-    ("14.", "Difficultes et Solutions"),
-    ("15.", "Bilan et Perspectives"),
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Plan de la Presentation")
+plans = [
+    ("01", "Contexte et Problematique"),
+    ("02", "Presentation de FreeNest"),
+    ("03", "Stack Technologique"),
+    ("04", "Architecture et CI/CD"),
+    ("05", "Authentification, 2FA et KYC"),
+    ("06", "Marketplace et Catalogue"),
+    ("07", "Contrats, Jalons et Temps"),
+    ("08", "Paiements Escrow et Stripe"),
+    ("09", "Messagerie Temps Reel et Push"),
+    ("10", "Intelligence Artificielle"),
+    ("11", "Agences et Gestion Talents"),
+    ("12", "Administration et Finance"),
+    ("13", "Base de Donnees (35+ tables)"),
+    ("14", "Diagrammes UML"),
+    ("15", "Deploiement Docker"),
+    ("16", "Demo et Resultats"),
+    ("17", "Bilan et Perspectives"),
 ]
-half = 8
-for i,(num,title) in enumerate(items_plan[:half]):
-    y  = Inches(1.35)+i*Inches(0.67)
-    add_rect(sl, Inches(0.4), y, Inches(0.5), Inches(0.45), BLUE_MAIN)
-    add_text(sl, num, Inches(0.4), y, Inches(0.5), Inches(0.45),
-             font_size=13, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(sl, title, Inches(1.0), y, Inches(5.3), Inches(0.45),
-             font_size=14, bold=False, color=GREY_DARK)
-for i,(num,title) in enumerate(items_plan[half:]):
-    y  = Inches(1.35)+i*Inches(0.67)
-    add_rect(sl, Inches(6.9), y, Inches(0.5), Inches(0.45), ORANGE)
-    add_text(sl, num, Inches(6.9), y, Inches(0.5), Inches(0.45),
-             font_size=13, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(sl, title, Inches(7.5), y, Inches(5.4), Inches(0.45),
-             font_size=14, bold=False, color=GREY_DARK)
+for i, (num, title) in enumerate(plans):
+    col = 0 if i < 9 else 1
+    row = i if i < 9 else i - 9
+    x = Inches(0.5 + col * 6.5)
+    y = Inches(1.5 + row * 0.55)
+    add_rect(s, x, y, Inches(0.45), Inches(0.38), fill=BLUE_LIGHT)
+    add_text(s, num, x, y+Inches(0.04), Inches(0.45), Inches(0.32),
+             size=12, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+    add_text(s, title, x+Inches(0.5), y+Inches(0.06), Inches(5.8), Inches(0.32),
+             size=12, color=BLUE_DARK)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 3 — CONTEXTE ET PROBLEMATIQUE
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Contexte et Problematique",
-             "Le marche du travail freelance en plein essor")
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 3 — CONTEXTE
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Contexte et Problematique")
+add_text(s, "Le marche mondial du freelance", Inches(0.5), Inches(1.3), Inches(12), Inches(0.5),
+         size=18, bold=True, color=BLUE_DARK)
+stat_box(s, "Freelancers dans le monde", "1.57 Md", Inches(0.4), Inches(2.0), bg=BLUE_MAIN)
+stat_box(s, "Marche 2025 (Mds $)",         "455 Md$",  Inches(3.4), Inches(2.0), bg=BLUE_LIGHT)
+stat_box(s, "Croissance annuelle",           "+15%",     Inches(6.4), Inches(2.0), bg=GREEN)
+stat_box(s, "Commission Upwork",             "20%+",     Inches(9.4), Inches(2.0), bg=RED)
 
-add_text(sl, "Le marche freelance represente +36% de la population active mondiale d'ici 2030.",
-         Inches(0.4), Inches(1.2), Inches(12.5), Inches(0.5),
-         font_size=16, bold=False, color=GREY_DARK)
+add_text(s, "Problematique : Les plateformes existantes souffrent de :",
+         Inches(0.5), Inches(3.5), Inches(12), Inches(0.4), size=14, bold=True, color=BLUE_DARK)
+bullet_list(s, [
+    "* Commissions elevees (20%+ chez Upwork)",
+    "* Interfaces vieillissantes, UX mediocre",
+    "* Manque de transparence sur les paiements",
+    "* Aucune IA integree pour aider freelancers et clients",
+    "* Pas d'agences, pas de catalogue de services flexibles",
+], Inches(0.5), Inches(3.9), Inches(12), Inches(2.5), size=13, color=BLUE_DARK)
 
-# 4 cartes problemes
-problems = [
-    (BLUE_MAIN,  "Langue",         "Upwork / Fiverr\nmajoritairement\nen anglais"),
-    (ORANGE,     "IA Premium",     "Fonctions IA\nreservees aux\nabonnements chers"),
-    (GREEN,      "Commissions",    "Jusqu'a 20%\nprelevement par\ntransaction"),
-    (RGBColor(142,68,173), "Complexite", "Interfaces peu\nintuitives pour\nles debutants"),
-]
-for i,(bg,title,desc) in enumerate(problems):
-    x = Inches(0.4) + i*Inches(3.2)
-    add_rect(sl, x, Inches(1.9), Inches(3.0), Inches(2.1), bg)
-    add_text(sl, title, x, Inches(1.92), Inches(3.0), Inches(0.6),
-             font_size=17, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(sl, desc,  x, Inches(2.55), Inches(3.0), Inches(1.2),
-             font_size=13, bold=False, color=RGBColor(220,240,255),
-             align=PP_ALIGN.CENTER)
-
-add_rect(sl, 0, Inches(4.22), W, Inches(0.06), ORANGE)
-
-add_text(sl, "Solution : FreeNest",
-         Inches(0.4), Inches(4.4), Inches(4), Inches(0.55),
-         font_size=22, bold=True, color=BLUE_MAIN)
-add_text(sl, "Une marketplace moderne, accessible, avec IA gratuite et paiement escrow transparent.",
-         Inches(0.4), Inches(4.95), Inches(12.5), Inches(0.55),
-         font_size=16, bold=False, color=GREY_DARK)
-
-features = ["IA integree pour tous","Commission fixe 10%","Escrow securise","Interface 3D moderne","OAuth Google","Temps reel Socket.IO"]
-for i,f in enumerate(features):
-    row,col = divmod(i,3)
-    badge(sl, f, Inches(0.4)+col*Inches(4.2), Inches(5.7)+row*Inches(0.55),
-          bg=BLUE_MAIN if row==0 else ORANGE, fg=WHITE, font_size=12)
-
-# ══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════
 #  SLIDE 4 — PRESENTATION FREENEST
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Presentation de FreeNest",
-             "Marketplace Freelance Full-Stack avec Intelligence Artificielle")
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Presentation de FreeNest", "Marketplace freelance full-stack de niveau production")
 
-infos = [
-    ("Nom",             "FreeNest  (alias Panda)"),
-    ("Type",            "Marketplace B2B / B2C Freelance"),
-    ("Backend",         "Laravel 12  (PHP 8.2+)"),
-    ("Frontend",        "React 19  +  Vite  +  TailwindCSS"),
-    ("Base de donnees", "MySQL 8.0  —  19 tables"),
-    ("Authentification","Sanctum  +  JWT  +  Google OAuth"),
-    ("Intelligence IA", "Ollama  (modele Mistral 7B)"),
-    ("Temps reel",      "Socket.IO 4.8"),
-    ("Paiements",       "Systeme Escrow  +  Stripe Ready"),
+add_text(s, "FreeNest — Alternative moderne et complete aux grandes plateformes",
+         Inches(0.5), Inches(1.3), Inches(12), Inches(0.5), size=14, color=GREY_TEXT)
+
+features = [
+    "Gestion de contrats et jalons complete",
+    "Paiements escrow securises via Stripe",
+    "Messagerie temps reel (WebSockets)",
+    "Catalogue de services productises",
+    "Gestion d'agences freelance",
+    "IA locale (Ollama / Mistral 7B)",
+    "KYC et authentification 2FA",
+    "Notifications Push Web",
+    "Deploiement Docker + CI/CD",
+    "Centre fiscal (W-9, VAT, W-8BEN)",
 ]
-for i,(l,v) in enumerate(infos):
-    y = Inches(1.3)+i*Inches(0.55)
-    if i%2==0:
-        add_rect(sl, Inches(0.3), y, Inches(8.5), Inches(0.5), BLUE_PALE)
-    info_row(sl, l, v, Inches(0.35), y+Inches(0.07))
+for i, f in enumerate(features):
+    col = 0 if i < 5 else 1
+    row = i if i < 5 else i - 5
+    x = Inches(0.5 + col * 6.4)
+    y = Inches(1.9 + row * 0.8)
+    add_rect(s, x, y, Inches(5.8), Inches(0.62), fill=WHITE)
+    add_rect(s, x, y, Inches(0.08), Inches(0.62), fill=BLUE_LIGHT)
+    add_text(s, "  " + f, x+Inches(0.15), y+Inches(0.12), Inches(5.5), Inches(0.4),
+             size=13, color=BLUE_DARK)
 
-# Stats droite
-for val,lbl,bg in [
-    ("19","Tables BDD",    BLUE_MAIN),
-    ("40+","Endpoints API",ORANGE),
-    ("53+","Composants",   GREEN),
-    ("5","Features IA",    RGBColor(142,68,173)),
-]:
-    idx = [("19","Tables BDD",BLUE_MAIN),("40+","Endpoints API",ORANGE),
-           ("53+","Composants",GREEN),("5","Features IA",RGBColor(142,68,173))].index((val,lbl,bg))
-    stat_box(sl, val, lbl,
-             Inches(9.1)+Inches(0.05)*(idx%2), Inches(1.3)+(idx//2)*Inches(1.6)+idx%2*Inches(0.1), bg)
-
-# ══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════
 #  SLIDE 5 — TECHNOLOGIES
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Stack Technologique",
-             "Technologies modernes choisies pour performance et maintenabilite")
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Stack Technologique")
 
-sections = [
-    ("BACKEND",          BLUE_MAIN, [
-        "Laravel 12     —  Framework PHP MVC",
-        "Sanctum 4.3    —  Auth tokens Bearer",
-        "Socialite 5.27 —  OAuth Google",
-        "Spatie 6.25    —  Roles et permissions",
-        "JWT Auth 2.3   —  JSON Web Tokens",
-        "Intervention   —  Traitement images",
-    ]),
-    ("FRONTEND",         ORANGE, [
-        "React 19.2     —  UI reactive",
-        "Vite           —  Build ultra-rapide",
-        "TailwindCSS 3.4—  Styles utilitaires",
-        "Zustand 5.0    —  State management",
-        "Three.js + R3F —  Rendu 3D",
-        "Framer Motion  —  Animations",
-    ]),
-    ("BASE DE DONNEES",  GREEN, [
-        "MySQL 8.0      —  SGBDR relationnel",
-        "Eloquent ORM   —  Requetes elegantes",
-        "19 tables      —  Schema complet",
-        "Migrations     —  Versionnees",
-    ]),
-    ("SPECIAL",          RGBColor(142,68,173), [
-        "Ollama / Mistral 7B  —  IA locale",
-        "Socket.IO 4.8        —  Temps reel",
-        "Axios 1.16           —  Client HTTP",
-        "Recharts 3.8         —  Graphiques",
-        "Stripe SDK           —  Paiements",
-    ]),
+add_text(s, "BACKEND", Inches(0.5), Inches(1.3), Inches(6), Inches(0.4),
+         size=15, bold=True, color=BLUE_MAIN)
+add_text(s, "FRONTEND", Inches(7.0), Inches(1.3), Inches(6), Inches(0.4),
+         size=15, bold=True, color=ORANGE)
+
+backend = [
+    "Laravel 12 — API REST (100+ endpoints)",
+    "PHP 8.2 — types stricts, attributs",
+    "Sanctum — Bearer tokens",
+    "Socialite — OAuth Google",
+    "Stripe PHP SDK — paiements + webhooks",
+    "Laravel Echo — broadcast WebSocket",
+    "Spatie Permissions — roles et droits",
+    "Queues + Scheduler — taches async",
 ]
-col_w = Inches(3.2)
-for i,(title,color,items) in enumerate(sections):
-    x = Inches(0.3) + i*col_w
-    add_rect(sl, x, Inches(1.25), col_w-Inches(0.1), Inches(0.5), color)
-    add_text(sl, title, x, Inches(1.27), col_w-Inches(0.1), Inches(0.46),
-             font_size=13, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    for j,item in enumerate(items):
-        y = Inches(1.85)+j*Inches(0.7)
-        if j%2==0:
-            add_rect(sl, x, y, col_w-Inches(0.1), Inches(0.65), RGBColor(240,245,255))
-        add_text(sl, item, x+Inches(0.1), y+Inches(0.1),
-                 col_w-Inches(0.25), Inches(0.5),
-                 font_size=12, bold=False, color=GREY_DARK)
+frontend = [
+    "React 19 — Concurrent Mode + Suspense",
+    "Vite 6 — build ultra-rapide, HMR",
+    "TailwindCSS 3.4 — dark/light mode",
+    "Zustand 5.0 — state management",
+    "Framer Motion 12 — animations",
+    "Socket.IO 4.8 — temps reel",
+    "Three.js + R3F — globe 3D",
+    "Recharts 3.8 — graphiques",
+]
+bullet_list(s, backend,  Inches(0.5), Inches(1.7), Inches(6.0), Inches(4.5), size=13, color=BLUE_DARK)
+bullet_list(s, frontend, Inches(7.0), Inches(1.7), Inches(6.0), Inches(4.5), size=13, color=BLUE_DARK)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 6 — ARCHITECTURE
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Architecture du Systeme",
-             "Full-Stack decouple — API REST stateless")
+divider(s, Inches(6.6))
+infra = ["Docker + Compose", "GitHub Actions CI/CD", "MySQL 8.0 (35+ tables)", "Redis (cache/queues)", "Ollama / Mistral 7B (IA locale)", "Nginx (frontend + backend)"]
+bullet_list(s, infra, Inches(0.5), Inches(6.65), Inches(12.5), Inches(0.8), size=12, color=GREY_TEXT)
+
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 6 — ARCHITECTURE ET CI/CD
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Architecture et CI/CD")
+add_text(s, "Separation stricte Frontend / Backend / IA — REST + WebSocket",
+         Inches(0.5), Inches(1.2), Inches(12), Inches(0.4), size=13, color=GREY_TEXT)
 
 layers = [
-    (BLUE_LIGHT,  "NAVIGATEUR  (Chrome / Firefox)",
-     "React 19 + Vite  —  port 5173\n53+ composants  |  Zustand  |  Axios"),
-    (BLUE_MAIN,   "BACKEND  (Laravel 12)",
-     "10 Controleurs  |  40+ Endpoints REST\nMiddleware Auth + Roles  |  17 Modeles Eloquent"),
-    (ORANGE,      "BASE DE DONNEES  (MySQL 8.0)",
-     "19 tables  |  200+ colonnes  |  15+ relations FK\nMigrations versionnees"),
-    (GREEN,       "IA & TEMPS REEL",
-     "Ollama / Mistral 7B  (port 11434)\nSocket.IO Server  (port 3001)"),
+    ("React 19 SPA (Vite + Nginx)", BLUE_LIGHT, Inches(0.5), Inches(1.7)),
+    ("Laravel 12 API REST",          BLUE_MAIN,  Inches(0.5), Inches(2.6)),
+    ("MySQL 8.0 + Redis",            BLUE_DARK,  Inches(0.5), Inches(3.5)),
+    ("Ollama / Mistral 7B",          GREEN,      Inches(7.0), Inches(2.6)),
+    ("Stripe API + Webhooks",         ORANGE,     Inches(7.0), Inches(3.5)),
+    ("Google OAuth 2.0",             RGBColor(66,133,244), Inches(7.0), Inches(1.7)),
 ]
-for i,(bg,title,desc) in enumerate(layers):
-    y = Inches(1.25)+i*Inches(1.38)
-    add_rect(sl, Inches(1.5), y, Inches(10), Inches(1.22), bg)
-    add_text(sl, title, Inches(1.6), y+Inches(0.1), Inches(9.8), Inches(0.48),
-             font_size=16, bold=True, color=WHITE)
-    add_text(sl, desc,  Inches(1.6), y+Inches(0.58), Inches(9.8), Inches(0.58),
-             font_size=13, bold=False, color=RGBColor(220,240,255))
-    if i < len(layers)-1:
-        add_text(sl, "REST API  |  Bearer Token  |  JSON",
-                 Inches(4.5), y+Inches(1.22), Inches(4.3), Inches(0.3),
-                 font_size=11, bold=False, color=GREY_MED, align=PP_ALIGN.CENTER)
+for label, color, x, y in layers:
+    add_rect(s, x, y, Inches(5.5), Inches(0.65), fill=color)
+    add_text(s, label, x+Inches(0.2), y+Inches(0.15), Inches(5.2), Inches(0.4),
+             size=14, bold=True, color=WHITE)
 
-add_text(sl,
-    "Avantages : Separation des responsabilites  —  Scalabilite horizontale  —  App mobile possible sans modifier le backend",
-    Inches(0.4), Inches(6.95), Inches(12.5), Inches(0.45),
-    font_size=12, bold=False, color=GREY_MED, align=PP_ALIGN.CENTER)
+add_text(s, "CI/CD GitHub Actions", Inches(0.5), Inches(4.5), Inches(7), Inches(0.4),
+         size=14, bold=True, color=BLUE_DARK)
+bullet_list(s, [
+    "backend.yml : PHP CS Fixer + PHPStan + PHPUnit + Docker build",
+    "frontend.yml : npm ci + ESLint + Vite build + Vitest",
+    "Declenchement sur chaque push/PR — echec bloque le merge",
+], Inches(0.5), Inches(4.9), Inches(12), Inches(1.8), size=13, color=BLUE_DARK)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 7 — AUTHENTIFICATION & ONBOARDING
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Module 1 — Authentification & Onboarding",
-             "3 methodes d'auth  |  Onboarding freelancer en 5 etapes")
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 7 — AUTH, 2FA, KYC
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Authentification, Securite et 2FA + KYC")
 
-# Gauche : 3 methodes
-add_text(sl, "3 Methodes d'Authentification",
-         Inches(0.4), Inches(1.3), Inches(5.8), Inches(0.5),
-         font_size=17, bold=True, color=BLUE_MAIN)
-methods = [
-    (BLUE_MAIN, "Email + Mot de passe", "Sanctum Bearer Token\nRevocable a la deconnexion"),
-    (ORANGE,    "Google OAuth",         "Laravel Socialite\nCreation auto du compte"),
-    (GREEN,     "JWT Auth",             "JSON Web Tokens\nAPI stateless"),
+add_text(s, "Authentification", Inches(0.5), Inches(1.3), Inches(4), Inches(0.4),
+         size=14, bold=True, color=BLUE_MAIN)
+bullet_list(s, [
+    "Email + mot de passe (bcrypt)",
+    "Google OAuth 2.0 (Socialite)",
+    "Reset par email (2 etapes)",
+    "Throttle: 10 req/min auth",
+    "Throttle: 5 req/min reset",
+], Inches(0.5), Inches(1.7), Inches(4.2), Inches(2.5), size=12, color=BLUE_DARK)
+
+add_text(s, "2FA TOTP", Inches(4.9), Inches(1.3), Inches(4), Inches(0.4),
+         size=14, bold=True, color=GREEN)
+bullet_list(s, [
+    "Google Authenticator",
+    "QR Code genere (secret TOTP)",
+    "Confirmation code 6 chiffres",
+    "8 codes de secours jetables",
+    "Regeneration des codes",
+], Inches(4.9), Inches(1.7), Inches(4.0), Inches(2.5), size=12, color=BLUE_DARK)
+
+add_text(s, "KYC - Identite", Inches(9.2), Inches(1.3), Inches(4), Inches(0.4),
+         size=14, bold=True, color=ORANGE)
+bullet_list(s, [
+    "Upload passeport / CNI",
+    "Selfie de verification",
+    "Stockage local securise",
+    "File d'attente admin",
+    "Approbation / rejet",
+], Inches(9.2), Inches(1.7), Inches(4.0), Inches(2.5), size=12, color=BLUE_DARK)
+
+divider(s, Inches(4.3))
+add_text(s, "Securite Globale", Inches(0.5), Inches(4.4), Inches(12), Inches(0.4),
+         size=14, bold=True, color=BLUE_DARK)
+bullet_list(s, [
+    "Audit Logs : toute action sensible tracee (user, action, IP, metadata JSON)",
+    "Rate Limiting : auth (10/min), IA (20/min), search (60-120/min)",
+    "Validation stricte Form Requests Laravel + Middleware EnsurePlan",
+], Inches(0.5), Inches(4.8), Inches(12.5), Inches(2.0), size=13, color=BLUE_DARK)
+
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 8 — MARKETPLACE ET CATALOGUE
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Marketplace et Catalogue de Services")
+
+add_text(s, "Offres d'emploi", Inches(0.5), Inches(1.3), Inches(6), Inches(0.4),
+         size=14, bold=True, color=BLUE_MAIN)
+bullet_list(s, [
+    "Publication avec budget min/max, type (horaire/fixe)",
+    "Statuts : draft -> open -> in_progress -> completed",
+    "Index FULLTEXT MySQL pour recherche ultra-rapide",
+    "Filtres : categorie, budget, type, date",
+    "Sauvegarde des offres favorites",
+], Inches(0.5), Inches(1.7), Inches(6.2), Inches(2.5), size=12, color=BLUE_DARK)
+
+add_text(s, "Catalogue (Fiverr-like)", Inches(7.0), Inches(1.3), Inches(6), Inches(0.4),
+         size=14, bold=True, color=ORANGE)
+bullet_list(s, [
+    "Services productises (3 tiers : Basic/Standard/Premium)",
+    "Images multiples, descriptions detaillees",
+    "Commandes : checkout, livraison, validation",
+    "Avis post-commande (1-5 etoiles)",
+    "Moderation admin (approuver / rejeter)",
+    "Sauvegarde des services favoris",
+], Inches(7.0), Inches(1.7), Inches(6.0), Inches(2.5), size=12, color=BLUE_DARK)
+
+divider(s, Inches(4.3))
+add_text(s, "Recherche Globale + Propositions", Inches(0.5), Inches(4.4), Inches(12), Inches(0.4),
+         size=14, bold=True, color=BLUE_DARK)
+bullet_list(s, [
+    "GET /api/search : recherche unifiee (offres + freelancers + services + agences)",
+    "GET /api/search/suggest : autocomplete temps reel (throttle 120/min) — resultats < 50ms",
+    "Propositions : cover letter + bid + jalons JSON | Generee par IA | Flag is_ai_generated",
+], Inches(0.5), Inches(4.8), Inches(12.5), Inches(2.0), size=13, color=BLUE_DARK)
+
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 9 — CONTRATS, JALONS, TEMPS
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Contrats, Jalons et Suivi du Temps")
+
+statuses = [
+    ("active",    BLUE_LIGHT),
+    ("paused",    GREY_TEXT),
+    ("completed", GREEN),
+    ("disputed",  ORANGE),
+    ("cancelled", RED),
+    ("archived",  BLUE_DARK),
 ]
-for i,(bg,title,desc) in enumerate(methods):
-    y = Inches(1.9)+i*Inches(1.2)
-    add_rect(sl, Inches(0.4), y, Inches(0.08), Inches(0.95), bg)
-    add_rect(sl, Inches(0.5), y, Inches(5.5),  Inches(0.95), RGBColor(245,248,252))
-    add_text(sl, title, Inches(0.65), y+Inches(0.08), Inches(5.3), Inches(0.42),
-             font_size=15, bold=True,  color=bg)
-    add_text(sl, desc,  Inches(0.65), y+Inches(0.5),  Inches(5.3), Inches(0.42),
-             font_size=12, bold=False, color=GREY_DARK)
+for i, (status, color) in enumerate(statuses):
+    add_rect(s, Inches(0.4 + i * 2.15), Inches(1.4), Inches(1.9), Inches(0.45), fill=color)
+    add_text(s, status, Inches(0.4 + i * 2.15), Inches(1.47), Inches(1.9), Inches(0.35),
+             size=12, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
 
-# Droite : Onboarding 5 etapes
-add_text(sl, "Onboarding Freelancer — 5 Etapes",
-         Inches(6.5), Inches(1.3), Inches(6.4), Inches(0.5),
-         font_size=17, bold=True, color=BLUE_MAIN)
-steps = [
-    ("1","Categorie principale  +  Specialites"),
-    ("2","Niveau d'experience  (entry / mid / expert)"),
-    ("3","Formation et education"),
-    ("4","Disponibilite  +  Heures/sem  +  Tarif"),
-    ("5","Photo de profil  +  Langues parlees"),
-]
-for i,(num,text) in enumerate(steps):
-    y = Inches(1.88)+i*Inches(0.96)
-    add_rect(sl, Inches(6.5), y, Inches(0.55), Inches(0.75),
-             BLUE_MAIN if i<4 else GREEN)
-    add_text(sl, num, Inches(6.5), y, Inches(0.55), Inches(0.75),
-             font_size=20, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(sl, text, Inches(7.15), y+Inches(0.15), Inches(5.7), Inches(0.5),
-             font_size=14, bold=False, color=GREY_DARK)
-    if i < 4:
-        add_rect(sl, Inches(6.72), y+Inches(0.75), Inches(0.1), Inches(0.2), BLUE_LIGHT)
+add_text(s, "Fonctionnalites avancees :", Inches(0.5), Inches(2.0), Inches(12), Inches(0.4),
+         size=13, bold=True, color=BLUE_DARK)
+two_col(s, [
+    "Fichiers livres (versioning)",
+    "Suivi du temps (start/stop timer)",
+    "Extensions de deadline",
+    "Analytics du contrat",
+    "Journal d'activite chronologique",
+], [
+    "Export PDF (contrat + litige)",
+    "Archive des contrats termines",
+    "Resolution de litiges par admin",
+    "Conversation liee au contrat",
+    "Notifications temps reel",
+], Inches(2.4), size=13)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 8 — MARKETPLACE ET OFFRES
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Module 2 — Marketplace des Offres",
-             "Publication, recherche et filtrage des offres d'emploi")
+divider(s, Inches(4.9))
+add_text(s, "Workflow des Jalons :", Inches(0.5), Inches(5.0), Inches(12), Inches(0.4),
+         size=13, bold=True, color=BLUE_DARK)
+milestone_flow = ["pending", "->", "funded", "->", "submitted", "->", "approved"]
+colors_flow = [GREY_TEXT, BLUE_DARK, ORANGE, BLUE_DARK, BLUE_LIGHT, BLUE_DARK, GREEN]
+for i, (step, color) in enumerate(zip(milestone_flow, colors_flow)):
+    add_text(s, step, Inches(0.5 + i * 1.7), Inches(5.4), Inches(1.5), Inches(0.5),
+             size=13, bold=(step != "->"), color=color)
 
-add_text(sl, "Cote CLIENT — Publier une offre",
-         Inches(0.4), Inches(1.3), Inches(5.8), Inches(0.5),
-         font_size=16, bold=True, color=BLUE_MAIN)
-client_fields = [
-    "Titre et description detaillee","Categorie et competences (JSON)",
-    "Type : horaire ou forfait","Budget minimum / maximum",
-    "Niveau d'experience requis","Duree estimee du projet",
-    "Options : mis en avant / urgent",
-]
-bullet_list(sl, client_fields, Inches(0.4), Inches(1.85), Inches(5.8), Inches(3.0),
-            font_size=13, color=GREY_DARK)
+bullet_list(s, [
+    "Jalon rejected -> retour a 'funded' | Jalon disputed -> admin arbitre | Factures hebdomadaires (WeeklyInvoice)",
+], Inches(0.5), Inches(5.9), Inches(12.5), Inches(0.8), size=12, color=BLUE_DARK)
 
-divider(sl, Inches(5.0))
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 10 — PAIEMENTS ESCROW ET STRIPE
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Systeme de Paiement Escrow et Stripe")
 
-add_text(sl, "Cycle de vie d'une offre :",
-         Inches(0.4), Inches(5.1), Inches(5), Inches(0.45),
-         font_size=14, bold=True, color=BLUE_MAIN)
-states = [("draft","Brouillon",GREY_MED),("open","Ouverte",GREEN),
-          ("in_progress","En cours",ORANGE),("completed","Terminee",BLUE_MAIN)]
-for i,(code,label,col) in enumerate(states):
-    x = Inches(0.4)+i*Inches(3.0)
-    add_rect(sl, x, Inches(5.65), Inches(2.6), Inches(0.65), col)
-    add_text(sl, label+"\n("+code+")", x, Inches(5.65), Inches(2.6), Inches(0.65),
-             font_size=12, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    if i<3:
-        add_text(sl, "->", x+Inches(2.6), Inches(5.78), Inches(0.4), Inches(0.38),
-                 font_size=16, bold=True, color=GREY_MED)
-
-# Droite : filtres
-add_text(sl, "Cote FREELANCER — Recherche & Filtres",
-         Inches(6.5), Inches(1.3), Inches(6.4), Inches(0.5),
-         font_size=16, bold=True, color=BLUE_MAIN)
-filters = [
-    ("Mots-cles",   "Recherche dans titre et description"),
-    ("Categorie",   "Hierarchie parent / enfant"),
-    ("Budget",      "Min / Max configurable"),
-    ("Type",        "Horaire ou forfait"),
-    ("Experience",  "Entry / Mid / Expert"),
-    ("Tri",         "Recents / Budget / Popularite"),
-]
-for i,(lbl,val) in enumerate(filters):
-    y = Inches(1.88)+i*Inches(0.77)
-    add_rect(sl, Inches(6.5), y, Inches(1.4), Inches(0.6), BLUE_MAIN)
-    add_text(sl, lbl, Inches(6.5), y, Inches(1.4), Inches(0.6),
-             font_size=12, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(sl, val, Inches(8.05), y+Inches(0.1), Inches(4.8), Inches(0.45),
-             font_size=13, bold=False, color=GREY_DARK)
-
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 9 — PROPOSITIONS ET CONTRATS
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Module 3 & 4 — Propositions et Contrats",
-             "Soumission, acceptation et creation automatique du contrat")
-
-# Workflow central
-workflow = [
-    (BLUE_MAIN,  "CLIENT",     "Publie\nune offre"),
-    (BLUE_LIGHT, "SYSTEME",    "Notifie les\nfreelancers"),
-    (GREEN,      "FREELANCER", "Soumet une\nproposition"),
-    (ORANGE,     "IA",         "Genere la\nlettre (optionnel)"),
-    (BLUE_MAIN,  "CLIENT",     "Accepte\nla proposition"),
-    (GREEN,      "SYSTEME",    "CONTRAT\nCREE AUTO"),
-]
-for i,(bg,actor,action) in enumerate(workflow):
-    x = Inches(0.3)+i*Inches(2.15)
-    add_rect(sl, x, Inches(1.25), Inches(1.95), Inches(0.4), bg)
-    add_text(sl, actor, x, Inches(1.25), Inches(1.95), Inches(0.4),
-             font_size=11, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_rect(sl, x, Inches(1.72), Inches(1.95), Inches(1.0), RGBColor(240,245,255))
-    add_text(sl, action, x, Inches(1.78), Inches(1.95), Inches(0.9),
-             font_size=13, bold=False, color=GREY_DARK, align=PP_ALIGN.CENTER)
-    if i<5:
-        add_text(sl, ">>>", x+Inches(1.95), Inches(2.05), Inches(0.2), Inches(0.4),
-                 font_size=14, bold=True, color=ORANGE, align=PP_ALIGN.CENTER)
-
-add_rect(sl, 0, Inches(2.9), W, Inches(0.05), ORANGE)
-
-# Proposition details
-add_text(sl, "Une Proposition contient :",
-         Inches(0.4), Inches(3.05), Inches(5.8), Inches(0.45),
-         font_size=15, bold=True, color=BLUE_MAIN)
-prop_items = [
-    "Lettre de motivation (ou generee par IA)",
-    "Montant propose (bid_amount)",
-    "Duree estimee + unite",
-    "Jalons optionnels (JSON)",
-    "Pieces jointes",
-    "Marque si IA generated",
-]
-bullet_list(sl, prop_items, Inches(0.4), Inches(3.55), Inches(5.8), Inches(2.8),
-            font_size=13, color=GREY_DARK)
-
-# Contrat details
-add_text(sl, "Un Contrat contient :",
-         Inches(6.8), Inches(3.05), Inches(6), Inches(0.45),
-         font_size=15, bold=True, color=BLUE_MAIN)
-contract_items = [
-    "Liaison Job + Proposition + 2 users",
-    "Type : horaire ou forfait",
-    "Montant total + escrow_amount",
-    "Statuts : active / paused / completed",
-    "Jalons avec montants et delais",
-    "Date de debut et deadline",
-]
-bullet_list(sl, contract_items, Inches(6.8), Inches(3.55), Inches(6.0), Inches(2.8),
-            font_size=13, color=GREY_DARK)
-
-add_text(sl, "Creation AUTOMATIQUE du contrat lors de l'acceptation  —  Conversation ouverte automatiquement",
-         Inches(0.4), Inches(6.9), Inches(12.5), Inches(0.45),
-         font_size=13, bold=True, color=BLUE_MAIN, align=PP_ALIGN.CENTER)
-
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 10 — PAIEMENTS ESCROW
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Module 5 — Paiements & Escrow",
-             "Systeme de paiement securise avec 3 soldes distincts")
-
-# Wallet
-add_text(sl, "PORTEFEUILLE (Wallet)",
-         Inches(0.4), Inches(1.3), Inches(4), Inches(0.45),
-         font_size=16, bold=True, color=BLUE_MAIN)
-wallets = [
-    (BLUE_MAIN,  "balance",          "Solde disponible",  "$1 200"),
-    (ORANGE,     "pending_balance",  "En attente",        "$50"),
-    (RGBColor(142,68,173), "escrow_balance", "Bloque escrow", "$300"),
-]
-for i,(bg,field,label,ex) in enumerate(wallets):
-    y = Inches(1.85)+i*Inches(0.85)
-    add_rect(sl, Inches(0.4), y, Inches(0.08), Inches(0.7), bg)
-    add_rect(sl, Inches(0.5), y, Inches(5.0),  Inches(0.7), RGBColor(240,245,252))
-    add_text(sl, field,  Inches(0.6), y+Inches(0.05), Inches(3.0), Inches(0.35),
-             font_size=13, bold=True, color=bg)
-    add_text(sl, label,  Inches(0.6), y+Inches(0.38), Inches(3.0), Inches(0.3),
-             font_size=11, bold=False, color=GREY_MED)
-    add_text(sl, ex,     Inches(4.0), y+Inches(0.15), Inches(1.4), Inches(0.4),
-             font_size=16, bold=True, color=bg, align=PP_ALIGN.RIGHT)
-
-# 4 phases
-add_text(sl, "Les 4 Phases du Paiement Securise",
-         Inches(6.3), Inches(1.3), Inches(6.6), Inches(0.45),
-         font_size=16, bold=True, color=BLUE_MAIN)
 phases = [
-    (BLUE_MAIN,  "1. DEPOT",      "Client depose 1 500$\nwallet.balance += 1500"),
-    (ORANGE,     "2. ESCROW",     "Finance jalon (300$)\nbalance-=300 / escrow+=300"),
-    (GREEN,      "3. LIVRAISON",  "Freelancer soumet\nmilestone.status = 'submitted'"),
-    (RGBColor(142,68,173), "4. LIBERATION", "Client approuve\n90% freelancer + 10% commission"),
+    ("1. Depot", "Client paye via\nStripe Checkout\n(3D Secure)", BLUE_LIGHT),
+    ("2. Escrow", "Client bloque\ndes fonds pour\nun jalon", ORANGE),
+    ("3. Livraison", "Freelancer soumet\nson travail\n+ fichiers", GREEN),
+    ("4. Liberation", "Client approuve\n-> 90% freelancer\n10% commission", BLUE_MAIN),
 ]
-for i,(bg,title,desc) in enumerate(phases):
-    x = Inches(6.3)+i*Inches(1.72)
-    add_rect(sl, x, Inches(1.88), Inches(1.62), Inches(2.0), bg)
-    add_text(sl, title, x, Inches(1.9), Inches(1.62), Inches(0.55),
-             font_size=12, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(sl, desc,  x, Inches(2.5), Inches(1.62), Inches(1.3),
-             font_size=11, bold=False, color=RGBColor(220,240,255),
-             align=PP_ALIGN.CENTER)
+for i, (title, desc, color) in enumerate(phases):
+    x = Inches(0.4 + i * 3.2)
+    add_rect(s, x, Inches(1.5), Inches(2.9), Inches(1.2), fill=color)
+    add_text(s, title, x, Inches(1.55), Inches(2.9), Inches(0.45),
+             size=14, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+    add_text(s, desc, x, Inches(2.0), Inches(2.9), Inches(0.75),
+             size=11, color=WHITE, align=PP_ALIGN.CENTER)
+    if i < 3:
+        add_text(s, "->", Inches(3.3 + i * 3.2), Inches(1.9), Inches(0.2), Inches(0.4),
+                 size=20, bold=True, color=BLUE_DARK)
 
-add_rect(sl, 0, Inches(4.1), W, Inches(0.05), ORANGE)
-
-# Commission
-add_text(sl, "Modele economique :",
-         Inches(0.4), Inches(4.25), Inches(5), Inches(0.45),
-         font_size=16, bold=True, color=BLUE_MAIN)
-add_text(sl, "Commission plateforme = 10%  par liberation",
-         Inches(0.4), Inches(4.8), Inches(12.5), Inches(0.45),
-         font_size=15, bold=False, color=GREY_DARK)
-add_text(sl, "Exemple : Jalon 300$   =>   Freelancer recoit 270$   |   Plateforme gagne 30$",
-         Inches(0.4), Inches(5.35), Inches(12.5), Inches(0.45),
-         font_size=14, bold=True, color=ORANGE)
-
-# Security points
-sec_items = [
-    "L'argent est bloque AVANT le debut du travail",
-    "Freelancer garanti : impossible de ne pas etre paye si le jalon est approuve",
-    "Client garanti : l'argent n'est libere QUE sur son approbation",
-    "Transactions atomiques MySQL : DB::transaction()",
+add_text(s, "Portefeuille a 3 balances :", Inches(0.5), Inches(3.1), Inches(12), Inches(0.4),
+         size=14, bold=True, color=BLUE_DARK)
+balances = [
+    ("balance", "Fonds disponibles et retirables", GREEN),
+    ("pending_balance", "Fonds en transit", ORANGE),
+    ("escrow_balance", "Fonds bloques en garantie", BLUE_MAIN),
 ]
-bullet_list(sl, sec_items, Inches(0.4), Inches(5.95), Inches(12.5), Inches(1.4),
-            font_size=13, color=GREY_DARK, icon="  [OK]  ")
+for i, (name, desc, color) in enumerate(balances):
+    x = Inches(0.5 + i * 4.2)
+    add_rect(s, x, Inches(3.55), Inches(3.8), Inches(0.8), fill=color)
+    add_text(s, name, x+Inches(0.1), Inches(3.58), Inches(3.6), Inches(0.35),
+             size=13, bold=True, color=WHITE)
+    add_text(s, desc, x+Inches(0.1), Inches(3.93), Inches(3.6), Inches(0.35),
+             size=11, color=WHITE)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 11 — MESSAGERIE TEMPS REEL
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Module 6 — Messagerie Temps Reel",
-             "Socket.IO + Laravel API REST  —  Persistance et instantaneite")
+divider(s, Inches(4.5))
+add_text(s, "Stripe Connect + Retraits + Abonnements", Inches(0.5), Inches(4.6), Inches(12), Inches(0.4),
+         size=14, bold=True, color=BLUE_DARK)
+bullet_list(s, [
+    "Stripe Connect Express : freelancers connectent leur IBAN pour virements",
+    "Retraits soumis a approbation admin (KYC requis pour deblocage)",
+    "Abonnements : Stripe Checkout + portail de facturation + invoices",
+    "Webhooks : checkout.session.completed, account.updated, invoice.paid",
+], Inches(0.5), Inches(5.0), Inches(12.5), Inches(2.2), size=12, color=BLUE_DARK)
 
-# Architecture
-add_text(sl, "Architecture", Inches(0.4), Inches(1.3), Inches(5.8), Inches(0.45),
-         font_size=16, bold=True, color=BLUE_MAIN)
-layers2 = [
-    (BLUE_MAIN,  "Freelancer (React)",   "socket.send()  +  HTTP POST"),
-    (ORANGE,     "Socket.IO Server",     "Broadcast instantane au destinataire"),
-    (GREEN,      "Laravel API",          "Validation + persistance MySQL"),
-    (RGBColor(142,68,173), "MySQL",      "Messages stockes + conversations"),
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 11 — MESSAGERIE TEMPS REEL ET PUSH
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Messagerie Temps Reel et Notifications Push")
+
+add_text(s, "Laravel Echo + Socket.IO 4.8 — 11 evenements WebSocket diffuses en temps reel",
+         Inches(0.5), Inches(1.3), Inches(12), Inches(0.4), size=13, color=GREY_TEXT)
+
+features_chat = [
+    ("Envoyer / Recevoir",  "Texte, fichiers, images en temps reel"),
+    ("Editer message",      "Historique des modifications preserve"),
+    ("Supprimer message",   "Suppression douce (deleted_at)"),
+    ("Reactions emoji",     "Toggle par message — MessageReaction"),
+    ("Accusee de lecture",  "Marquer toute la conversation lue"),
+    ("Indicateur frappe",   "UserTyping broadcast — 'X ecrit...'"),
+    ("Livraison",           "MessageDelivered confirmation"),
+    ("Recherche",           "Par conversation ou contenu message"),
+    ("Piece jointe",        "Upload et partage de fichiers"),
+    ("Lien contrat",        "Conversation liee au contrat actif"),
 ]
-for i,(bg,title,desc) in enumerate(layers2):
-    y = Inches(1.85)+i*Inches(1.1)
-    add_rect(sl, Inches(0.4), y, Inches(5.6), Inches(0.95), bg)
-    add_text(sl, title, Inches(0.55), y+Inches(0.08), Inches(5.4), Inches(0.42),
-             font_size=14, bold=True, color=WHITE)
-    add_text(sl, desc,  Inches(0.55), y+Inches(0.52), Inches(5.4), Inches(0.38),
-             font_size=12, bold=False, color=RGBColor(220,240,255))
+for i, (feat, desc) in enumerate(features_chat):
+    col = 0 if i < 5 else 1
+    row = i if i < 5 else i - 5
+    x = Inches(0.4 + col * 6.5)
+    y = Inches(1.8 + row * 0.82)
+    add_rect(s, x, y, Inches(5.9), Inches(0.65), fill=WHITE)
+    add_rect(s, x, y, Inches(0.08), Inches(0.65), fill=BLUE_LIGHT)
+    add_text(s, feat, x+Inches(0.15), y+Inches(0.05), Inches(2.5), Inches(0.3),
+             size=12, bold=True, color=BLUE_DARK)
+    add_text(s, desc, x+Inches(0.15), y+Inches(0.33), Inches(5.6), Inches(0.28),
+             size=11, color=GREY_TEXT)
 
-# Features
-add_text(sl, "Fonctionnalites", Inches(6.5), Inches(1.3), Inches(6.4), Inches(0.45),
-         font_size=16, bold=True, color=BLUE_MAIN)
-feat = [
-    ("Direct",           "Freelancer <-> Client"),
-    ("Groupe",           "Lie a un contrat specifique"),
-    ("Fichiers",         "Texte / images / documents"),
-    ("Threading",        "Reponse a un message cible"),
-    ("Lu / Non-lu",      "is_read  +  read_at timestamp"),
-    ("Pagination",       "Chargement lazy au scroll"),
-    ("Auto-creation",    "A l'acceptation d'une proposition"),
-]
-for i,(lbl,val) in enumerate(feat):
-    y = Inches(1.88)+i*Inches(0.73)
-    add_rect(sl, Inches(6.5), y, Inches(2.2), Inches(0.6), BLUE_MAIN)
-    add_text(sl, lbl, Inches(6.5), y, Inches(2.2), Inches(0.6),
-             font_size=12, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(sl, val, Inches(8.8), y+Inches(0.1), Inches(4.6), Inches(0.45),
-             font_size=13, bold=False, color=GREY_DARK)
+divider(s, Inches(6.5))
+add_text(s, "Push Notifications (VAPID) : Service Worker sw.js | subscribe / unsubscribe | Son (sound.js) + icone navigateur",
+         Inches(0.5), Inches(6.55), Inches(12.5), Inches(0.7), size=12, color=BLUE_DARK)
 
-# ══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════
 #  SLIDE 12 — INTELLIGENCE ARTIFICIELLE
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Module 7 — Intelligence Artificielle",
-             "Ollama / Mistral 7B  —  5 fonctionnalites IA integ rees")
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Intelligence Artificielle — Ollama / Mistral 7B")
 
-# Flux
-add_text(sl, "Flux d'Integration IA",
-         Inches(0.4), Inches(1.3), Inches(8), Inches(0.45),
-         font_size=16, bold=True, color=BLUE_MAIN)
-flux = ["Utilisateur", "AIController", "MySQL (contexte)", "Ollama / Mistral", "ai_histories", "Frontend"]
-flux_bg=[BLUE_LIGHT,BLUE_MAIN,GREEN,ORANGE,RGBColor(142,68,173),BLUE_LIGHT]
-for i,(f,bg) in enumerate(zip(flux,flux_bg)):
-    x = Inches(0.35)+i*Inches(2.15)
-    add_rect(sl, x, Inches(1.85), Inches(1.95), Inches(0.65), bg)
-    add_text(sl, f, x, Inches(1.87), Inches(1.95), Inches(0.62),
-             font_size=11, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    if i<5:
-        add_text(sl, ">>>", x+Inches(1.95), Inches(1.95), Inches(0.2), Inches(0.45),
-                 font_size=13, bold=True, color=GREY_MED, align=PP_ALIGN.CENTER)
+add_text(s, "IA locale — Aucun envoi vers OpenAI — Confidentialite totale — Fallback si indisponible",
+         Inches(0.5), Inches(1.2), Inches(12), Inches(0.4), size=13, color=GREY_TEXT)
 
-add_rect(sl, 0, Inches(2.65), W, Inches(0.05), ORANGE)
-
-# 5 features
-add_text(sl, "5 Fonctionnalites IA", Inches(0.4), Inches(2.8), Inches(8), Inches(0.45),
-         font_size=16, bold=True, color=BLUE_MAIN)
-ia_features = [
-    (BLUE_MAIN,  "Generation Proposition", "Lettre adaptee a l'offre\net au profil freelancer"),
-    (ORANGE,     "Matching Freelancers",    "Meilleures suggestions\npour une offre client"),
-    (GREEN,      "Analyse de Profil",       "Conseils personnalises\npour ameliorer son profil"),
-    (RGBColor(142,68,173), "Chat Assistant","Aide contextuelle\nsur la plateforme"),
-    (RGBColor(41,128,185), "Smart Search",  "Recherche en\nlangage naturel"),
+ai_features = [
+    ("Generation de proposition", "Redige une proposition a partir du profil freelancer et de l'offre", BLUE_LIGHT),
+    ("Matching freelancers",       "Recommande les meilleurs freelancers pour une offre client", GREEN),
+    ("Analyse de profil",          "Conseils personnalises pour optimiser le profil freelancer", ORANGE),
+    ("Chat assistant",             "Assistant IA conversationnel — questions/reponses contextuelles", BLUE_MAIN),
+    ("Recherche intelligente",     "Recherche semantique au-dela des mots-cles exacts", RGBColor(142,68,173)),
 ]
-for i,(bg,title,desc) in enumerate(ia_features):
-    x = Inches(0.3)+i*Inches(2.6)
-    add_rect(sl, x, Inches(3.3), Inches(2.45), Inches(2.8), bg)
-    add_text(sl, title, x, Inches(3.32), Inches(2.45), Inches(0.7),
-             font_size=13, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(sl, desc,  x, Inches(4.1), Inches(2.45), Inches(1.8),
-             font_size=12, bold=False, color=RGBColor(220,240,255),
-             align=PP_ALIGN.CENTER)
+for i, (title, desc, color) in enumerate(ai_features):
+    y = Inches(1.7 + i * 0.92)
+    add_rect(s, Inches(0.4), y, Inches(0.5), Inches(0.72), fill=color)
+    add_text(s, str(i+1), Inches(0.4), y+Inches(0.15), Inches(0.5), Inches(0.4),
+             size=16, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+    add_rect(s, Inches(1.0), y, Inches(11.9), Inches(0.72), fill=WHITE)
+    add_text(s, title, Inches(1.1), y+Inches(0.05), Inches(4.5), Inches(0.35),
+             size=13, bold=True, color=color)
+    add_text(s, desc, Inches(1.1), y+Inches(0.38), Inches(11.7), Inches(0.3),
+             size=11, color=GREY_TEXT)
 
-add_text(sl,
-    "Fallback automatique : si Ollama est indisponible, des reponses pre-definies intelligentes sont retournees",
-    Inches(0.4), Inches(6.35), Inches(12.5), Inches(0.45),
-    font_size=13, bold=True, color=ORANGE, align=PP_ALIGN.CENTER)
+divider(s, Inches(6.5))
+bullet_list(s, [
+    "Rate limit: 20 req/min | Logs tokens dans ai_histories | Fallback pre-genere si Ollama indisponible",
+], Inches(0.5), Inches(6.55), Inches(12.5), Inches(0.7), size=12, color=BLUE_DARK)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 13 — BASE DE DONNEES  (avec diagramme ERD)
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Base de Donnees — 19 Tables",
-             "MySQL 8.0  |  Eloquent ORM  |  Migrations versionnees")
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 13 — AGENCES ET TALENTS
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Agences et Gestion des Talents")
 
-# Image ERD
-erd_path = os.path.join(UML, "05_erd.png")
-if os.path.exists(erd_path):
-    add_img(sl, erd_path, Inches(0.3), Inches(1.3), Inches(7.8))
+add_text(s, "Agences", Inches(0.5), Inches(1.3), Inches(6), Inches(0.4),
+         size=16, bold=True, color=BLUE_MAIN)
+bullet_list(s, [
+    "Creer une agence (logo, nom, description)",
+    "Inviter des membres par email (token unique)",
+    "Roles : owner / admin / member",
+    "Transfert de propriete de l'agence",
+    "Page publique dans le repertoire agences",
+    "Accepter / decliner une invitation",
+], Inches(0.5), Inches(1.75), Inches(6.0), Inches(3.0), size=13, color=BLUE_DARK)
 
-# Tableau recap
-groups = [
-    ("Auth / Profils", BLUE_MAIN, "users, freelancer_profiles,\nclient_profiles, subscriptions,\npersonal_access_tokens"),
-    ("Marketplace",    ORANGE,    "categories, skills,\nfreelancer_skills, portfolios,\njob_postings"),
-    ("Missions",       GREEN,     "proposals, contracts,\nmilestones, reviews"),
-    ("Finance",        RGBColor(142,68,173), "wallets, transactions"),
-    ("Communication",  BLUE_LIGHT,"conversations, messages"),
-    ("IA",             RGBColor(41,128,185), "ai_histories"),
+add_text(s, "Gestion des Talents (Clients)", Inches(7.0), Inches(1.3), Inches(6), Inches(0.4),
+         size=16, bold=True, color=ORANGE)
+bullet_list(s, [
+    "Saved Freelancers : signets rapides (un clic)",
+    "Talent Lists : listes curees et nommees",
+    "Ajouter / retirer des membres de liste",
+    "Notes personnelles sur les freelancers",
+    "Organisation par specialite ou projet",
+], Inches(7.0), Inches(1.75), Inches(6.0), Inches(3.0), size=13, color=BLUE_DARK)
+
+divider(s, Inches(4.9))
+add_text(s, "Centre Fiscal", Inches(0.5), Inches(5.0), Inches(12), Inches(0.4),
+         size=16, bold=True, color=GREEN)
+bullet_list(s, [
+    "Soumission : W-9 (USA), W-8BEN (international), VAT (Europe)",
+    "Export PDF des documents fiscaux | Validation admin (approuver / rejeter avec motif)",
+], Inches(0.5), Inches(5.4), Inches(12.5), Inches(1.5), size=13, color=BLUE_DARK)
+
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 14 — ADMINISTRATION ET FINANCE
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Administration et Finance Admin")
+
+admin_sections = [
+    ("Dashboard Admin",     ["Stats : GMV, commissions, contrats", "Gestion utilisateurs (ban, verify)", "Analytics avancees"], BLUE_MAIN),
+    ("Finance Admin",       ["Vue d'ensemble revenue plateforme", "File retraits (approuver / rejeter)", "Parametres : commission, limites"], ORANGE),
+    ("KYC Admin",           ["File verifications en attente", "Acces securise aux documents", "Approuver / Rejeter + audit log"], GREEN),
+    ("Moderation Catalogue",["Services en attente de validation", "Approuver / Rejeter publication", "Documents fiscaux W-9/W-8BEN/VAT"], RED),
 ]
-for i,(grp,bg,tables) in enumerate(groups):
-    y = Inches(1.3)+i*Inches(1.0)
-    if i >= 4:
-        y = Inches(1.3)+(i-2)*Inches(1.0)
-        x = Inches(11.1)
-    else:
-        x = Inches(8.4)
-    add_rect(sl, x, y, Inches(0.2), Inches(0.88), bg)
-    add_rect(sl, x+Inches(0.2), y, Inches(5.2), Inches(0.88), RGBColor(245,248,252))
-    add_text(sl, grp, x+Inches(0.28), y+Inches(0.04), Inches(5.0), Inches(0.38),
-             font_size=13, bold=True, color=bg)
-    add_text(sl, tables, x+Inches(0.28), y+Inches(0.42), Inches(5.0), Inches(0.44),
-             font_size=10, bold=False, color=GREY_MED)
+for i, (title, items, color) in enumerate(admin_sections):
+    col = i % 2
+    row = i // 2
+    x = Inches(0.4 + col * 6.5)
+    y = Inches(1.5 + row * 2.5)
+    add_rect(s, x, y, Inches(5.9), Inches(0.5), fill=color)
+    add_text(s, title, x+Inches(0.2), y+Inches(0.08), Inches(5.6), Inches(0.38),
+             size=14, bold=True, color=WHITE)
+    for j, item in enumerate(items):
+        add_text(s, "  > " + item, x+Inches(0.1), y+Inches(0.5+j*0.5), Inches(5.7), Inches(0.45),
+                 size=12, color=BLUE_DARK)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 14 — DIAGRAMMES UML
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Diagrammes UML — Vue d'ensemble",
-             "17 diagrammes couvrant tous les aspects du systeme")
+divider(s, Inches(6.65))
+add_text(s, "Middleware 'admin' + double verification controller — Audit logs sur toutes les actions sensibles",
+         Inches(0.5), Inches(6.68), Inches(12.5), Inches(0.6), size=11, color=GREY_TEXT)
 
-imgs = [
-    ("01_use_case_global.png",   "Use Case Global",        Inches(0.3),  Inches(1.3),  Inches(4.1)),
-    ("04_class_diagram.png",     "Classes",                Inches(4.55), Inches(1.3),  Inches(4.1)),
-    ("11_activity_cycle.png",    "Activite Cycle Mission", Inches(8.8),  Inches(1.3),  Inches(4.2)),
-    ("08_sequence_escrow.png",   "Sequence Escrow",        Inches(0.3),  Inches(4.3),  Inches(4.1)),
-    ("15_state_contract.png",    "Etats Contrat",          Inches(4.55), Inches(4.3),  Inches(4.1)),
-    ("17_deployment.png",        "Deploiement",            Inches(8.8),  Inches(4.3),  Inches(4.2)),
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 15 — BASE DE DONNEES
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Base de Donnees — 35+ Tables MySQL")
+add_img(s, os.path.join(UML_DIR, "06_erd.png"),
+        Inches(0.3), Inches(1.3), Inches(13), Inches(5.9))
+
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 16 — DIAGRAMMES UML
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Diagrammes UML — Vue d'Ensemble (20 diagrammes)")
+uml_imgs = [
+    ("01_use_case_global.png",  "Use Case Global"),
+    ("02_use_case_freelancer.png", "Use Case Freelancer"),
+    ("05_class_diagram.png",    "Diagramme de Classes"),
+    ("14_activity_cycle.png",   "Activite Mission"),
+    ("16_state_contrat.png",    "Etats Contrat"),
+    ("17_state_milestone.png",  "Etats Jalon"),
 ]
-for path,label,x,y,w in imgs:
-    full = os.path.join(UML, path)
-    if os.path.exists(full):
-        add_img(sl, full, x, y, w)
-    add_text(sl, label, x, y-Inches(0.3), w, Inches(0.28),
-             font_size=11, bold=True, color=BLUE_MAIN, align=PP_ALIGN.CENTER)
-
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 15 — SECURITE
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Securite — 4 Couches de Protection",
-             "Authentification  |  Autorisation  |  Validation  |  Donnees")
-
-layers_sec = [
-    (BLUE_MAIN, "Couche 1 : AUTHENTIFICATION",
-     ["Sanctum Bearer Token — unique par session", "Revocable immediatement a la deconnexion",
-      "Google OAuth — delegation a Google (pas de mdp stocke)"]),
-    (ORANGE,    "Couche 2 : AUTORISATION",
-     ["Middleware role:freelancer / role:client / role:admin", "Principe de moindre privilege",
-      "Un etudiant ne peut PAS acceder aux routes admin"]),
-    (GREEN,     "Couche 3 : VALIDATION",
-     ["Form Requests Laravel cote serveur", "Types verifies + longueurs max",
-      "Codes HTTP standards (401, 403, 422, 500)"]),
-    (RGBColor(142,68,173), "Couche 4 : DONNEES SENSIBLES",
-     ["Mots de passe haches avec bcrypt (Hash::make)", "Secrets dans .env — jamais en dur dans le code",
-      "CORS configure — seul le domaine frontend autorise"]),
+positions = [
+    (Inches(0.2),  Inches(1.4), Inches(4.2)),
+    (Inches(4.6),  Inches(1.4), Inches(4.2)),
+    (Inches(9.0),  Inches(1.4), Inches(4.2)),
+    (Inches(0.2),  Inches(4.3), Inches(4.2)),
+    (Inches(4.6),  Inches(4.3), Inches(4.2)),
+    (Inches(9.0),  Inches(4.3), Inches(4.2)),
 ]
-for i,(bg,title,items) in enumerate(layers_sec):
-    row, col = divmod(i, 2)
-    x = Inches(0.3) + col*Inches(6.5)
-    y = Inches(1.3) + row*Inches(2.8)
-    add_rect(sl, x, y, Inches(6.2), Inches(0.5), bg)
-    add_text(sl, title, x, y, Inches(6.2), Inches(0.5),
-             font_size=14, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    for j,item in enumerate(items):
-        add_text(sl, "  >  "+item, x, y+Inches(0.58)+j*Inches(0.6),
-                 Inches(6.2), Inches(0.55),
-                 font_size=13, bold=False, color=GREY_DARK)
+for (img, label), (x, y, w) in zip(uml_imgs, positions):
+    path = os.path.join(UML_DIR, img)
+    add_img(s, path, x, y, w, Inches(2.8))
+    add_text(s, label, x, y+Inches(2.82), w, Inches(0.3),
+             size=10, color=GREY_TEXT, align=PP_ALIGN.CENTER)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 16 — DEMONSTRATION
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Demonstration Live",
-             "http://localhost:5173  |  http://localhost:8000  |  http://localhost:11434")
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 17 — DEPLOIEMENT DOCKER
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Deploiement Docker et Infrastructure")
 
-scenarios = [
-    (BLUE_MAIN, "Scenario 1 : Inscription Freelancer  (2 min)", [
-        "S'inscrire en tant que freelancer",
-        "Processus onboarding : 5 etapes completes",
-        "Tableau de bord freelancer — statistiques",
-    ]),
-    (ORANGE,    "Scenario 2 : Workflow Client  (2 min)", [
-        "Publier une offre d'emploi",
-        "Consulter les profils freelancers",
-        "Accepter une proposition → Contrat cree auto",
-    ]),
-    (GREEN,     "Scenario 3 : IA et Paiement  (2 min)", [
-        "Freelancer genere une proposition via Ollama IA",
-        "Client finance l'escrow → Freelancer livre",
-        "Liberation du paiement et messagerie temps reel",
-    ]),
-    (RGBColor(142,68,173), "Bonus : Admin Dashboard  (30 sec)", [
-        "Statistiques globales de la plateforme",
-        "Gestion des utilisateurs (ban, verifier)",
-        "Analytics et revenus",
-    ]),
+services = [
+    ("Frontend\nReact 19 + Nginx", BLUE_LIGHT,  Inches(0.4)),
+    ("Backend\nLaravel 12 API",    BLUE_MAIN,   Inches(3.3)),
+    ("MySQL 8.0\n35+ tables",       ORANGE,      Inches(6.2)),
+    ("Redis\nCache + Queues",       GREEN,        Inches(9.1)),
 ]
-for i,(bg,title,steps) in enumerate(scenarios):
-    row, col = divmod(i, 2)
-    x = Inches(0.3)+col*Inches(6.5)
-    y = Inches(1.3)+row*Inches(2.8)
-    add_rect(sl, x, y, Inches(6.2), Inches(0.5), bg)
-    add_text(sl, title, x, y, Inches(6.2), Inches(0.5),
-             font_size=13, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    for j,step in enumerate(steps):
-        add_text(sl, "  "+str(j+1)+".  "+step,
-                 x, y+Inches(0.58)+j*Inches(0.65),
-                 Inches(6.2), Inches(0.6),
-                 font_size=13, bold=False, color=GREY_DARK)
+for label, color, x in services:
+    add_rect(s, x, Inches(1.5), Inches(2.7), Inches(1.5), fill=color)
+    add_text(s, label, x, Inches(1.65), Inches(2.7), Inches(1.2),
+             size=13, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 17 — DIFFICULTES ET SOLUTIONS
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Difficultes Rencontrees & Solutions",
-             "Problemes reels resolus au cours du developpement")
-
-problems_solutions = [
-    ("Configuration CORS",       "Origines Laravel:8000 / React:5173 differentes",
-     "cors.php + SANCTUM_STATEFUL_DOMAINS"),
-    ("Migration Sanctum absente","Table personal_access_tokens manquante",
-     "Migration dediee 2026_05_19_..."),
-    ("Middleware non reconnu",   "Alias non declares dans bootstrap",
-     "Correction withMiddleware() dans app.php"),
-    ("Palettes Tailwind",        "Shades CSS non definis",
-     "Ajout 50-950 dans tailwind.config.js"),
-    ("Ollama indisponible",      "Serveur IA non demarre",
-     "try/catch avec reponses fallback"),
-    ("Escrow 3 soldes",          "Logique atomique complexe",
-     "DB::transaction() Laravel"),
-    ("Upload images",            "Type MIME et stockage securise",
-     "Intervention/Image + storage/app/public"),
-    ("Onboarding champs abs.",   "Profil incomplet apres inscription",
-     "Migration additive add_onboarding_fields"),
+services2 = [
+    ("Soketi\nWebSocket",     RGBColor(142,68,173), Inches(0.4)),
+    ("Ollama\nMistral 7B",    RGBColor(52,152,219), Inches(3.3)),
+    ("Stripe\nPaiements",     RGBColor(99,91,255),  Inches(6.2)),
+    ("GitHub Actions\nCI/CD", RGBColor(36,41,46),   Inches(9.1)),
 ]
-add_rect(sl, Inches(0.3), Inches(1.25), Inches(4.0), Inches(0.42), BLUE_MAIN)
-add_rect(sl, Inches(4.35),Inches(1.25), Inches(4.0), Inches(0.42), ORANGE)
-add_rect(sl, Inches(8.7), Inches(1.25), Inches(4.3), Inches(0.42), GREEN)
-for label,col in [("Difficulte",BLUE_MAIN),("Cause",ORANGE),("Solution",GREEN)]:
-    x = {"Difficulte":Inches(0.3),"Cause":Inches(4.35),"Solution":Inches(8.7)}[label]
-    add_text(sl, label, x, Inches(1.25), Inches(4.0), Inches(0.42),
-             font_size=13, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+for label, color, x in services2:
+    add_rect(s, x, Inches(3.2), Inches(2.7), Inches(1.3), fill=color)
+    add_text(s, label, x, Inches(3.35), Inches(2.7), Inches(1.0),
+             size=13, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
 
-for i,(diff,cause,sol) in enumerate(problems_solutions):
-    y = Inches(1.73)+i*Inches(0.68)
-    bg_row = RGBColor(245,248,252) if i%2==0 else WHITE
-    add_rect(sl, Inches(0.3),  y, Inches(4.0), Inches(0.62), bg_row)
-    add_rect(sl, Inches(4.35), y, Inches(4.0), Inches(0.62), bg_row)
-    add_rect(sl, Inches(8.7),  y, Inches(4.3), Inches(0.62), bg_row)
-    add_text(sl, diff,  Inches(0.4),  y+Inches(0.1), Inches(3.8), Inches(0.45),
-             font_size=12, bold=True,  color=BLUE_MAIN)
-    add_text(sl, cause, Inches(4.45), y+Inches(0.1), Inches(3.8), Inches(0.45),
-             font_size=11, bold=False, color=GREY_DARK)
-    add_text(sl, sol,   Inches(8.8),  y+Inches(0.1), Inches(4.1), Inches(0.45),
-             font_size=11, bold=True,  color=GREEN)
+divider(s, Inches(4.7))
+add_text(s, "Configuration Production", Inches(0.5), Inches(4.8), Inches(12), Inches(0.4),
+         size=14, bold=True, color=BLUE_DARK)
+bullet_list(s, [
+    "Dockerfile multi-stage backend (PHP-FPM + Nginx) + Dockerfile Nginx frontend",
+    "nginx.conf : Gzip, Cache-Control (assets 1 an), SPA try_files, Service Worker",
+    "docker-compose.yml : orchestration complete (6+ services)",
+    "CI/CD : backend.yml + frontend.yml — echec bloque le merge automatiquement",
+], Inches(0.5), Inches(5.2), Inches(12.5), Inches(2.0), size=13, color=BLUE_DARK)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 18 — COMPETENCES ACQUISES
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Competences Acquises",
-             "Bilan technique et personnel du projet")
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 18 — DEMO ET RESULTATS
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Demo et Resultats")
 
-# Barres de competences
-skills_data = [
-    ("Base de donnees relationnelles", 90, BLUE_MAIN),
-    ("API REST Laravel",               82, ORANGE),
-    ("Frontend React 19",              76, GREEN),
-    ("Securite web",                   68, RGBColor(142,68,173)),
-    ("Integration IA (Ollama)",        55, RGBColor(41,128,185)),
-    ("Temps reel (Socket.IO)",         60, RGBColor(39,174,96)),
-]
-add_text(sl, "Competences Techniques",
-         Inches(0.4), Inches(1.3), Inches(6), Inches(0.45),
-         font_size=16, bold=True, color=BLUE_MAIN)
-BAR_W = Inches(5.5)
-for i,(skill,pct,col) in enumerate(skills_data):
-    y = Inches(1.88)+i*Inches(0.8)
-    add_text(sl, skill, Inches(0.4), y, Inches(4.5), Inches(0.35),
-             font_size=13, bold=False, color=GREY_DARK)
-    add_rect(sl, Inches(0.4), y+Inches(0.38), BAR_W, Inches(0.28), RGBColor(220,230,245))
-    add_rect(sl, Inches(0.4), y+Inches(0.38), int(BAR_W*pct/100), Inches(0.28), col)
-    add_text(sl, str(pct)+"%", Inches(0.4)+int(BAR_W*pct/100)+Inches(0.05),
-             y+Inches(0.38), Inches(0.5), Inches(0.28),
-             font_size=11, bold=True, color=col)
+stat_box(s, "Tables MySQL",      "35+",  Inches(0.3), Inches(1.5), bg=BLUE_MAIN)
+stat_box(s, "Endpoints API",     "100+", Inches(3.4), Inches(1.5), bg=BLUE_LIGHT)
+stat_box(s, "Pages React",       "50+",  Inches(6.5), Inches(1.5), bg=GREEN)
+stat_box(s, "Composants React",  "80+",  Inches(9.6), Inches(1.5), bg=ORANGE)
 
-# Stats chiffres droite
-add_text(sl, "Realisations en Chiffres",
-         Inches(7.0), Inches(1.3), Inches(5.9), Inches(0.45),
-         font_size=16, bold=True, color=BLUE_MAIN)
-stats_num = [
-    ("19",  "Tables BDD",         BLUE_MAIN),
-    ("40+", "Endpoints API",      ORANGE),
-    ("53+", "Composants React",   GREEN),
-    ("3",   "Auth methods",       RGBColor(142,68,173)),
-    ("5",   "Features IA",        RGBColor(41,128,185)),
-    ("10%", "Commission escrow",  RGBColor(39,174,96)),
-]
-for i,(num,lbl,col) in enumerate(stats_num):
-    row, c = divmod(i, 3)
-    x = Inches(7.0)+c*Inches(1.95)
-    y = Inches(1.85)+row*Inches(1.55)
-    add_rect(sl, x, y, Inches(1.8), Inches(1.35), col)
-    add_text(sl, num, x, y+Inches(0.18), Inches(1.8), Inches(0.65),
-             font_size=28, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    add_text(sl, lbl, x, y+Inches(0.85), Inches(1.8), Inches(0.44),
-             font_size=11, bold=False, color=RGBColor(210,230,255),
-             align=PP_ALIGN.CENTER)
+stat_box(s, "Evenements WS",     "11",   Inches(0.3), Inches(3.0), bg=RGBColor(142,68,173))
+stat_box(s, "Fonctionnalites IA","5",    Inches(3.4), Inches(3.0), bg=RGBColor(52,152,219))
+stat_box(s, "Services Docker",   "6+",   Inches(6.5), Inches(3.0), bg=RED)
+stat_box(s, "LOC (lignes code)", "25K+", Inches(9.6), Inches(3.0), bg=BLUE_DARK)
 
-# ══════════════════════════════════════════════════════════════
-#  SLIDE 19 — PERSPECTIVES
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-slide_bg(sl)
-slide_header(sl, "Perspectives d'Evolution",
-             "FreeNest — Feuille de route future")
+divider(s, Inches(4.5))
+add_text(s, "Parcours utilisateur demontrable de bout en bout :", Inches(0.5), Inches(4.6), Inches(12), Inches(0.4),
+         size=14, bold=True, color=BLUE_DARK)
+bullet_list(s, [
+    "Inscription -> 2FA -> KYC -> Publication offre -> Proposition IA -> Contrat -> Escrow Stripe -> Livraison -> Paiement",
+    "Catalogue : service -> commande -> livraison -> avis  |  Agence : creation -> invitation -> collaboration",
+    "Chat temps reel + reactions emoji + Push Web  |  Admin : finance, KYC, moderation catalogue",
+], Inches(0.5), Inches(5.0), Inches(12.5), Inches(1.8), size=13, color=BLUE_DARK)
 
-horizons = [
-    (BLUE_MAIN,  "Court terme",   [
-        "Deploiement production (VPS + Nginx + SSL)",
-        "Integration Stripe pour paiements reels",
-        "Tests automatises (PHPUnit + Vitest)",
-        "Redis pour le cache et les queues",
-    ]),
-    (ORANGE,     "Moyen terme",   [
-        "Application mobile React Native",
-        "IA avancee : embeddings + recherche semantique",
-        "Verification d'identite (KYC)",
-        "Notifications push",
-    ]),
-    (GREEN,      "Long terme",    [
-        "Internationalisation FR / EN / AR",
-        "Programme d'affiliation",
-        "API publique pour integrations tierces",
-        "Multi-devise et localisation",
-    ]),
-]
-for i,(bg,horizon,items) in enumerate(horizons):
-    x = Inches(0.3)+i*Inches(4.35)
-    add_rect(sl, x, Inches(1.25), Inches(4.1), Inches(0.55), bg)
-    add_text(sl, horizon, x, Inches(1.25), Inches(4.1), Inches(0.55),
-             font_size=18, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-    for j,item in enumerate(items):
-        y = Inches(1.9)+j*Inches(0.75)
-        add_rect(sl, x, y, Inches(4.1), Inches(0.65),
-                 RGBColor(240,245,252) if j%2==0 else WHITE)
-        add_text(sl, "  >  "+item, x, y+Inches(0.1), Inches(4.1), Inches(0.5),
-                 font_size=13, bold=False, color=GREY_DARK)
+# ════════════════════════════════════════════════════════════════
+#  SLIDE 19 — BILAN
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+slide_bg(s)
+slide_header(s, "Bilan et Perspectives")
 
-divider(sl, Inches(5.15))
-add_text(sl, "Compétences à approfondir :",
-         Inches(0.4), Inches(5.3), Inches(4), Inches(0.42),
-         font_size=15, bold=True, color=BLUE_MAIN)
-next_skills = ["DevOps (Docker, CI/CD)","Tests automatises","Performance (Redis)","ML / Embeddings vectoriels"]
-for i,s in enumerate(next_skills):
-    badge(sl, s, Inches(0.4)+i*Inches(3.2), Inches(5.85),
-          bg=BLUE_MAIN if i%2==0 else ORANGE)
+add_text(s, "Competences acquises :", Inches(0.5), Inches(1.3), Inches(6), Inches(0.4),
+         size=15, bold=True, color=BLUE_MAIN)
+bullet_list(s, [
+    "Architecture full-stack decouplee (API REST + SPA)",
+    "Paiements complexes (Stripe, escrow, webhooks)",
+    "Temps reel (Laravel Broadcasting + Socket.IO)",
+    "Securite avancee (2FA, KYC, audit logs)",
+    "DevOps complet (Docker, Nginx, CI/CD)",
+    "Integration IA locale (Ollama, Mistral 7B)",
+    "BDD relationnelle complexe (35+ tables)",
+], Inches(0.5), Inches(1.75), Inches(6.0), Inches(3.5), size=13, color=BLUE_DARK)
 
-# ══════════════════════════════════════════════════════════════
+add_text(s, "Perspectives :", Inches(7.0), Inches(1.3), Inches(6), Inches(0.4),
+         size=15, bold=True, color=ORANGE)
+bullet_list(s, [
+    "Application mobile React Native",
+    "Microservices (Auth / Payment / AI)",
+    "IA multimodale (images, videos)",
+    "Video consultations integrees",
+    "Multi-devises, i18n international",
+    "Kubernetes (orchestration prod)",
+    "Certifications freelancers en ligne",
+], Inches(7.0), Inches(1.75), Inches(6.0), Inches(3.5), size=13, color=BLUE_DARK)
+
+divider(s, Inches(5.5))
+add_text(s, "Difficultes surmontees :", Inches(0.5), Inches(5.6), Inches(12), Inches(0.4),
+         size=14, bold=True, color=BLUE_DARK)
+bullet_list(s, [
+    "Transactions atomiques escrow (race conditions evitees avec BEGIN/COMMIT)",
+    "Securite Stripe Webhooks (verification HMAC signature, idempotence des evenements)",
+    "WebSockets en production (Soketi containerise, canaux prives Sanctum)",
+], Inches(0.5), Inches(6.0), Inches(12.5), Inches(1.2), size=12, color=BLUE_DARK)
+
+# ════════════════════════════════════════════════════════════════
 #  SLIDE 20 — CONCLUSION
-# ══════════════════════════════════════════════════════════════
-sl = prs.slides.add_slide(BLANK)
-add_rect(sl, 0, 0, W, H, BLUE_DARK)
-add_rect(sl, 0, 0, W, Inches(0.08), ORANGE)
-add_rect(sl, 0, H-Inches(0.08), W, Inches(0.08), ORANGE)
+# ════════════════════════════════════════════════════════════════
+s = prs.slides.add_slide(BLANK)
+add_rect(s, 0, 0, W, H, fill=BLUE_DARK)
+add_rect(s, 0, Inches(2.5), W, Inches(2.8), fill=BLUE_MAIN)
+add_text(s, "Merci pour votre attention", 0, Inches(0.8), W, Inches(1.2),
+         size=38, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
+add_text(s, "FreeNest — Marketplace Freelance Full-Stack de Niveau Production",
+         0, Inches(2.6), W, Inches(0.7), size=18, color=WHITE, align=PP_ALIGN.CENTER)
+add_text(s, "Laravel 12  |  React 19  |  Stripe  |  Docker  |  Ollama  |  CI/CD GitHub Actions",
+         0, Inches(3.3), W, Inches(0.6), size=14, color=RGBColor(160,200,255), align=PP_ALIGN.CENTER)
+add_rect(s, Inches(4), Inches(4.1), Inches(5.33), Inches(0.06), fill=ORANGE)
+add_text(s, "Ayoub Elmernissi — ayoubelmerniss55@gmail.com — Juin 2026",
+         0, Inches(4.3), W, Inches(0.5), size=14, color=RGBColor(200,220,255), align=PP_ALIGN.CENTER)
+add_text(s, "Questions ?", 0, Inches(5.2), W, Inches(1.2),
+         size=42, bold=True, color=ORANGE, align=PP_ALIGN.CENTER)
 
-add_text(sl, "FREENEST",
-         Inches(0.5), Inches(0.7), Inches(12), Inches(1.3),
-         font_size=56, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-add_text(sl, "Marketplace Freelance Full-Stack avec Intelligence Artificielle",
-         Inches(0.5), Inches(1.85), Inches(12), Inches(0.6),
-         font_size=20, bold=False, color=RGBColor(180,210,255), align=PP_ALIGN.CENTER)
-
-add_rect(sl, Inches(3.5), Inches(2.55), Inches(6.3), Inches(0.05), ORANGE)
-
-add_text(sl, "Merci pour votre attention !",
-         Inches(0.5), Inches(2.75), Inches(12), Inches(0.7),
-         font_size=30, bold=True, color=ORANGE, align=PP_ALIGN.CENTER)
-
-checklist = [
-    "19 tables MySQL  |  40+ endpoints API  |  53+ composants React",
-    "5 fonctionnalites IA (Ollama/Mistral)  |  Escrow 10% commission",
-    "Messagerie Socket.IO  |  OAuth Google  |  Interface 3D Three.js",
-]
-for i,item in enumerate(checklist):
-    add_text(sl, item, Inches(0.5), Inches(3.6)+i*Inches(0.6), Inches(12), Inches(0.55),
-             font_size=15, bold=False, color=RGBColor(200,225,255), align=PP_ALIGN.CENTER)
-
-add_rect(sl, Inches(3.5), Inches(5.4), Inches(6.3), Inches(0.05), BLUE_LIGHT)
-
-add_text(sl, "Questions ?",
-         Inches(0.5), Inches(5.6), Inches(12), Inches(0.6),
-         font_size=26, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-add_text(sl, "Ayoub Elmernissi   |   ayoubelmerniss55@gmail.com",
-         Inches(0.5), Inches(6.25), Inches(12), Inches(0.5),
-         font_size=16, bold=False, color=RGBColor(180,210,255), align=PP_ALIGN.CENTER)
-add_text(sl, "Projet de Fin d'Etudes  —  2025 / 2026",
-         Inches(0.5), Inches(6.78), Inches(12), Inches(0.45),
-         font_size=14, bold=False, color=RGBColor(140,170,210), align=PP_ALIGN.CENTER)
-
-# ══════════════════════════════════════════════════════════════
-#  SAUVEGARDE
-# ══════════════════════════════════════════════════════════════
+# Sauvegarde
 out = r"C:\Users\Pro\Desktop\PFE O1\documentation\FreeNest_Presentation.pptx"
 prs.save(out)
 print("OK - Presentation PowerPoint creee : " + out)

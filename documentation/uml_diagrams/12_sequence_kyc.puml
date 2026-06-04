@@ -1,0 +1,47 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam sequenceMessageAlign center
+title Sequence -- Verification d'Identite KYC
+
+actor "Freelancer" as FL
+actor "Admin" as ADM
+participant "Frontend" as FE
+participant "IdentityVerificationController" as KYC
+participant "Storage" as STG
+database "MySQL" as DB
+
+== Soumission des documents ==
+FL -> FE : Accede a /settings/identity
+FE -> KYC : GET /api/verify-identity/status
+KYC -> DB : SELECT identity_verifications WHERE user_id=X
+DB --> KYC : {status: 'none'}
+KYC --> FE : {status: 'not_submitted'}
+
+FL -> FE : Upload: passeport + selfie
+FE -> KYC : POST /api/verify-identity
+{document_type, front, back, selfie}
+KYC -> STG : Storage::disk('local')->put(files)
+KYC -> DB : INSERT identity_verifications {status:'pending'}
+KYC --> FE : HTTP 201 {status: 'pending'}
+FE --> FL : Documents en cours de verification
+
+== Traitement Admin ==
+ADM -> FE : Accede a /admin/kyc
+FE -> KYC : GET /api/admin/kyc
+KYC -> DB : SELECT WHERE status='pending'
+DB --> KYC : Liste des soumissions
+KYC --> FE : HTTP 200 {verifications}
+
+ADM -> FE : Examine les documents
+FE -> KYC : GET /api/admin/kyc/{id}
+KYC -> STG : Sert le fichier via route signee
+STG --> ADM : Documents affiches
+
+ADM -> FE : Clique "Approuver"
+FE -> KYC : POST /api/admin/kyc/{id}/approve
+KYC -> DB : UPDATE identity_verifications SET status='approved'
+KYC -> DB : UPDATE users SET is_verified=true
+KYC -> DB : INSERT audit_logs {action:'kyc_approved'}
+KYC --> FE : HTTP 200
+FE --> FL : Notification: Identite verifiee !
+@enduml

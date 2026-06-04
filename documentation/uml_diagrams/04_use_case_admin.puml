@@ -1,0 +1,82 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFE8E8
+  BorderColor #E53935
+}
+left to right direction
+title Use Case -- Administrateur (Detail)
+
+actor "Admin" as ADM #LightCoral
+
+rectangle "Espace Admin" {
+  package "Dashboard et Analytics" {
+    (Voir tableau de bord) as DASH
+    (Consulter analytics) as ANALY
+    (Rapports plateforme) as REPORT
+  }
+  package "Gestion Utilisateurs" {
+    (Lister utilisateurs) as USERS
+    (Bannir un utilisateur) as BAN
+    (Verifier un compte) as VERIFY
+    (Voir details utilisateur) as UDET
+  }
+  package "KYC -- Verification Identite" {
+    (Consulter file KYC) as KQUEUE
+    (Examiner documents) as KDOC
+    (Approuver KYC) as KAPPR
+    (Rejeter KYC) as KREJ
+  }
+  package "Finance" {
+    (Dashboard finance) as FDASH
+    (Voir retraits en attente) as FWITH
+    (Approuver retrait) as FAPPR
+    (Rejeter retrait) as FREJ
+    (Parametres plateforme) as FSET
+  }
+  package "Documents Fiscaux" {
+    (Examiner tax documents) as TLIST
+    (Approuver document) as TAPPR
+    (Rejeter document) as TREJ
+  }
+  package "Moderation Catalogue" {
+    (Voir services en attente) as CQUEUE
+    (Approuver service) as CAPPR
+    (Rejeter service) as CREJ
+  }
+  package "Litiges" {
+    (Examiner litiges) as DISP
+    (Resoudre litige) as RESOLV
+  }
+}
+
+ADM --> DASH
+ADM --> ANALY
+ADM --> REPORT
+ADM --> USERS
+ADM --> BAN
+ADM --> VERIFY
+ADM --> UDET
+ADM --> KQUEUE
+ADM --> KDOC
+ADM --> KAPPR
+ADM --> KREJ
+ADM --> FDASH
+ADM --> FWITH
+ADM --> FAPPR
+ADM --> FREJ
+ADM --> FSET
+ADM --> TLIST
+ADM --> TAPPR
+ADM --> TREJ
+ADM --> CQUEUE
+ADM --> CAPPR
+ADM --> CREJ
+ADM --> DISP
+ADM --> RESOLV
+
+KAPPR .> KQUEUE : <<include>>
+FAPPR .> FWITH  : <<include>>
+RESOLV .> DISP  : <<include>>
+@enduml

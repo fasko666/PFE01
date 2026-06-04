@@ -1,0 +1,82 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam activity {
+  BackgroundColor #EBF5FB
+  BorderColor #2196F3
+  ArrowColor #1565C0
+}
+title Activite -- Cycle de Vie Complet d'une Mission FreeNest
+
+|#AED6F1|Client|
+|#A9DFBF|Freelancer|
+|#FAD7A0|Systeme|
+
+|Client|
+start
+:Publie une offre;
+
+|Systeme|
+:statut = 'open';
+:Notifie les freelancers;
+
+|Freelancer|
+:Parcourt les offres;
+if (Interesse ?) then (Oui)
+  if (Utilise IA ?) then (Oui)
+    :Generation IA proposition;
+  else (Non)
+    :Redige manuellement;
+  endif
+  :Soumet proposition + jalons;
+else (Non)
+  stop
+endif
+
+|Systeme|
+:Proposition = 'pending';
+
+|Client|
+:Examine propositions;
+if (Accepte ?) then (Oui)
+  :Accepte proposition #N;
+else (Non)
+  stop
+endif
+
+|Systeme|
+:Contrat cree;
+:Conversation ouverte;
+:Autres props rejetees;
+
+|Client|
+:Finance escrow jalon 1;
+
+|Freelancer|
+:Realise le travail;
+:Soumet le jalon + fichiers;
+
+|Client|
+:Revise les livrables;
+if (Approuve ?) then (Oui)
+  :Libere le paiement;
+  |Systeme|
+  :Freelancer recoit 90%;
+  :Commission 10% plateforme;
+  if (Jalons restants ?) then (Oui)
+    |Client|
+    backward: Finance prochain jalon;
+  else (Non)
+    :Contrat = 'completed';
+    :Echanges des avis;
+    stop
+  endif
+else if (Demande corrections) then (Oui)
+  |Freelancer|
+  backward: Corrige et resoumet;
+else (Litige)
+  |Systeme|
+  :contract.status = 'disputed';
+  :Admin arbitre;
+  stop
+endif
+@enduml

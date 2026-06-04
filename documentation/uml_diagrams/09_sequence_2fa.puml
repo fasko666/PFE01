@@ -1,0 +1,35 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam sequenceMessageAlign center
+title Sequence -- Activation 2FA TOTP
+
+actor "Utilisateur" as USR
+participant "Frontend" as FE
+participant "TwoFactorController" as TFC
+participant "Google Authenticator" as GA
+database "MySQL" as DB
+
+USR -> FE : Accede aux parametres securite
+FE -> TFC : POST /api/two-factor/enable
+TFC -> TFC : Genere secret TOTP aleatoire
+TFC -> DB : UPDATE users SET two_factor_secret=secret
+TFC --> FE : {qr_code_url, secret}
+
+FE --> USR : Affiche QR Code
+USR -> GA : Scanne le QR Code
+GA --> USR : Affiche code TOTP 6 chiffres
+
+USR -> FE : Saisit le code TOTP
+FE -> TFC : POST /api/two-factor/confirm {code:'123456'}
+TFC -> TFC : Verifie TOTP (algorithme time-based)
+
+alt Code valide
+  TFC -> DB : UPDATE two_factor_confirmed=true
+  TFC -> DB : INSERT recovery_codes [8 codes]
+  TFC --> FE : HTTP 200 + codes de secours
+  FE --> USR : 2FA active - Codes de secours affiches
+else Code invalide
+  TFC --> FE : HTTP 422 {error: 'Code invalide'}
+  FE --> USR : Erreur - Reessayez
+end
+@enduml

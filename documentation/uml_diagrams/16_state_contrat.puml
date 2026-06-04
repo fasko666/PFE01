@@ -1,0 +1,34 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam state {
+  BackgroundColor #FFF9E6
+  BorderColor #E67E22
+  ArrowColor #D35400
+}
+title Etats d'un Contrat -- FreeNest
+
+[*] --> active : Proposition acceptee
+
+active --> paused    : Travail suspendu
+active --> completed : Tous jalons approuves
+active --> disputed  : Litige ouvert
+active --> cancelled : Annulation mutuelle
+
+paused --> active : Reprise du travail
+
+disputed --> active    : Litige resolu (freelancer)
+disputed --> cancelled : Litige resolu (client)
+
+completed --> archived : Contrat archive
+cancelled  --> archived : Contrat archive
+
+archived --> [*]
+completed --> [*]
+
+note right of disputed
+  Admin peut resoudre:
+  - En faveur freelancer -> active
+  - En faveur client -> cancelled
+  (PDF litige genere)
+end note
+@enduml

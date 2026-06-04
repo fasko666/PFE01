@@ -12,111 +12,93 @@ actor "Client" as CL #LightBlue
 
 rectangle "Espace Client" {
   package "Compte et Securite" {
-    (S'inscrire)                  as REG
-    (Se connecter)                as LOGIN
-    (Mot de passe oublie)         as FORGOT
-    (Activer 2FA TOTP)            as TFA
-    (Verification KYC)            as KYC
-    (Profil entreprise)           as CPRO
+    (S'inscrire) as REG
+    (Se connecter) as LOGIN
+    (2FA TOTP) as TFA
+    (Reset mot de passe) as RESET
+    (Profil entreprise) as CPRO
+    (Centre fiscal) as TAX
   }
-  package "Gestion des Offres" {
-    (Creer une offre)             as CREATE
-    (Definir budget & comp.)      as SETDET
-    (Publier l'offre)             as PUB
-    (Modifier offre)              as EDIT
-    (Voir mes offres)             as MYJOBS
-    (Cloturer offre)              as CLOSE
+  package "Gestion Offres" {
+    (Creer une offre) as CREATE
+    (Definir budget et comp.) as SETDET
+    (Publier l'offre) as PUB
+    (Modifier offre) as EDIT
+    (Cloturer offre) as CLOSE
   }
-  package "Recrutement & Talents" {
-    (Parcourir freelancers)       as BROWSE
-    (Recherche globale)           as SEARCH
-    (Voir profil freelancer)      as VIEW
-    (Voir portfolio)              as PORT
-    (Sauvegarder freelancer)      as SAVEF
-    (Creer liste de talents)      as TLIST
-    (Ajouter a une liste)         as ADDL
-    (Matching IA)                 as MATCH
-    (Consulter propositions)      as PROPS
-    (Mettre en shortlist)         as SHORT
-    (Accepter proposition)        as ACCEPT
-    (Rejeter proposition)         as REJECT
+  package "Catalogue" {
+    (Parcourir services) as BCAT
+    (Commander un service) as OCAT
+    (Valider livraison) as VCAT
+    (Laisser un avis) as RCAT
   }
-  package "Contrats, Jalons & Litiges" {
-    (Creer contrat)               as CON
-    (Definir jalons)              as DEFMIL
-    (Reviser le travail)          as REV
-    (Approuver jalon)             as APR
-    (Rejeter jalon)               as CORR
-    (Ajouter fichiers)            as CFILE
-    (Demander prolongation)       as EXT
-    (Ouvrir un litige)            as DISP
-    (Telecharger contrat PDF)     as PDF
-    (Telecharger litige PDF)      as DPDF
-    (Archiver contrat)            as ARCH
+  package "Recrutement et Talents" {
+    (Parcourir freelancers) as BROWSE
+    (Matching IA) as MATCH
+    (Sauvegarder freelancer) as SAVE
+    (Creer liste talents) as TLIST
+    (Consulter propositions) as PROPS
+    (Accepter proposition) as ACCEPT
+    (Rejeter proposition) as REJECT
   }
-  package "Finances" {
-    (Deposer des fonds)           as DEP
-    (Financer l'escrow)           as ESC
-    (Liberer paiement)            as REL
-    (Historique transactions)     as HIST
-    (Soumettre W-9 / VAT)         as TAX
+  package "Contrats et Jalons" {
+    (Voir mes contrats) as CON
+    (Financer un jalon) as DEFMIL
+    (Approuver jalon) as APR
+    (Demander corrections) as CORR
+    (Demander extension) as EXT
+    (Ouvrir un litige) as DISP
+  }
+  package "Finance" {
+    (Deposer des fonds Stripe) as DEP
+    (Liberer paiement) as REL
+    (Historique transactions) as HIST
+    (Abonnement plan) as PLAN
   }
   package "Communication" {
-    (Messagerie temps reel)       as MSG
-    (Reactions et fichiers)       as MEDIA
-    (Evaluer freelancer)          as REVI
-    (Notifications)               as NOTIF
-    (Activer push)                as PUSH
+    (Messagerie temps reel) as MSG
+    (Evaluer freelancer) as REVI
+    (Notifications push) as NOTIF
   }
 }
 
 CL --> REG
 CL --> LOGIN
-CL --> FORGOT
 CL --> TFA
-CL --> KYC
+CL --> RESET
 CL --> CPRO
+CL --> TAX
 CL --> CREATE
 CL --> SETDET
 CL --> PUB
 CL --> EDIT
-CL --> MYJOBS
 CL --> CLOSE
+CL --> BCAT
+CL --> OCAT
+CL --> VCAT
+CL --> RCAT
 CL --> BROWSE
-CL --> SEARCH
-CL --> VIEW
-CL --> PORT
-CL --> SAVEF
-CL --> TLIST
-CL --> ADDL
 CL --> MATCH
+CL --> SAVE
+CL --> TLIST
 CL --> PROPS
-CL --> SHORT
 CL --> ACCEPT
 CL --> REJECT
 CL --> CON
 CL --> DEFMIL
-CL --> REV
 CL --> APR
 CL --> CORR
-CL --> CFILE
 CL --> EXT
 CL --> DISP
-CL --> PDF
-CL --> DPDF
-CL --> ARCH
 CL --> DEP
-CL --> ESC
 CL --> REL
 CL --> HIST
-CL --> TAX
+CL --> PLAN
 CL --> MSG
-CL --> MEDIA
 CL --> REVI
 CL --> NOTIF
-CL --> PUSH
 
-ACCEPT  .> CON  : <<include>>
-APR     .> REL  : <<include>>
-TLIST   .> ADDL : <<include>>
+ACCEPT .> CON   : <<include>>
+APR    .> REL   : <<include>>
+DISP   .> CORR  : <<extend>>
 @enduml

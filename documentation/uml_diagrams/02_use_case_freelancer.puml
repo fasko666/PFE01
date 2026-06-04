@@ -12,118 +12,98 @@ actor "Freelancer" as FL #LightGreen
 
 rectangle "Espace Freelancer" {
   package "Compte et Securite" {
-    (S'inscrire par email)        as REG
-    (Connexion Google)            as GOOGLE
-    (Mot de passe oublie)         as FORGOT
-    (Activer 2FA TOTP)            as TFA
-    (Codes de recuperation)       as RCODES
-    (Onboarding)                  as OB
-    (Modifier profil)             as EDIT
-    (Upload photo)                as PHOTO
-    (Verification d'identite KYC) as KYC
+    (S'inscrire par email) as REG
+    (Connexion Google) as GOOGLE
+    (Reset mot de passe) as RESET
+    (Activer 2FA TOTP) as TFA
+    (Onboarding 5 etapes) as OB
+    (Modifier profil) as EDIT
+    (Verifier identite KYC) as KYC
+    (Centre fiscal) as TAX
   }
   package "Portfolio et Competences" {
-    (Ajouter projet portfolio)    as PORT
-    (Modifier projet)             as EDITP
-    (Gerer competences)           as SKILL
-    (Definir niveaux)             as LEVEL
+    (Ajouter projet portfolio) as PORT
+    (Gerer competences) as SKILL
+    (Definir niveaux) as LEVEL
   }
-  package "Marketplace & Recherche" {
-    (Parcourir les offres)        as BROWSE
-    (Recherche globale)           as SEARCH
-    (Filtrer par categorie)       as FCAT
-    (Filtrer par budget)          as FBUD
-    (Consulter une offre)         as VIEW
-    (Sauvegarder une offre)       as SAVE
+  package "Marketplace" {
+    (Parcourir les offres) as BROWSE
+    (Recherche globale) as GSEARCH
+    (Filtrer par categorie) as FCAT
+    (Consulter une offre) as VIEW
+  }
+  package "Catalogue de Services" {
+    (Creer service) as CCAT
+    (Definir tiers tarifs) as TIER
+    (Gerer commandes recues) as CORD
+    (Livrer commande) as DELIVER
   }
   package "Propositions" {
-    (Soumettre proposition)       as SUB
-    (Generer via IA)              as AI
-    (Definir jalons)              as MIL
-    (Voir mes propositions)       as MYPROP
-    (Retirer proposition)         as WITHD
+    (Soumettre proposition) as SUB
+    (Generer via IA) as AIR
+    (Definir jalons) as MIL
+    (Voir mes propositions) as MYPROP
+    (Retirer proposition) as WITHD
   }
-  package "Missions actives" {
-    (Voir mes contrats)           as CONTRACT
-    (Soumettre jalon)             as SUBM
-    (Demarrer chrono)             as TSTART
-    (Arreter chrono)              as TSTOP
-    (Rapport hebdomadaire)        as TWK
-    (Telecharger fichiers)        as FILES
-    (Demander prolongation)       as EXT
-    (Ouvrir un litige)            as DISP
-    (Telecharger contrat PDF)     as PDF
+  package "Contrats et Jalons" {
+    (Voir mes contrats) as CONTRACT
+    (Soumettre jalon termine) as SUBM
+    (Upload fichiers livres) as UPLOAD
+    (Suivi du temps) as TIMER
   }
-  package "Finances" {
-    (Consulter portefeuille)      as WAL
-    (Voir transactions)           as TXN
-    (Connecter Stripe)            as SC
-    (Demander retrait)            as CASH
-    (Soumettre W-8BEN / VAT)      as TAX
+  package "Finance" {
+    (Consulter portefeuille) as WAL
+    (Retirer gains Stripe) as CASH
+    (Factures hebdomadaires) as WINV
   }
-  package "Messagerie & Notifications" {
-    (Messagerie temps reel)       as MSG
-    (Reactions et fichiers)       as MEDIA
-    (Notes vocales)               as VOICE
-    (Notifications in-app)        as NOTIF
-    (Activer push)                as PUSH
+  package "Agences" {
+    (Creer mon agence) as CAGENCY
+    (Inviter des membres) as CINV
   }
   package "IA" {
-    (Analyser mon profil)         as ANAL
-    (Chat assistant IA)           as CHAT
-    (Generer cover letter)        as COV
+    (Analyser mon profil) as ANAL
+    (Chat assistant IA) as CHAT
+    (Recherche intelligente) as SMART
   }
 }
 
 FL --> REG
 FL --> GOOGLE
-FL --> FORGOT
+FL --> RESET
 FL --> TFA
-FL --> RCODES
 FL --> OB
 FL --> EDIT
-FL --> PHOTO
 FL --> KYC
+FL --> TAX
 FL --> PORT
-FL --> EDITP
 FL --> SKILL
 FL --> LEVEL
 FL --> BROWSE
-FL --> SEARCH
+FL --> GSEARCH
 FL --> FCAT
-FL --> FBUD
 FL --> VIEW
-FL --> SAVE
+FL --> CCAT
+FL --> TIER
+FL --> CORD
+FL --> DELIVER
 FL --> SUB
-FL --> AI
+FL --> AIR
 FL --> MIL
 FL --> MYPROP
 FL --> WITHD
 FL --> CONTRACT
 FL --> SUBM
-FL --> TSTART
-FL --> TSTOP
-FL --> TWK
-FL --> FILES
-FL --> EXT
-FL --> DISP
-FL --> PDF
+FL --> UPLOAD
+FL --> TIMER
 FL --> WAL
-FL --> TXN
-FL --> SC
 FL --> CASH
-FL --> TAX
-FL --> MSG
-FL --> MEDIA
-FL --> VOICE
-FL --> NOTIF
-FL --> PUSH
+FL --> WINV
+FL --> CAGENCY
+FL --> CINV
 FL --> ANAL
 FL --> CHAT
-FL --> COV
+FL --> SMART
 
-SUB     .> AI      : <<extend>>
-SUB     .> MIL     : <<include>>
-TFA     .> RCODES  : <<include>>
-CASH    .> SC      : <<include>>
+SUB .> AIR : <<extend>>
+SUB .> MIL : <<include>>
 @enduml

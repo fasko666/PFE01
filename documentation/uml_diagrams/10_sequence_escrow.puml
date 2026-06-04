@@ -1,0 +1,53 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam sequenceMessageAlign center
+title Sequence -- Paiement Escrow Stripe (4 phases)
+
+actor "Client" as CL
+actor "Freelancer" as FL
+participant "Frontend" as FE
+participant "StripeController" as STC
+participant "PaymentController" as PAY
+participant "Stripe API" as STRIPE
+database "MySQL" as DB
+
+== Phase 1 : Depot Stripe ==
+CL -> FE : Clique "Deposer des fonds"
+FE -> STC : POST /api/payments/stripe/deposit-session
+STC -> STRIPE : createCheckoutSession({amount:1500$})
+STRIPE --> STC : {url: checkout.stripe.com/...}
+STC --> FE : {url}
+FE --> CL : Redirect Stripe Checkout
+
+CL -> STRIPE : Paye par carte (3D Secure)
+STRIPE -> PAY : Webhook checkout.session.completed
+PAY -> DB : wallet.balance += 1500
+PAY --> STRIPE : HTTP 200
+
+== Phase 2 : Escrow ==
+CL -> FE : Finance jalon 1 (300$)
+FE -> PAY : POST /api/payments/contracts/{id}/fund-escrow
+PAY -> DB : balance -= 300, escrow_balance += 300, milestone='funded'
+PAY --> FE : OK
+FE --> FL : Notification: Jalon finance - commencez !
+
+== Phase 3 : Livraison ==
+FL -> FE : Soumet jalon termine + fichiers
+FE -> PAY : PUT /api/milestones/{id}/submit
+PAY -> DB : milestone.status = 'submitted'
+FE --> CL : Notification: Revision requise !
+
+== Phase 4 : Liberation ==
+CL -> FE : Approuve le travail
+FE -> PAY : POST /api/payments/milestones/{id}/release
+note right : commission = 300 x 10% = 30$
+net freelancer = 270$
+PAY -> DB : BEGIN TRANSACTION
+PAY -> DB : escrow -= 300
+freelancer.balance += 270
+milestone='approved'
+INSERT 2 transactions
+PAY -> DB : COMMIT
+PAY --> FE : {net_received: 270$}
+FE --> FL : +270$ credites !
+@enduml

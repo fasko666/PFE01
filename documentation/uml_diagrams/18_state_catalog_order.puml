@@ -1,0 +1,29 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam state {
+  BackgroundColor #E8F5E9
+  BorderColor #27AE60
+  ArrowColor #1E8449
+}
+title Etats d'une Commande Catalogue (CatalogOrder)
+
+[*] --> pending : Client commande un service
+
+pending --> in_progress : Freelancer demarre
+
+in_progress --> delivered : Freelancer livre les fichiers
+
+delivered --> completed : Client accepte la livraison
+-> Avis possible
+delivered --> revision   : Client demande revision
+
+revision --> delivered : Freelancer re-livre
+
+completed --> [*]
+
+note right of delivered
+  Client peut laisser
+  un avis (1-5 etoiles)
+  apres completion
+end note
+@enduml

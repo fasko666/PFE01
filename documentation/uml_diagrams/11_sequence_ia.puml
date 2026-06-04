@@ -1,0 +1,43 @@
+@startuml
+skinparam backgroundColor #FAFAFA
+skinparam sequenceMessageAlign center
+title Sequence -- Generation de Proposition par IA (Ollama Mistral 7B)
+
+actor "Freelancer" as FL
+participant "Frontend" as FE
+participant "AIController" as AIC
+participant "Ollama Mistral 7B" as OLLAMA
+database "MySQL" as DB
+
+FL -> FE : Clique "Generer avec IA" sur offre #42
+FE -> AIC : POST /api/ai/generate-proposal {job_id:42}
+
+AIC -> DB : SELECT job_postings WHERE id=42
+DB --> AIC : {title, description, skills, budget}
+
+AIC -> DB : SELECT freelancer_profiles (current user)
+DB --> AIC : {title, experience, skills, hourly_rate}
+
+AIC -> AIC : Construit le prompt structure
+note right of AIC
+  "Tu es expert en propositions freelance.
+   Offre: Dev React SaaS - Budget 800-1500$
+   Profil: Full-Stack 5 ans - 35$/h
+   Redige une proposition pro en francais,
+   200-250 mots. Sois convaincant."
+end note
+
+AIC -> OLLAMA : POST /api/generate {model:'mistral', prompt}
+
+alt Ollama disponible
+  OLLAMA --> AIC : {response: "Bonjour...", tokens: 412}
+  AIC -> DB : INSERT ai_histories {tokens: 412}
+  AIC --> FE : HTTP 200 {proposal_text}
+else Ollama indisponible (fallback)
+  OLLAMA --> AIC : Erreur connexion
+  AIC --> FE : HTTP 200 {proposal_text: fallback, is_fallback:true}
+end
+
+FE --> FL : Proposition pre-remplie
+FL -> FE : Ajuste et soumet
+@enduml
