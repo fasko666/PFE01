@@ -356,19 +356,24 @@ export default function FreelancerProfile() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6 animate-pulse">
-        <div className="card p-6">
-          <div className="flex gap-5">
-            <div className="skeleton w-20 h-20 rounded-2xl shrink-0" />
-            <div className="flex-1 space-y-3">
-              <div className="skeleton h-6 rounded-lg w-1/3" />
-              <div className="skeleton h-4 rounded-lg w-1/2" />
-              <div className="skeleton h-4 rounded-lg w-1/4" />
+      <div className={username ? 'min-h-screen bg-dark-950 px-4 py-6' : ''} style={username ? { paddingTop: 60 } : {}}>
+        <div className="max-w-4xl mx-auto space-y-6 animate-pulse">
+          <div className="card overflow-hidden">
+            <div className="h-24 skeleton rounded-none" />
+            <div className="px-6 pb-6">
+              <div className="flex items-end gap-4 -mt-10 mb-5">
+                <div className="skeleton w-20 h-20 rounded-2xl shrink-0" />
+              </div>
+              <div className="space-y-3">
+                <div className="skeleton h-6 rounded-lg w-1/3" />
+                <div className="skeleton h-4 rounded-lg w-1/2" />
+                <div className="skeleton h-4 rounded-lg w-1/4" />
+              </div>
             </div>
           </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => <div key={i} className="card p-5 h-20 skeleton" />)}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => <div key={i} className="card p-5 h-20 skeleton" />)}
+          </div>
         </div>
       </div>
     );
@@ -380,158 +385,167 @@ export default function FreelancerProfile() {
   const avail = AVAIL_CONFIG[profile.freelancer_profile?.availability] || AVAIL_CONFIG.available;
 
   return (
+    <div className={username ? 'min-h-screen bg-dark-950 px-4 py-6' : ''} style={username ? { paddingTop: 60 } : {}}>
     <div className="max-w-4xl mx-auto space-y-5">
       {/* Hero card */}
-      <motion.div {...fadeUp(0)} className="card p-6">
-        <div className="flex items-start gap-5 flex-wrap">
-          <div className="relative shrink-0 group">
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={handleAvatarChange}
-            />
-            <UserAvatar user={profile} size={80} className="!rounded-2xl ring-2 ring-dark-700" />
-            {profile.is_online && !isOwnProfile && (
-              <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-dark-950" />
-            )}
-            {isOwnProfile && (
-              <button
-                onClick={() => avatarInputRef.current?.click()}
-                disabled={uploadingAvatar}
-                className="absolute inset-0 rounded-2xl flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity disabled:cursor-wait"
-                title="Change photo"
-              >
-                {uploadingAvatar
-                  ? <Loader2 className="w-6 h-6 text-white animate-spin" />
-                  : <Camera className="w-6 h-6 text-white" />
-                }
-              </button>
-            )}
-          </div>
+      <motion.div {...fadeUp(0)} className="card overflow-hidden">
+        {/* Gradient banner */}
+        <div className="h-24 bg-gradient-to-br from-primary-700/80 via-primary-600/50 to-violet-700/40 relative overflow-hidden">
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5" />
+          <div className="absolute -bottom-4 -left-4 w-24 h-24 rounded-full bg-white/5" />
+        </div>
 
-          <div className="flex-1 min-w-0">
-            {editing ? (
-              <div className="space-y-3">
-                <input
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="input font-semibold"
-                  placeholder="Professional title"
-                />
-                <textarea
-                  value={form.bio}
-                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                  className="input h-24 resize-none text-sm"
-                  placeholder="Write your bio…"
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-500 text-sm">$</span>
-                    <input
-                      type="number"
-                      value={form.hourly_rate}
-                      onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })}
-                      className="input pl-7"
-                      placeholder="Hourly rate"
-                    />
-                  </div>
-                  <input
-                    value={form.country}
-                    onChange={(e) => setForm({ ...form, country: e.target.value })}
-                    className="input"
-                    placeholder="Country"
-                  />
-                </div>
-                <select
-                  value={form.availability}
-                  onChange={(e) => setForm({ ...form, availability: e.target.value })}
-                  className="input"
+        <div className="px-6 pb-6">
+          {/* Avatar + actions row — avatar overlaps banner */}
+          <div className="flex items-end justify-between gap-3 flex-wrap -mt-10 mb-5">
+            <div className="relative shrink-0 group">
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+              <UserAvatar user={profile} size={80} className="!rounded-2xl ring-4 ring-dark-900" />
+              {profile.is_online && !isOwnProfile && (
+                <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-dark-900" />
+              )}
+              {isOwnProfile && (
+                <button
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="absolute inset-0 rounded-2xl flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity disabled:cursor-wait"
+                  title="Change photo"
                 >
-                  <option value="available">Available for work</option>
-                  <option value="busy">Busy</option>
-                  <option value="not_available">Not available</option>
-                </select>
-                <div className="flex gap-2">
-                  <button onClick={() => setEditing(false)} className="btn btn-ghost btn-sm gap-1.5">
-                    <X className="w-3.5 h-3.5" strokeWidth={2} />
-                    Cancel
-                  </button>
-                  <button onClick={saveProfile} disabled={saving} className="btn btn-primary btn-sm">
-                    {saving ? 'Saving…' : 'Save Changes'}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <h1 className="text-xl font-bold text-dark-100">{profile.name}</h1>
-                  {profile.is_verified && (
-                    <BadgeCheck className="w-5 h-5 text-primary-400 shrink-0" strokeWidth={2} />
-                  )}
-                  {profile.freelancer_profile?.is_top_rated && (
-                    <span className="badge text-2xs bg-yellow-500/10 text-yellow-400 border-yellow-500/20 flex items-center gap-1">
-                      <Star className="w-2.5 h-2.5 fill-yellow-400" strokeWidth={0} />
-                      Top Rated
-                    </span>
-                  )}
-                </div>
-                <p className="text-dark-300 text-sm mb-2">{profile.freelancer_profile?.title || 'Freelancer'}</p>
-                <div className="flex items-center gap-4 flex-wrap text-xs text-dark-500 mb-3">
-                  {profile.country && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3" strokeWidth={2} />
-                      {profile.country}
-                    </span>
-                  )}
-                  <StarDisplay rating={avgRating} count={profile.reviews_count || 0} />
-                  {profile.freelancer_profile?.hourly_rate && (
-                    <span className="font-semibold text-green-400 flex items-center gap-0.5">
-                      <DollarSign className="w-3 h-3" strokeWidth={2} />
-                      {profile.freelancer_profile.hourly_rate}/hr
-                    </span>
-                  )}
-                  <span className={`flex items-center gap-1 ${avail.cls}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${avail.dot}`} />
-                    {avail.label}
-                  </span>
-                </div>
-                {profile.freelancer_profile?.bio && (
-                  <p className="text-dark-400 text-sm leading-relaxed">{profile.freelancer_profile.bio}</p>
-                )}
-              </>
-            )}
-          </div>
-
-          {!editing && (
-            <div className="flex gap-2 shrink-0">
-              {isOwnProfile ? (
-                <button onClick={() => setEditing(true)} className="btn btn-ghost btn-sm gap-1.5">
-                  <Edit3 className="w-3.5 h-3.5" strokeWidth={2} />
-                  Edit Profile
+                  {uploadingAvatar
+                    ? <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    : <Camera className="w-6 h-6 text-white" />
+                  }
                 </button>
-              ) : (
-                <>
-                  <button
-                    onClick={async () => {
-                      try {
-                        await api.chat.start({ user_id: profile.id });
-                        navigate('/messages');
-                      } catch { toast.error('Failed to start chat'); }
-                    }}
-                    className="btn btn-ghost btn-sm gap-1.5"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" strokeWidth={2} />
-                    Message
-                  </button>
-                  <button className="btn btn-primary btn-sm gap-1.5">
-                    <UserPlus className="w-3.5 h-3.5" strokeWidth={2} />
-                    Hire Now
-                  </button>
-                </>
               )}
             </div>
+
+            {!editing && (
+              <div className="flex gap-2 shrink-0">
+                {isOwnProfile ? (
+                  <button onClick={() => setEditing(true)} className="btn btn-ghost btn-sm gap-1.5">
+                    <Edit3 className="w-3.5 h-3.5" strokeWidth={2} />
+                    Edit Profile
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await api.chat.start({ user_id: profile.id });
+                          navigate('/messages');
+                        } catch { toast.error('Failed to start chat'); }
+                      }}
+                      className="btn btn-ghost btn-sm gap-1.5"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" strokeWidth={2} />
+                      Message
+                    </button>
+                    <button className="btn btn-primary btn-sm gap-1.5">
+                      <UserPlus className="w-3.5 h-3.5" strokeWidth={2} />
+                      Hire Now
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Profile info */}
+          {editing ? (
+            <div className="space-y-3">
+              <input
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                className="input font-semibold"
+                placeholder="Professional title"
+              />
+              <textarea
+                value={form.bio}
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                className="input h-24 resize-none text-sm"
+                placeholder="Write your bio…"
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-500 text-sm">$</span>
+                  <input
+                    type="number"
+                    value={form.hourly_rate}
+                    onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })}
+                    className="input pl-7"
+                    placeholder="Hourly rate"
+                  />
+                </div>
+                <input
+                  value={form.country}
+                  onChange={(e) => setForm({ ...form, country: e.target.value })}
+                  className="input"
+                  placeholder="Country"
+                />
+              </div>
+              <select
+                value={form.availability}
+                onChange={(e) => setForm({ ...form, availability: e.target.value })}
+                className="input"
+              >
+                <option value="available">Available for work</option>
+                <option value="busy">Busy</option>
+                <option value="not_available">Not available</option>
+              </select>
+              <div className="flex gap-2">
+                <button onClick={() => setEditing(false)} className="btn btn-ghost btn-sm gap-1.5">
+                  <X className="w-3.5 h-3.5" strokeWidth={2} />
+                  Cancel
+                </button>
+                <button onClick={saveProfile} disabled={saving} className="btn btn-primary btn-sm">
+                  {saving ? 'Saving…' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                <h1 className="text-xl font-bold text-dark-100">{profile.name}</h1>
+                {profile.is_verified && (
+                  <BadgeCheck className="w-5 h-5 text-primary-400 shrink-0" strokeWidth={2} />
+                )}
+                {profile.freelancer_profile?.is_top_rated && (
+                  <span className="badge text-2xs bg-yellow-500/10 text-yellow-400 border-yellow-500/20 flex items-center gap-1">
+                    <Star className="w-2.5 h-2.5 fill-yellow-400" strokeWidth={0} />
+                    Top Rated
+                  </span>
+                )}
+              </div>
+              <p className="text-dark-300 text-sm mb-3">{profile.freelancer_profile?.title || 'Freelancer'}</p>
+              <div className="flex items-center gap-4 flex-wrap text-xs text-dark-500 mb-3">
+                {profile.country && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3 h-3" strokeWidth={2} />
+                    {profile.country}
+                  </span>
+                )}
+                <StarDisplay rating={avgRating} count={profile.reviews_count || 0} />
+                {profile.freelancer_profile?.hourly_rate && (
+                  <span className="font-semibold text-green-400 flex items-center gap-0.5">
+                    <DollarSign className="w-3 h-3" strokeWidth={2} />
+                    {profile.freelancer_profile.hourly_rate}/hr
+                  </span>
+                )}
+                <span className={`flex items-center gap-1 ${avail.cls}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${avail.dot}`} />
+                  {avail.label}
+                </span>
+              </div>
+              {profile.freelancer_profile?.bio && (
+                <p className="text-dark-400 text-sm leading-relaxed break-words">{profile.freelancer_profile.bio}</p>
+              )}
+            </>
           )}
         </div>
       </motion.div>
@@ -785,6 +799,7 @@ export default function FreelancerProfile() {
           onSuccess={handleReviewSuccess}
         />
       )}
+    </div>
     </div>
   );
 }

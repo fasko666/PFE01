@@ -38,16 +38,20 @@ function mapApiFreelancer(u) {
 
 /* ─── Map API job → card shape ─────────────────────────────── */
 function mapApiJob(j) {
-  const skillList = Array.isArray(j.skills) ? j.skills : [];
+  const rawSkills = j.skills_required || j.skills || [];
+  const skillList = Array.isArray(rawSkills) ? rawSkills : [];
   const visibleSkills = skillList.slice(0, 6);
   if (skillList.length > 6) visibleSkills.push(`+${skillList.length - 6}`);
+  const budgetParts = [];
+  if (j.budget_min) budgetParts.push(`$${j.budget_min}${j.budget_max && j.budget_max !== j.budget_min ? `–$${j.budget_max}` : '+'}`);
   return {
     id:     j.id,
     posted: j.created_at ? new Date(j.created_at).toLocaleDateString() : '',
     title:  j.title,
-    type:   [j.type === 'hourly' ? 'Hourly' : 'Fixed price', j.experience_level || ''].filter(Boolean).join(' · '),
+    type:   [j.type === 'hourly' ? 'Hourly' : 'Fixed price', j.experience_level || '', budgetParts[0] || ''].filter(Boolean).join(' · '),
     desc:   j.description || '',
     skills: visibleSkills,
+    status: j.status,
   };
 }
 
@@ -61,216 +65,6 @@ const fadeUp = (delay = 0) => ({
 /* ─── Sub-nav categories ─────────────────────────────────────── */
 const SUB_NAV = ['Development & IT', 'AI Services', 'Design & Creative', 'Sales & Marketing', 'Admin & Customer Support'];
 
-/* ─── Talent results ─────────────────────────────────────────── */
-const TALENT = [
-  {
-    name: 'Fahad W.', title: 'Medical Billing Specialist and Coding Project Management, AR Follow-up', country: 'Pakistan',
-    jobSuccess: 100, earned: '$40K+', available: true,
-    skills: ['Data Entry', 'Computer Skills', 'Medical Records Software', 'Microsoft Word', 'ICD Coding', '+10'],
-    bio: 'Thank you for visiting my profile. I have over 12 years of experience working as a Medical Billing Specialist, Virtual Assistant, Data entry/processing, Project Management, Technical Support, and Call Center. I have excellent…',
-    avatar: 'https://ui-avatars.com/api/?name=Fahad+W&background=4361ff&color=fff&size=120&bold=true',
-    profile: {
-      city: 'Rawalpindi, Pakistan',
-      localTime: '10:34 am local time',
-      since: 'Since 2013, I have worked with several US clients in the medical billing and revenue cycle management industry, helping practices recover revenue and reduce denials.',
-      stats: { jobs: 5, hours: '4.8K', rating: 5.0, reviews: 5, jobSuccess: 100 },
-      feedback: [
-        { date: 'April 10, 2026',    title: 'Medical Billing & RCM Expert to cover Back Log', rating: 5.0, body: '"He knows how to fix and respond on time. Fahad is highly experienced and recommended for Medical Billing Services. His skills really help us to minimize and understand how to keep..."', client: 'Muhammad Arif K.' },
-        { date: 'October 20, 2025',  title: 'Accounts Receivable Specialist',                rating: 5.0, body: '"Performed exceptionally well managing the AR for a small PT clinic."', client: 'Lisa N.' },
-        { date: 'February 16, 2025', title: 'Medical Biller Required for Collaborate MD',     rating: 5.0, body: '"Fahad provided outstanding medical billing training for our staff. His deep expertise, engaging teaching style, and ability to tailor the sessions to our needs were exceptional. We…"', client: 'Kavin M.' },
-        { date: 'June 24, 2022',     title: 'Require Medical billing Specialist for Collaborate MD', rating: 5.0, body: '"Fahad is hard working and dedicated, I will work with Fahad on future projects 100%. Excellent job."', client: 'Fahad H.' },
-      ],
-      completedJobs: [
-        { title: 'Medical Billing & RCM Expert to cover Back Log',                  rating: 5.0, dates: 'Apr 7, 2026 - Apr 10, 2026',  tags: ['Data Entry', 'Microsoft Excel', 'Web Development', 'Graphic Design', 'Logo Design'], desc: 'We are seeking a skilled professional to manage our medical billing and RCM processes. Responsibilities…' },
-        { title: 'Accounts Receivable Specialist',                                  rating: 5.0, dates: 'Dec 26, 2023 - Oct 20, 2025', tags: ['Data Entry', 'Microsoft Excel', 'Accounts Receivable', 'Accounts Receivable Management'], desc: 'We are seeking a highly skilled individual to assist with the wind-down process of accounts receivable…' },
-        { title: 'Medical Biller Required for Collaborate MD and Rain Tree Software',rating: 5.0, dates: 'Feb 14, 2025 - Feb 16, 2025', tags: ['Data Entry', 'Microsoft Excel', 'Medical Billing & Coding', 'Customer Service'],         desc: 'We are seeking a skilled Medical Biller who is proficient in both Collaborate MD and Rain Tree software…' },
-        { title: 'Medical Billing and denial - with ECW experience - *Full time only*',rating: 5.0, dates: 'May 22, 2023 - Dec 7, 2023', tags: ['EMR Data Entry', 'Medical Billing & Coding', 'Phone Communication', 'Administrative S'],     desc: 'Looking for someone to help out with reviewing and Submitting claims, Post EOBs, correct/appeal denials…' },
-        { title: 'Require Medical billing Specialist for Collaborate MD',             rating: 5.0, dates: 'Jun 23, 2022 - Jun 24, 2022', tags: ['Microsoft Excel', 'Data Entry', 'Medical Billing & Coding', 'Customer Service'],                 desc: 'Looking for Medical billing Specialist, for the short term project. I have few claims need to be fixed…' },
-      ],
-      portfolio: [
-        { title: 'Practice Suits Complete RCM', tag: 'Data Entry', tags: '+7', gradient: 'from-blue-500/30 via-red-500/20 to-emerald-500/30' },
-        { title: 'Collaborate MD',              tag: 'Data Entry', tags: '+2', gradient: 'from-emerald-500/30 to-green-700/30' },
-      ],
-      skills: ['Data Entry', 'Computer Skills', 'Medical Records Software', 'Microsoft Word', 'ICD Coding', 'Accounts Receivable Management', 'Insurance Claim Submission', 'Administrative Support', 'H-Connect Compusoft EHR', 'Medical Billing & Coding', 'Technical Support', 'Insurance Verification', 'Accounts Receivable', 'Electronic Medical Record', 'Medical Billing'],
-        browseSimilar: ['Data Entry Specialists', 'Excel Experts', 'Administrative Assistants', 'Google Docs Experts', 'Verification Specialists'],
-    },
-  },
-  {
-    name: 'Ghandour H.', title: 'Automation Engineer | Python, AI, n8n & RPA Systems', country: 'Egypt',
-    jobSuccess: 100, earned: '$25K+', available: true, consultations: true,
-    skills: ['Web Scraping', 'Automation', 'Python', 'Data Extraction', 'Django', 'Back-End Development', '+14'],
-    bio: 'I build automation systems that replace hours of repetitive manual work and keep running reliably for months without anyone touching them. 🚀 Recent builds: A multi-device automation platform handling large-scale…',
-    avatar: 'https://ui-avatars.com/api/?name=Ghandour+H&background=8b5cf6&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Md Jamrul M.', title: 'Senior AI-Enabled E-commerce Specialist | CMS, SEO & Automation', country: 'Bangladesh',
-    jobSuccess: 95, earned: '$60K+', available: true, consultations: true,
-    skills: ['Microsoft Word', 'Copy & Paste', 'Microsoft Excel', 'Data Entry', 'WordPress', 'PDF Conversion', '+9'],
-    bio: 'I help e-commerce brands, agencies, and growing businesses keep their stores, content, and back-office workflows organised, accurate, and scalable. I have been working with international clients since 2015 and on…',
-    avatar: 'https://ui-avatars.com/api/?name=Md+Jamrul+M&background=ec4899&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Raton M.', title: 'B2B Lead Generation | Email-List Building | Any Target Lead | Scraping', country: 'Bangladesh',
-    jobSuccess: 100, earned: '$20K+', available: true,
-    skills: ['Lead Generation', 'Data Entry', 'Company Research', 'Contact List', 'Data Scraping', '+10'],
-    bio: '🎯 "I always deliver more than value" 🎯 ✨ Experience Matters: I am a full-time professional VA with…',
-    avatar: 'https://ui-avatars.com/api/?name=Raton+M&background=10b981&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Aqssa Z.', title: 'PhD Researcher/Content Writer/SPSS Expert', country: 'Pakistan',
-    jobSuccess: 97, earned: '$9K+',
-    skills: ['SEO Writing', 'Research & Strategy', 'Academic Research', 'Essay Writing', 'Research Proposals', '+8'],
-    bio: '👋 Welcome to my profile. ⭐ TOP RATED ⭐ With over 7 years of experience in research and content writing, I am dedicated to delivering high-quality, insightful, and meticulously researched content tailored to your specific…',
-    avatar: 'https://ui-avatars.com/api/?name=Aqssa+Z&background=f43f5e&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'MD. Mehedi H.', title: 'Certified GA4 & GTM Expert | Conversion Tracking, Server-Side Specialist', country: 'Bangladesh',
-    jobSuccess: 98, earned: '$20K+', available: true,
-    skills: ['Google Tag Manager', 'Marketing Analytics', 'Data Visualization', 'Shopify', '+11'],
-    bio: '🚀 Top-rated and Certified Google Analytics 4 (GA4) and Google Tag Manager (GTM) expert with 5+ years of experience in delivering data-driven tracking solutions. I specialize in Server-Side Tracking, conversion…',
-    avatar: 'https://ui-avatars.com/api/?name=MD+Mehedi+H&background=3b82f6&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Stefan L.', title: 'WordPress Web Developer | Website security expert | 24h available', country: 'Serbia',
-    jobSuccess: 100, earned: '$100K+', available: true,
-    skills: ['PHP', 'Search Engine Optimization', 'Web Design', 'WordPress', 'Website', 'Yoast SEO', '+10'],
-    bio: 'Experienced WordPress web developer, available 24h, on your service for urgent tasks and long term projects, same as complete server maintenance on daily/weekly level for all time zones! - WordPress website complete…',
-    avatar: 'https://ui-avatars.com/api/?name=Stefan+L&background=a855f7&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Md Makshudul H.', title: 'Google Ads | Google Ads Manager | Search Engine Marketing', country: 'Bangladesh',
-    jobSuccess: 100, earned: '$600+', available: true, consultations: true,
-    skills: ['Digital Marketing', 'Digital Marketing Materials', 'Digital Marketing Strategy', 'Google Ad Manager', '+11'],
-    bio: "Hello, I'm Makshud 👋 Give me something to build, and I'll create a system that works for you 24/7 - consistently delivering results. That's my commitment. If you shoot me a invitation or message, I'll send you a personalised…",
-    avatar: 'https://ui-avatars.com/api/?name=Md+Makshudul+H&background=06b6d4&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Vinod H.', title: 'SEO Expert, Guest Blogger, Blogger Outreach, Guest Posting Service', country: 'India',
-    jobSuccess: 100, earned: '$1M+', available: true,
-    skills: ['Content SEO', 'SEO Backlinking', 'Search Engine Optimization', 'WordPress', '+10'],
-    bio: "I began my career as a software engineer in Mumbai in 2007, moved to Singapore, and eventually founded Walnut Solutions. With over 13 years of experience, I've worked with clients across three regions, specializing in…",
-    avatar: 'https://ui-avatars.com/api/?name=Vinod+H&background=eab308&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Aman H.', title: 'SEO Content Writer | 9+ Years Experience', country: 'India',
-    jobSuccess: 100, earned: '$40K+', consultations: true,
-    skills: ['SEO Content', 'SEO Writing', 'SEO Keyword Research', 'SEO Competitor Analysis', 'Yoast SEO', '+9'],
-    bio: "*Last updated: May, 2026* Hey there! I'm Aman, an on-page SEO expert with 9+ years of expertise working for brands of all sizes. You'd need me for any of these reasons: - Your website isn't getting enough traffic. - You hav…",
-    avatar: 'https://ui-avatars.com/api/?name=Aman+H&background=0ea5e9&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Harjeet K.', title: 'Wordpress/Joomla Expert | Elementor Pro Specialist | LMS | Long-Term Support', country: 'United States',
-    jobSuccess: 100, earned: '$90K+',
-    skills: ['LearnDash', 'Elementor', 'PHP', 'Web Design', 'BuddyPress', 'WordPress', 'WooCommerce', '+8'],
-    bio: 'INDIVIDUAL FREELANCER! TOP RATED PLUS FREELANCER! Available for full time. I bring 9+ years of professional experience in web development and design, including 7 years in IT companies as a web developer…',
-    avatar: 'https://ui-avatars.com/api/?name=Harjeet+K&background=84cc16&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'MD Habibul Islam H.', title: 'Converting WordPress Website Expert | Elementor | Divi | Oxygen', country: 'Bangladesh',
-    jobSuccess: 100, earned: '$4K+',
-    skills: ['WooCommerce', 'Elementor', 'Divi', 'Web Design', 'Web Development', 'Website Redesign', '+9'],
-    bio: 'Hello, Looking for a guy who specializes in better converting rate for your WordPress Website? Who also can create stress-free WordPress solutions with Elementor Pro, Divi or Oxygen? With a track record of raising profit…',
-    avatar: 'https://ui-avatars.com/api/?name=MD+Habibul+Islam+H&background=22c55e&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Suman H.', title: 'eCommerce VA, TPT Store, Etsy, Shopify, Canva, PowerPoint, Design', country: 'Bangladesh',
-    jobSuccess: 100, earned: '$4K+', available: true,
-    skills: ['Data Entry', 'Lead Generation', 'Online Research', 'Store Management', '+11'],
-    bio: 'I am a professional freelancer specializing in the Teachers Pay Teachers (TPT) platform, with expertise in instructional design and educational product development. I focus on understanding client requirements and…',
-    avatar: 'https://ui-avatars.com/api/?name=Suman+H&background=ef4444&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Seema R.', title: 'WordPress Data Entry | Admin Services', country: 'India',
-    jobSuccess: 100, earned: '$50K+',
-    skills: ['Shopify', 'Adobe Photoshop', 'WordPress', 'Magento', 'Administrative Support', '+7'],
-    bio: 'My self Seema Rana - having more than 6 years experience in WordPress content management, E-Commerce products uploading, social media management & web research. A very highly self-motivated professional with…',
-    avatar: 'https://ui-avatars.com/api/?name=Seema+R&background=f97316&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Iqbal H.', title: 'Virtual Assistant, Data Entry Specialist, Research, Product Listing', country: 'Bangladesh',
-    jobSuccess: 100, earned: '$40K+',
-    skills: ['Google Workspace', 'Data Entry', 'Product Listings', 'Microsoft Word', 'Adobe Photoshop', '+8'],
-    bio: 'TOP-RATED Virtual Assistant!! 12+ Years Experience. 9000+ Working Hours. Data Entry, Research, Product Listing, Lead generation, ChatGPT, AI Enthusiast. Hey! Are you looking for a fast, detail-oriented, quick-…',
-    avatar: 'https://ui-avatars.com/api/?name=Iqbal+H&background=14b8a6&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Pandurang K.', title: 'PDF Expert | PDF Accessibility, WCAG, Section 505 | MS Word Expert', country: 'India',
-    jobSuccess: 97, earned: '$15K+', available: true,
-    skills: ['Microsoft Excel', 'Microsoft Word', 'Data Entry', 'Adobe Photoshop', 'Online Research', '+8'],
-    bio: 'FYI: $15/hr for the work PDF Accessibility/Remediation, WCAG, Section 505. Hello, I have 15+year experience in multiple Industries E-Publication, E-learning, Financial Documents, Data Management, Data Conversion, and…',
-    avatar: 'https://ui-avatars.com/api/?name=Pandurang+K&background=8b5cf6&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Md. Altab H.', title: 'WordPress, WooCommerce & Elementor Expert', country: 'Bangladesh',
-    jobSuccess: 100, earned: '$50K+', consultations: true,
-    skills: ['WooCommerce', 'WordPress', 'CMS Product Upload', 'Data Entry', 'Accuracy Verification', '+7'],
-    bio: 'Hello! I am a WordPress, WooCommerce & Elementor Expert with experience in building professional, responsive, and SEO-friendly websites. I help businesses, bloggers, and online stores create modern, fast, and…',
-    avatar: 'https://ui-avatars.com/api/?name=Md+Altab+H&background=4ade80&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Md. Mijanur H.', title: 'Virtual Assistant Data Entry Ecommerce Product Listing Image Editing', country: 'Bangladesh',
-    jobSuccess: 100, earned: '$15K+', consultations: true,
-    skills: ['Data Entry', 'Amazon Seller Central', 'Amazon', 'Product Listings', 'Amazon FBA', '+15'],
-    bio: "Hi, I'm Mijan, a full-time eCommerce assistant. I've worked with Amazon, eBay, Walmart, and Shopify, helping brands grow their online presence. I specialize in Storefront Design, A+ Content, Listing Images, and Brand Stor…",
-    associated: { name: 'Mijanur Hossain', earned: '' },
-    avatar: 'https://ui-avatars.com/api/?name=Md+Mijanur+H&background=f59e0b&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Okta H.', title: 'Data Entry Specialist, Admin Support, Virtual Assistance', country: 'Indonesia',
-    jobSuccess: 100, earned: '$70K+',
-    skills: ['Microsoft Word', 'Google Docs', 'Data Entry', 'Microsoft Excel', 'Photo Editing', '+10'],
-    bio: "Hi! I'm a dedicated freelancer from Indonesia, and I've been working on PANDA since 2016. Over the years, I've helped clients with a variety of tasks — from data entry, virtual assistance, and internet research to transcription…",
-    avatar: 'https://ui-avatars.com/api/?name=Okta+H&background=ec4899&color=fff&size=120&bold=true',
-  },
-  {
-    name: 'Zahid H.', title: 'Graphic & Web Designer | Branding Expert', country: 'Pakistan',
-    jobSuccess: 100, earned: '$30K+', consultations: true,
-    skills: ['Graphic Design', 'Adobe Illustrator', 'Thumbnail', 'Landing Page', 'Banner Ad Design', '+10'],
-    bio: "Hi! I'm a professional Graphic Designer and Web Designer with over 15 years of experience creating high-quality, creative, and results-driven designs for clients worldwide. I specialize in logo design, branding, website design,…",
-    avatar: 'https://ui-avatars.com/api/?name=Zahid+H&background=0891b2&color=fff&size=120&bold=true',
-  },
-];
-
-const PEOPLE_ALSO_SEARCHED = ['k', 'a', 'hacker', 'ha'];
-
-/* ─── Job results ────────────────────────────────────────────── */
-const JOBS = [
-  {
-    posted: '4 weeks ago',
-    title: 'Instructor Recommendations – Solar, EPA 608 & Carpentry Trainings',
-    type: 'Hourly · Intermediate · Est. time: Less than 1 month, Less than 30 hrs/week',
-    desc: "I hope you're doing well. I'm reaching out to see if you might have any instructor recommendations for a few upcoming training opportunities we're currently planning. ____________________________ Solar Instructor Opportunity We are looking for a qualified solar instruct…",
-    skills: ['Microsoft Excel', 'PDF Conversion', 'Financial Planning', 'Management Consulting', 'Financial Modeling', '+10'],
-  },
-  {
-    posted: '4 weeks ago',
-    title: 'Testimonial VIDEO',
-    type: 'Hourly · Intermediate · Est. time: Less than 1 month, Less than 30 hrs/week',
-    desc: 'Hi, quick paid opportunity 🔥 We\'re looking for Indian male creators to record a short "client experience / case study" style video (30–45 sec). It\'s for a B2B marketing campaign (international audience), so we need a professional, natural delivery in English. No posting required — just recording…',
-    skills: ['Spokesperson Video', 'Narrated Presentation', 'Live Action Explainer', 'Video Narration', 'Green Screen', 'TikTok', '+9'],
-  },
-  {
-    posted: '3 weeks ago',
-    title: 'Cold Call Demo Setter for Website Design and SaaS Agency',
-    type: 'Hourly · $4.00 - $4.00 · Intermediate · Est. time: 1 to 3 months, Less than 30 hrs/week',
-    desc: 'We are seeking a proactive and results-driven cold call demo setter to join our website design and SaaS agency. The ideal candidate will be responsible for reaching out to potential clients, setting demos, and generating leads. You should be comfortable speaking on the phone and have …',
-    skills: ['Cold Calling', 'Sales', 'Outbound Sales', 'HubSpot'],
-  },
-  {
-    posted: '4 weeks ago',
-    title: 'Video Editor for YouTube Channel',
-    type: 'Fixed price · Intermediate · Est. budget: $150.00',
-    desc: 'I am seeking a skilled video editor to create engaging documentary-style videos for my YouTube channel. The videos are approximately 25 minutes long and require attention to detail to maintain viewer interest. The ideal candidate will have experience in video post-editing and be able to deliver…',
-    skills: ['Video Editing', 'Video Post-Editing', 'YouTube Marketing', 'YouTube Development'],
-  },
-  {
-    posted: '3 weeks ago',
-    title: 'Looping video of ocean storm for art installation',
-    type: 'Fixed price · Intermediate · Est. budget: $300.00',
-    desc: 'I need a 30-second seamlessly looping video of a stylized ocean storm — high seas, dark clouds, lightning. For projection in a gallery installation. Resolution 4K, no audio required. Reference materials available on request.',
-    skills: ['Video Production', 'Motion Graphics', 'After Effects', '+3'],
-  },
-];
 
 /* ─── Filter constants ───────────────────────────────────────── */
 const BADGE_OPTIONS = [
@@ -423,80 +217,64 @@ function TalentFilters({ filters, setFilters }) {
 }
 
 /* ─── Filter sidebar — Jobs ──────────────────────────────────── */
-function JobFilters() {
+function JobFilters({ filters, setFilters }) {
+  const toggle = (key, val) =>
+    setFilters((f) => ({ ...f, [key]: f[key] === val ? '' : val }));
+  const toggleArr = (key, val) =>
+    setFilters((f) => ({ ...f, [key]: f[key].includes(val) ? f[key].filter((x) => x !== val) : [...f[key], val] }));
+
   return (
     <aside className="space-y-6">
-      <FilterGroup title="Category">
-        <Select placeholder="Select Categories" />
-      </FilterGroup>
-
       <FilterGroup title="Experience level">
         <div className="space-y-2.5">
-          <Checkbox>Entry Level <span className="text-dark-500">(10,281)</span></Checkbox>
-          <Checkbox>Intermediate <span className="text-dark-500">(92,065)</span></Checkbox>
-          <Checkbox>Expert <span className="text-dark-500">(36,661)</span></Checkbox>
+          {['entry', 'intermediate', 'expert'].map((lvl) => (
+            <Checkbox key={lvl} checked={filters.experience.includes(lvl)} onChange={() => toggleArr('experience', lvl)}>
+              {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
+            </Checkbox>
+          ))}
         </div>
       </FilterGroup>
 
       <FilterGroup title="Job type">
         <div className="space-y-2.5">
-          <Checkbox>Hourly <span className="text-dark-500">(87,183)</span></Checkbox>
-          <div className="flex gap-2 pl-6">
-            <input placeholder="Min" className="w-16 px-2 py-1 rounded-md bg-dark-900 border border-dark-700 text-xs text-dark-200 placeholder:text-dark-600" />
-            <span className="text-xs text-dark-500 self-center">/hr</span>
-            <input placeholder="Max" className="w-16 px-2 py-1 rounded-md bg-dark-900 border border-dark-700 text-xs text-dark-200 placeholder:text-dark-600" />
-            <span className="text-xs text-dark-500 self-center">/hr</span>
-          </div>
-          <Checkbox>Fixed-Price <span className="text-dark-500">(51,913)</span></Checkbox>
-          <div className="space-y-2 pl-6">
-            <Checkbox sub>Less than $100 <span className="text-dark-500">(21,861)</span></Checkbox>
-            <Checkbox sub>$100 to $500 <span className="text-dark-500">(17,577)</span></Checkbox>
-            <Checkbox sub>$500 - $1K <span className="text-dark-500">(5,416)</span></Checkbox>
-            <Checkbox sub>$1K - $5K <span className="text-dark-500">(5,802)</span></Checkbox>
-            <Checkbox sub>$5K+ <span className="text-dark-500">(1,257)</span></Checkbox>
-            <div className="flex gap-2">
-              <input placeholder="Min" className="w-16 px-2 py-1 rounded-md bg-dark-900 border border-dark-700 text-xs text-dark-200 placeholder:text-dark-600" />
-              <input placeholder="Max" className="w-16 px-2 py-1 rounded-md bg-dark-900 border border-dark-700 text-xs text-dark-200 placeholder:text-dark-600" />
-            </div>
-          </div>
+          <Checkbox checked={filters.job_type === 'hourly'} onChange={() => toggle('job_type', 'hourly')}>Hourly</Checkbox>
+          <Checkbox checked={filters.job_type === 'fixed'} onChange={() => toggle('job_type', 'fixed')}>Fixed-Price</Checkbox>
         </div>
       </FilterGroup>
 
-      <FilterGroup title="Client history">
-        <div className="space-y-2.5">
-          <Checkbox>No hires <span className="text-dark-500">(44,206)</span></Checkbox>
-          <Checkbox>1 to 9 hires <span className="text-dark-500">(37,338)</span></Checkbox>
-          <Checkbox>10+ hires <span className="text-dark-500">(57,426)</span></Checkbox>
+      <FilterGroup title="Budget">
+        <div className="flex gap-2 items-center">
+          <span className="text-xs text-dark-500">$</span>
+          <input
+            value={filters.budget_min}
+            onChange={(e) => setFilters((f) => ({ ...f, budget_min: e.target.value }))}
+            placeholder="Min"
+            type="number"
+            className="w-20 px-2 py-1.5 rounded-md bg-dark-900 border border-dark-700 text-xs text-dark-200 placeholder:text-dark-600 outline-none focus:border-primary-500/50"
+          />
+          <span className="text-xs text-dark-500">–</span>
+          <input
+            value={filters.budget_max}
+            onChange={(e) => setFilters((f) => ({ ...f, budget_max: e.target.value }))}
+            placeholder="Max"
+            type="number"
+            className="w-20 px-2 py-1.5 rounded-md bg-dark-900 border border-dark-700 text-xs text-dark-200 placeholder:text-dark-600 outline-none focus:border-primary-500/50"
+          />
         </div>
-      </FilterGroup>
-
-      <FilterGroup title="Client location" hint>
-        <Select placeholder="Select client locations" />
-      </FilterGroup>
-
-      <FilterGroup title="Client time zones" hint>
-        <Select placeholder="Select client time zones" />
       </FilterGroup>
 
       <FilterGroup title="Project length">
         <div className="space-y-2.5">
-          <Checkbox>Less than one month <span className="text-dark-500">(78,065)</span></Checkbox>
-          <Checkbox>1 to 3 months <span className="text-dark-500">(83,409)</span></Checkbox>
-          <Checkbox>3 to 6 months <span className="text-dark-500">(59,073)</span></Checkbox>
-          <Checkbox>More than 6 months <span className="text-dark-500">(74,283)</span></Checkbox>
-        </div>
-      </FilterGroup>
-
-      <FilterGroup title="Hours per week">
-        <div className="space-y-2.5">
-          <Checkbox>Less than 30 hrs/week <span className="text-dark-500">(54,451)</span></Checkbox>
-          <Checkbox>More than 30 hrs/week <span className="text-dark-500">(73,500)</span></Checkbox>
-        </div>
-      </FilterGroup>
-
-      <FilterGroup title="Job duration">
-        <div className="space-y-2.5">
-          <Checkbox>Contract-to-hire roles <span className="text-dark-500">(29,417)</span></Checkbox>
+          {[
+            { label: 'Less than 1 month', value: 'less_than_1_month' },
+            { label: '1 to 3 months',    value: '1_to_3_months' },
+            { label: '3 to 6 months',    value: '3_to_6_months' },
+            { label: 'More than 6 months', value: 'more_than_6_months' },
+          ].map(({ label, value }) => (
+            <Checkbox key={value} checked={filters.duration === value} onChange={() => toggle('duration', value)}>
+              {label}
+            </Checkbox>
+          ))}
         </div>
       </FilterGroup>
     </aside>
@@ -562,10 +340,16 @@ function Radio({ checked, onChange, children, name }) {
 
 /* ─── Talent result card ─────────────────────────────────────── */
 function TalentCard({ t, delay, active, onView }) {
+  const navigate = useNavigate();
+  const handleView = () => {
+    if (t.username) navigate(`/freelancers/${t.username}`);
+    else onView && onView();
+  };
+
   return (
     <motion.article
       {...fadeUp(delay)}
-      onClick={onView}
+      onClick={handleView}
       className={`border-b border-dark-800 py-6 px-4 -mx-4 rounded-2xl transition-colors group cursor-pointer ${
         active ? 'bg-dark-900' : 'hover:bg-dark-900/40'
       }`}
@@ -586,7 +370,7 @@ function TalentCard({ t, delay, active, onView }) {
           </div>
         </div>
         <button
-          onClick={(e) => { e.stopPropagation(); onView && onView(); }}
+          onClick={(e) => { e.stopPropagation(); handleView(); }}
           className="px-4 py-1.5 rounded-full border border-primary-500/40 text-primary-300 text-xs font-semibold hover:bg-primary-500/10 hover:border-primary-500 transition-all shrink-0"
         >
           View profile
@@ -641,24 +425,6 @@ function TalentCard({ t, delay, active, onView }) {
 /* ─── Profile panel (slides in from the right) ──────────────── */
 const PANEL_TABS = ['About', 'Client feedback', 'Work history', 'Portfolio', 'Skills'];
 
-const FAKE_FEEDBACK = [
-  { date: 'March 12, 2026',    title: 'Marketing Analytics & Reporting Setup (GA...', rating: 5.0, body: '"10/10! Great to work with! Great quality work and will be working with him with all of my clients."', client: 'Amanda G.' },
-  { date: 'November 14, 2025', title: 'BigCommerce, GTM Expert Needed to Imp...',     rating: 5.0, body: '"The task was completed professionally, testing and fixing all the details that arose. Thank you for your work."', client: 'Lukas K.' },
-  { date: 'October 2, 2025',   title: 'GA4 audit + Looker Studio dashboards',           rating: 5.0, body: '"Smart, fast, communicative. Highly recommend for any GA4 work."', client: 'Priya N.' },
-  { date: 'July 8, 2025',      title: 'Server-side tracking setup for Shopify Plus',    rating: 4.8, body: '"Helped us migrate without losing a single conversion event. Will rehire."', client: 'Sam O.' },
-];
-
-const FAKE_JOBS = [
-  { title: 'Marketing Analytics & Reporting Setup (GA4 + GoHighLevel) + Training', rating: 5.0, dates: 'Feb 5, 2026 - Mar 12, 2026' },
-  { title: 'Server-side GTM implementation for D2C brand',                          rating: 5.0, dates: 'Jan 14, 2026 - Feb 8, 2026' },
-  { title: 'Conversion tracking audit + recommendations',                           rating: 4.9, dates: 'Dec 3, 2025 - Jan 5, 2026' },
-];
-
-const FAKE_PORTFOLIO = [
-  { title: 'GA4 Migration Case Study', tag: 'Analytics' },
-  { title: 'GTM Server-side Setup',    tag: 'Tracking' },
-  { title: 'Looker Studio Dashboards', tag: 'Reporting' },
-];
 
 /* ─── Talent/Jobs dropdown ─────────────────────────────────── */
 function SearchTypeDropdown({ tab, onChange }) {
@@ -804,10 +570,10 @@ function ProfilePanel({ talent, onClose }) {
   }, []);
 
   const p = talent.profile || {};
-  const feedback   = p.feedback     || FAKE_FEEDBACK;
-  const jobs       = p.completedJobs || FAKE_JOBS;
-  const portfolio  = p.portfolio    || FAKE_PORTFOLIO;
-  const titleStats = p.stats || { jobs: 70, hours: 395, rating: 4.9, reviews: 43, jobSuccess: talent.jobSuccess || 98 };
+  const feedback   = p.feedback      || [];
+  const jobs       = p.completedJobs || [];
+  const portfolio  = p.portfolio     || [];
+  const titleStats = p.stats || { jobs: talent.total_jobs || 0, hours: talent.total_hours || 0, rating: talent.rating || 0, reviews: talent.reviews_count || 0, jobSuccess: talent.jobSuccess || 0 };
   const totalPages = Math.max(1, Math.ceil(feedback.length / 2));
 
   return (
@@ -934,15 +700,20 @@ function ProfilePanel({ talent, onClose }) {
                     </div>
                   </div>
 
-                  <p className="text-sm text-dark-300 leading-relaxed">
-                    🚀 <span className="font-semibold text-dark-100">Top-rated and Certified Google Analytics 4 (GA4)</span> and <span className="font-semibold text-dark-100">Google Tag Manager (GTM)</span> expert with 5+ years of experience in delivering data-driven tracking solutions. I specialize in <span className="font-semibold text-dark-100">Server-Side Tracking, conversion tracking, pixel setups,</span> and advanced analytics integration that enhance data accuracy, optimize marketing efforts, and deliver actionable insights.
-                  </p>
-                  <button className="text-xs font-semibold text-primary-400 hover:text-primary-300 mt-3">Show more</button>
+                  {talent.bio ? (
+                    <p className="text-sm text-dark-300 leading-relaxed">{talent.bio}</p>
+                  ) : (
+                    <p className="text-sm text-dark-500 italic">No biography available.</p>
+                  )}
                 </section>
 
                 {/* Client feedback */}
                 <section className="rounded-2xl border border-dark-800 bg-dark-900 p-6">
                   <h3 className="text-base font-bold font-display text-dark-100 mb-5">Client feedback ({feedback.length})</h3>
+                  {feedback.length === 0 ? (
+                    <p className="text-sm text-dark-500 italic">No feedback yet.</p>
+                  ) : (
+                  <>
                   <div className="grid md:grid-cols-2 gap-3">
                     {feedback.slice((fbPage - 1) * 2, fbPage * 2).map((f, i) => (
                       <div key={i} className="rounded-xl border border-dark-800 bg-dark-950 p-4">
@@ -964,8 +735,6 @@ function ProfilePanel({ talent, onClose }) {
                       </div>
                     ))}
                   </div>
-
-                  {/* Pagination */}
                   <div className="flex items-center justify-center gap-1 mt-5">
                     <button
                       onClick={() => setFbPage((p) => Math.max(1, p - 1))}
@@ -993,6 +762,8 @@ function ProfilePanel({ talent, onClose }) {
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
+                  </>
+                  )}
                 </section>
 
                 {/* Work history teaser */}
@@ -1014,6 +785,9 @@ function ProfilePanel({ talent, onClose }) {
                   <div className="flex items-center gap-3 text-sm font-bold text-dark-100 mb-3 pb-2 border-b border-dark-800">
                     Completed jobs <span className="text-dark-500 font-normal">{jobs.length}</span>
                   </div>
+                  {jobs.length === 0 ? (
+                    <p className="text-sm text-dark-500 italic">No completed jobs to display.</p>
+                  ) : (
                   <div className="space-y-3">
                     {jobs.map((j, i) => (
                       <div key={i} className="text-xs">
@@ -1027,6 +801,7 @@ function ProfilePanel({ talent, onClose }) {
                       </div>
                     ))}
                   </div>
+                  )}
                 </section>
               </div>
             )}
@@ -1035,6 +810,9 @@ function ProfilePanel({ talent, onClose }) {
             {tab === 'Client feedback' && (
               <section className="rounded-2xl border border-dark-800 bg-dark-900 p-6">
                 <h3 className="text-base font-bold font-display text-dark-100 mb-5">All client feedback</h3>
+                {feedback.length === 0 ? (
+                  <p className="text-sm text-dark-500 italic">No feedback yet.</p>
+                ) : (
                 <div className="space-y-4">
                   {feedback.map((f, i) => (
                     <div key={i} className="pb-4 border-b border-dark-800 last:border-b-0">
@@ -1049,6 +827,7 @@ function ProfilePanel({ talent, onClose }) {
                     </div>
                   ))}
                 </div>
+                )}
               </section>
             )}
 
@@ -1058,6 +837,9 @@ function ProfilePanel({ talent, onClose }) {
                 <section className="rounded-2xl border border-dark-800 bg-dark-900 p-6">
                   <h3 className="text-base font-bold font-display text-dark-100 mb-1">Completed jobs <span className="text-dark-500 font-normal text-sm ml-1">{jobs.length}</span></h3>
                   <div className="h-0.5 w-24 bg-dark-100 mt-2 mb-5" />
+                  {jobs.length === 0 ? (
+                    <p className="text-sm text-dark-500 italic">No completed jobs to display.</p>
+                  ) : (
                   <div className="space-y-5">
                     {jobs.map((j, i) => (
                       <div key={i} className="pb-5 border-b border-dark-800 last:border-b-0">
@@ -1086,13 +868,7 @@ function ProfilePanel({ talent, onClose }) {
                       </div>
                     ))}
                   </div>
-
-                  <div className="pt-5 mt-2 text-xs text-dark-300">
-                    {talent.name} has more jobs.{' '}
-                    <Link to="/register" className="text-primary-400 hover:text-primary-300 font-semibold underline underline-offset-2">
-                      Create an account to review them
-                    </Link>
-                  </div>
+                  )}
                 </section>
 
                 {/* Portfolio appended on Work history tab */}
@@ -1125,18 +901,40 @@ function ProfilePanel({ talent, onClose }) {
 
 /* ─── Job result card ────────────────────────────────────────── */
 function JobCard({ j, delay }) {
+  const navigate  = useNavigate();
+  const { user }  = useAuthStore();
+  const isFreelancer = user?.role === 'freelancer';
+
+  const goToJob = () => { if (j.id) navigate(`/jobs/${j.id}`); };
+
   return (
-    <motion.article {...fadeUp(delay)} className="border-b border-dark-800 py-6 group cursor-pointer">
-      <div className="text-2xs text-dark-500 mb-2">Posted {j.posted}</div>
-      <h3 className="text-base font-bold text-dark-100 leading-tight mb-2 group-hover:text-primary-300 transition-colors">
-        {j.title}
-      </h3>
-      <p className="text-2xs text-dark-400 mb-3">{j.type}</p>
+    <motion.article
+      {...fadeUp(delay)}
+      onClick={goToJob}
+      className="border-b border-dark-800 py-6 group cursor-pointer hover:bg-dark-900/30 rounded-xl -mx-2 px-2 transition-colors"
+    >
+      <div className="flex items-start justify-between gap-4 mb-2">
+        <div className="flex-1 min-w-0">
+          <div className="text-2xs text-dark-500 mb-1.5">Posted {j.posted}</div>
+          <h3 className="text-base font-bold text-dark-100 leading-tight mb-1.5 group-hover:text-primary-300 transition-colors">
+            {j.title}
+          </h3>
+          <p className="text-2xs text-dark-400">{j.type}</p>
+        </div>
+        {isFreelancer && j.id && j.status !== 'closed' && (
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate(`/jobs/${j.id}`); }}
+            className="shrink-0 px-4 py-1.5 rounded-full bg-primary-500 hover:bg-primary-600 text-white text-xs font-semibold transition-all"
+          >
+            Apply now
+          </button>
+        )}
+      </div>
       <p className="text-xs text-dark-300 leading-relaxed mb-4 line-clamp-2">{j.desc}</p>
       <div className="flex flex-wrap gap-1.5">
         {j.skills.map((s, i) => (
           <span key={i} className={`px-2.5 py-1 rounded-full text-2xs font-medium ${
-            s.startsWith('+') ? 'bg-dark-800 text-dark-400' : 'bg-dark-800 text-dark-200 hover:bg-dark-700 cursor-pointer transition-colors'
+            s.startsWith('+') ? 'bg-dark-800 text-dark-400' : 'bg-dark-800 text-dark-200'
           }`}>
             {s}
           </span>
@@ -1146,56 +944,77 @@ function JobCard({ j, delay }) {
   );
 }
 
+const DEFAULT_JOB_FILTERS = { experience: [], job_type: '', budget_min: '', budget_max: '', duration: '' };
+
 /* ─── Main page ──────────────────────────────────────────────── */
 export default function Search() {
   const [params, setParams] = useSearchParams();
   const initialType = params.get('type') === 'jobs' ? 'jobs' : 'talent';
-  const [tab, setTab] = useState(initialType);
-  const [query, setQuery] = useState(params.get('q') || '');
-  const [sortBy, setSortBy] = useState('Relevance');
-  const [sortOpen, setSortOpen] = useState(false);
+  const initialQ    = params.get('q') || '';
+
+  const [tab, setTab]             = useState(initialType);
+  const [inputValue, setInputValue] = useState(initialQ);  // what user types (does NOT trigger fetch)
+  const [query, setQuery]         = useState(initialQ);    // committed search → drives API fetch
+  const [sortBy, setSortBy]       = useState('newest');
+  const [sortOpen, setSortOpen]   = useState(false);
   const [selectedTalent, setSelectedTalent] = useState(null);
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [filters, setFilters]     = useState(DEFAULT_FILTERS);
+  const [jobFilters, setJobFilters] = useState(DEFAULT_JOB_FILTERS);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [apiTalent, setApiTalent] = useState([]);
   const [apiJobs, setApiJobs]     = useState([]);
-  const [loading, setLoading]     = useState(false);
-  const clearFilters = () => setFilters(DEFAULT_FILTERS);
+  const [loading, setLoading]     = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const clearFilters = () => { setFilters(DEFAULT_FILTERS); setJobFilters(DEFAULT_JOB_FILTERS); };
 
-  /* ─── Fetch real data from backend when query/tab changes ─── */
+  /* ─── Fetch from MySQL whenever the committed query/tab/filters change ─── */
   useEffect(() => {
     let cancelled = false;
     const q = query.trim();
-
     setLoading(true);
+    setFetchError(null);
+
     const fetchPromise = tab === 'jobs'
-      ? api.jobs.list({ search: q, per_page: 24 }).then((r) => ({
-          jobs: (r.data?.data?.data ?? r.data?.data ?? []).map(mapApiJob),
-        }))
-      : api.freelancers.list({ search: q, per_page: 24 }).then((r) => ({
-          talent: (r.data?.data?.data ?? r.data?.data ?? []).map(mapApiFreelancer),
-        }));
+      ? api.jobs.list({
+          search: q || undefined,
+          per_page: 50,
+          sort: sortBy,
+          ...(jobFilters.experience.length === 1 ? { experience_level: jobFilters.experience[0] } : {}),
+          ...(jobFilters.job_type   ? { job_type:    jobFilters.job_type }   : {}),
+          ...(jobFilters.budget_min ? { budget_min:  jobFilters.budget_min } : {}),
+          ...(jobFilters.budget_max ? { budget_max:  jobFilters.budget_max } : {}),
+          ...(jobFilters.duration   ? { duration:    jobFilters.duration }   : {}),
+        }).then((r) => ({ jobs: (r.data?.data?.data ?? r.data?.data ?? []).map(mapApiJob) }))
+      : api.freelancers.list({ search: q || undefined, per_page: 50 })
+          .then((r) => ({ talent: (r.data?.data?.data ?? r.data?.data ?? []).map(mapApiFreelancer).filter((t) => !me || t.id !== me.id) }));
 
     fetchPromise
       .then((res) => {
-        if (cancelled) return;
-        if (res.talent) setApiTalent(res.talent);
-        if (res.jobs)   setApiJobs(res.jobs);
+        if (!cancelled) {
+          if (res.jobs)   setApiJobs(res.jobs);
+          if (res.talent) setApiTalent(res.talent);
+        }
       })
-      .catch(() => {
-        if (cancelled) return;
-        if (tab === 'jobs') setApiJobs([]); else setApiTalent([]);
+      .catch((err) => {
+        if (!cancelled) {
+          const msg = err?.response?.data?.message || 'Could not connect to database. Check your backend is running.';
+          setFetchError(msg);
+          if (tab === 'jobs') setApiJobs([]); else setApiTalent([]);
+        }
       })
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [query, tab]);
+  }, [query, tab, sortBy, jobFilters, retryCount]);
 
+  /* ─── Sync URL params → input + committed query ─── */
   useEffect(() => {
     const t = params.get('type');
     if (t === 'jobs' || t === 'talent') setTab(t);
-    const q = params.get('q');
-    if (q !== null) setQuery(q);
+    const q = params.get('q') ?? '';
+    setInputValue(q);
+    setQuery(q);
   }, [params]);
 
   const switchTab = (next) => {
@@ -1205,17 +1024,19 @@ export default function Search() {
     setParams(p, { replace: true });
   };
 
+  /* Submit commits inputValue → query and updates URL */
   const onSearch = (e) => {
     e.preventDefault();
+    const q = inputValue.trim();
+    setQuery(q);
     const p = new URLSearchParams(params);
-    if (query.trim()) p.set('q', query.trim()); else p.delete('q');
+    if (q) p.set('q', q); else p.delete('q');
     p.set('type', tab);
     setParams(p, { replace: true });
   };
 
   const filteredTalent = useMemo(() => {
-    // Use real API data when present; fall back to hardcoded mock TALENT only as a last resort
-    const source = apiTalent.length > 0 ? apiTalent : (query.trim() ? [] : TALENT);
+    const source = apiTalent;
     const q = (query || '').toLowerCase().trim();
     return source.filter((t) => {
       /* Text query — name / title / skills / bio */
@@ -1271,16 +1092,8 @@ export default function Search() {
     return out;
   }, [filters]);
 
-  const filteredJobs = useMemo(() => {
-    const source = apiJobs.length > 0 ? apiJobs : (query.trim() ? [] : JOBS);
-    const q = (query || '').toLowerCase().trim();
-    if (!q) return source;
-    return source.filter((j) =>
-      j.title.toLowerCase().includes(q) ||
-      (j.desc || '').toLowerCase().includes(q) ||
-      (j.skills || []).join(' ').toLowerCase().includes(q)
-    );
-  }, [apiJobs, query]);
+  /* Jobs come pre-filtered from MySQL — no client-side filtering needed */
+  const filteredJobs = apiJobs;
 
   return (
     <div className="min-h-screen bg-dark-950" style={{ paddingTop: 60 }}>
@@ -1308,13 +1121,13 @@ export default function Search() {
           <form onSubmit={onSearch} className="flex-1 relative max-w-2xl">
             <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500" />
             <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Search jobs or talent…"
               className="w-full pl-10 pr-10 py-3 rounded-full border border-dark-700 bg-dark-900 text-sm text-dark-100 placeholder:text-dark-500 focus:outline-none focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/30 transition-colors"
             />
-            {query && (
-              <button type="button" onClick={() => { setQuery(''); const p = new URLSearchParams(params); p.delete('q'); setParams(p, { replace: true }); }}
+            {inputValue && (
+              <button type="button" onClick={() => { setInputValue(''); setQuery(''); const p = new URLSearchParams(params); p.delete('q'); setParams(p, { replace: true }); }}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full border border-dark-600 flex items-center justify-center text-dark-500 hover:text-dark-100 hover:border-dark-500 transition-colors">
                 <X className="w-2.5 h-2.5" />
               </button>
@@ -1383,7 +1196,7 @@ export default function Search() {
           <div className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto pr-2 scrollbar-none pb-4 lg:pb-0`}>
             {tab === 'talent'
               ? <TalentFilters filters={filters} setFilters={setFilters} />
-              : <JobFilters />}
+              : <JobFilters filters={jobFilters} setFilters={setJobFilters} />}
           </div>
 
           {/* Results */}
@@ -1392,15 +1205,15 @@ export default function Search() {
               <div className="flex justify-end mb-2 relative">
                 <button onClick={() => setSortOpen(!sortOpen)}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dark-700 bg-dark-900 text-xs text-dark-200 hover:border-dark-600 transition-colors">
-                  Sort by: <span className="font-semibold text-dark-100">{sortBy}</span>
+                  Sort by: <span className="font-semibold text-dark-100">{{ newest: 'Newest first', created_at: 'Oldest first', budget_max: 'Budget (high)' }[sortBy] || 'Newest first'}</span>
                   <ChevronDown className={`w-3.5 h-3.5 text-dark-500 transition-transform ${sortOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {sortOpen && (
                   <div className="absolute right-0 top-full mt-1 z-10 rounded-lg border border-dark-700 bg-dark-900 overflow-hidden shadow-xl min-w-[180px]">
-                    {['Relevance', 'Newest', 'Client spend'].map((opt) => (
-                      <button key={opt} onClick={() => { setSortBy(opt); setSortOpen(false); }}
-                        className={`w-full text-left px-3 py-2 text-xs hover:bg-dark-800 transition-colors ${sortBy === opt ? 'text-primary-300 font-semibold' : 'text-dark-300'}`}>
-                        {opt}
+                    {[{ label: 'Newest first', val: 'newest' }, { label: 'Oldest first', val: 'created_at' }, { label: 'Budget (high)', val: 'budget_max' }].map(({ label, val }) => (
+                      <button key={val} onClick={() => { setSortBy(val); setSortOpen(false); }}
+                        className={`w-full text-left px-3 py-2 text-xs hover:bg-dark-800 transition-colors ${sortBy === val ? 'text-primary-300 font-semibold' : 'text-dark-300'}`}>
+                        {label}
                       </button>
                     ))}
                   </div>
@@ -1409,7 +1222,12 @@ export default function Search() {
             )}
 
             {tab === 'talent' ? (
-              filteredTalent.length === 0 ? (
+              loading ? (
+                <div className="py-20 flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-xs text-dark-500">Finding talent…</p>
+                </div>
+              ) : filteredTalent.length === 0 ? (
                 <EmptyState query={query} kind="talent" onClear={activeChips.length > 0 ? clearFilters : null} />
               ) : (
                 <>
@@ -1418,38 +1236,9 @@ export default function Search() {
                     {query && <> for "<span className="text-dark-200 font-semibold">{query}</span>"</>}
                   </div>
 
-                  {filteredTalent.slice(0, 12).map((t, i) => (
+                  {filteredTalent.map((t, i) => (
                     <TalentCard
-                      key={t.name}
-                      t={t}
-                      delay={i * 0.04}
-                      active={selectedTalent?.name === t.name}
-                      onView={() => setSelectedTalent(t)}
-                    />
-                  ))}
-
-                  {/* People also searched for — only when there's something to suggest */}
-                  {filteredTalent.length > 12 && (
-                    <div className="border-b border-dark-800 py-6">
-                      <h3 className="text-sm font-bold text-dark-100 mb-4">People also searched for</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {PEOPLE_ALSO_SEARCHED.map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => setQuery(s)}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-dark-700 bg-dark-900 text-xs text-dark-200 hover:border-primary-500/40 hover:text-primary-300 transition-all text-left"
-                          >
-                            <SearchIcon className="w-3.5 h-3.5 text-dark-500 shrink-0" />
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {filteredTalent.slice(12).map((t, i) => (
-                    <TalentCard
-                      key={t.name}
+                      key={t.id || t.name}
                       t={t}
                       delay={i * 0.04}
                       active={selectedTalent?.name === t.name}
@@ -1478,12 +1267,32 @@ export default function Search() {
                   </div>
                 </>
               )
+            ) : loading ? (
+              <div className="py-20 flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs text-dark-500">Searching database…</p>
+              </div>
+            ) : fetchError ? (
+              <div className="py-16 flex flex-col items-center gap-3 text-center">
+                <p className="text-sm font-semibold text-red-400">Connection error</p>
+                <p className="text-xs text-dark-500 max-w-sm">{fetchError}</p>
+                <button
+                  onClick={() => setRetryCount((n) => n + 1)}
+                  className="mt-2 px-4 py-2 rounded-full bg-primary-500 text-white text-xs font-semibold hover:bg-primary-600 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : filteredJobs.length === 0 ? (
+              <EmptyState query={query} kind="jobs" />
             ) : (
-              filteredJobs.length === 0 ? (
-                <EmptyState query={query} kind="jobs" />
-              ) : (
-                filteredJobs.map((j, i) => <JobCard key={j.title} j={j} delay={i * 0.04} />)
-              )
+              <>
+                <div className="text-2xs text-dark-500 mb-2 mt-1">
+                  Showing <span className="text-dark-200 font-semibold">{filteredJobs.length}</span> {filteredJobs.length === 1 ? 'job' : 'jobs'} from database
+                  {query && <> for "<span className="text-dark-200 font-semibold">{query}</span>"</>}
+                </div>
+                {filteredJobs.map((j, i) => <JobCard key={j.id || j.title} j={j} delay={i * 0.04} />)}
+              </>
             )}
           </div>
         </div>

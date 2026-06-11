@@ -206,7 +206,8 @@ function AppRoot() {
 
             <Route path="/ai-assistant"  element={<AIAssistant />} />
             <Route path="/settings"      element={<ProtectedRoute roles={['freelancer', 'client']}><FreelancerSettings /></ProtectedRoute>} />
-            <Route path="/reports"       element={<ProtectedRoute roles={['freelancer', 'client']}><Reports /></ProtectedRoute>} />
+            <Route path="/reports"          element={<ProtectedRoute roles={['freelancer', 'client']}><Reports /></ProtectedRoute>} />
+            <Route path="/reports/:section" element={<ProtectedRoute roles={['freelancer', 'client']}><Reports /></ProtectedRoute>} />
 
             {/* Admin */}
             <Route path="/admin/dashboard" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />

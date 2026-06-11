@@ -142,7 +142,7 @@ def build_styles():
 
 
 # ── helpers ─────────────────────────────────────────────────────────────────────
-def _img_flowable(path, max_w=CONTENT_W, max_h=20.5 * cm):
+def _img_flowable(path, max_w=CONTENT_W, max_h=23 * cm):
     iw, ih = PILImage.open(path).size
     ratio = iw / ih
     w = max_w
@@ -150,6 +150,12 @@ def _img_flowable(path, max_w=CONTENT_W, max_h=20.5 * cm):
     if h > max_h:
         h = max_h
         w = h * ratio
+    if w < max_w * 0.55:          # portrait: center by widening to full content width
+        w = max_w * 0.55           # minimum 55 % of content width for readability
+        h = w / ratio
+        if h > max_h:
+            h = max_h
+            w = h * ratio
     return Image(path, width=w, height=h)
 
 
@@ -332,8 +338,14 @@ def render(blocks, out_path):
         elif k == "figure":
             path, n, cap = b[1], b[2], b[3]
             img = _img_flowable(path)
-            grp = [img, Paragraph(f"Figure {n}: {cap}", S["figcap"])]
-            story.append(KeepTogether(grp))
+            cap_para = Paragraph(f"Figure {n}: {cap}", S["figcap"])
+            # Large figures (nearly full-page height): skip KeepTogether to avoid clipping
+            if img.drawHeight > 17 * cm:
+                story.append(img)
+                story.append(cap_para)
+                story.append(Spacer(1, 0.3 * cm))
+            else:
+                story.append(KeepTogether([img, cap_para]))
         elif k == "table":
             res = _table(b, S)
             if isinstance(res, list):

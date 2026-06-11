@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Chapitre 3 : Conception de la solution."""
-from blocks_helpers import H1, H2, H3, P, B, NOTE, CODE, FIG, TBL
+from blocks_helpers import H1, H2, H3, P, B, NOTE, CODE, FIG, TBL, PB
 
 
 def ch3():
@@ -114,6 +114,7 @@ def ch3():
           "(`IdentityVerification`). Le noyau financier comprend `Wallet` (portefeuille à trois soldes : "
           "disponible, séquestre, en attente), `Transaction` (grand livre en double-entrée, immuable) et "
           "`WithdrawalRequest` (demandes de retrait avec cycle de validation)."),
+        PB(),
         FIG("class_part1", "Diagramme de classes — Sous-système 1 : Identité, Sécurité & Finance"),
         TBL(["Classe", "Rôle dans le sous-système"],
             [["User", "Entité centrale : agrège l'identité, le rôle et les préférences de chaque acteur"],
@@ -132,6 +133,7 @@ def ch3():
           "`CatalogOrder`, relie le client et le freelance, et constitue le contexte de tous les "
           "jalons, fichiers, transactions et conversations. Le flux complet de mise en relation "
           "est visible : `JobPosting` → `Proposal` → `Contract` → `Milestone` → paiement libéré."),
+        PB(),
         FIG("class_part2", "Diagramme de classes — Sous-système 2 : Marketplace, Contrats & Communication"),
         TBL(["Classe", "Rôle dans le sous-système"],
             [["JobPosting", "Offre publiée par le client : titre, budget, catégorie, statut"],
@@ -152,6 +154,7 @@ def ch3():
           "(regroupement de freelances sous une bannière) et les **listes de talents**. L'IA est "
           "représentée par `AiHistory` qui historise chaque interaction avec le modèle de langage. "
           "`TaxDocument` trace les obligations fiscales annuelles des freelances."),
+        PB(),
         FIG("class_part3", "Diagramme de classes — Sous-système 3 : Catalogue, Agences & Talents"),
         TBL(["Classe", "Rôle dans le sous-système"],
             [["CatalogProject", "Service packagé du freelance : 3 paliers tarifaires, modération admin"],
@@ -367,11 +370,92 @@ def ch3():
              "évolutivité. Cette architecture découplée permet également d'envisager une "
              "application mobile native consommant la même API sans modification du back-end."),
 
-        H2("VII", "Conclusion du chapitre"),
+        H2("VII", "Patterns de conception appliqués"),
+        P("La qualité de l'architecture de Panda repose non seulement sur les technologies choisies, mais "
+          "aussi sur l'application rigoureuse de **patterns de conception** (design patterns) éprouvés. "
+          "Ces patterns structurent le code, réduisent le couplage, améliorent la testabilité et facilitent "
+          "l'évolution de la plateforme. Cinq patterns principaux sont mobilisés dans le projet."),
+
+        H3("1", "Pattern Repository — abstraction de la persistance"),
+        P("Le **pattern Repository** est implémenté via Laravel Eloquent ORM. Chaque modèle Eloquent "
+          "(`User`, `Contract`, `Wallet`, etc.) joue le rôle de *repository* : il encapsule toutes les "
+          "opérations de persistance (CRUD, requêtes complexes, scopes) derrière une interface orientée "
+          "domaine. Les contrôleurs et services ne connaissent jamais la couche SQL directement — ils "
+          "manipulent des collections d'objets Eloquent."),
+        TBL(["Modèle Repository", "Exemples de méthodes exposées", "Avantage"],
+            [["Contract", "Contract::with('milestones','files')->where('client_id', $id)->paginate()", "Requêtes complexes encapsulées et réutilisables"],
+             ["Wallet", "Wallet::lockForUpdate()->find($id)", "Verrouillage pessimiste transparent"],
+             ["JobPosting", "JobPosting::published()->inCategory($cat)->latest()", "Scopes chainables, aucun SQL brut dans les contrôleurs"],
+             ["User", "User::with('freelancerProfile','wallet')->role('freelancer')->get()", "Chargement eager évitant le problème N+1"]],
+            caption="Exemples d'application du pattern Repository via Eloquent",
+            widths=[0.24, 0.48, 0.28]),
+        NOTE("L'usage systématique des **Eloquent Scopes** (`scopePublished`, `scopeInCategory`, etc.) "
+             "matérialise le pattern Repository : la logique de requête est centralisée dans le modèle "
+             "plutôt que dispersée dans les contrôleurs."),
+
+        H3("2", "Pattern Service Layer — isolation de la logique métier"),
+        P("Le **pattern Service Layer** est le pilier architectural du back-end. Chaque domaine sensible "
+          "possède un service dédié qui concentre la logique métier, garantissant qu'aucun contrôleur "
+          "ne contient de règles de gestion critiques. Les services sont injectés par le conteneur "
+          "d'injection de dépendances de Laravel."),
+        TBL(["Service", "Responsabilités principales", "Injecté dans"],
+            [["LedgerService", "fundEscrow, releaseMilestone, deposit, withdraw — atomicité et grand livre", "PaymentController, MilestoneController"],
+             ["StripeService", "createCheckoutSession, createPayout, constructWebhookEvent", "PaymentController, WebhookController"],
+             ["NotificationService", "sendRealTime, sendPush, sendEmail — façade unifiée", "Tous les contrôleurs émettant des notifications"],
+             ["AIService", "generateProposal, matchFreelancers, analyzeContract — appels Ollama", "AIController"],
+             ["ContractService", "createFromProposal, createFromCatalogOrder, checkCompletion", "ContractController, MilestoneController"]],
+            caption="Services métier du pattern Service Layer",
+            widths=[0.24, 0.48, 0.28]),
+
+        H3("3", "Pattern Observer — découplage événementiel"),
+        P("Le **pattern Observer** est natif dans Laravel via le système d'**événements et écouteurs** "
+          "(*Events & Listeners*). Lorsqu'une action métier se produit, un événement est émis ; des "
+          "écouteurs découplés réagissent de façon asynchrone (via la file d'attente Redis). Ce pattern "
+          "évite que le code métier ne soit pollué par des préoccupations transverses."),
+        TBL(["Événement Laravel", "Déclencheur", "Écouteurs abonnés"],
+            [["MilestoneApproved", "Client approuve un jalon", "LedgerListener (libère fonds), NotificationListener (email + push), AuditListener (journal)"],
+             ["ContractCompleted", "Tous les jalons payés", "ReviewReminderListener, TaxDocumentListener, AnalyticsListener"],
+             ["MessageSent", "Nouveau message créé", "BroadcastListener (WebSocket Reverb), PushNotificationListener"],
+             ["PaymentReceived", "Webhook Stripe traité", "LedgerListener (crédite wallet), NotificationListener"],
+             ["IdentityVerified", "Admin valide un KYC", "ProfileActivationListener, EmailNotificationListener"]],
+            caption="Événements et écouteurs — pattern Observer",
+            widths=[0.26, 0.28, 0.46]),
+
+        H3("4", "Pattern Strategy — algorithmes interchangeables"),
+        P("Le **pattern Strategy** est appliqué dans les composants nécessitant plusieurs variantes "
+          "d'un même algorithme. Il permet de sélectionner la stratégie à l'exécution sans modifier "
+          "le code appelant."),
+        TBL(["Contexte d'application", "Stratégies disponibles", "Critère de sélection"],
+            [["Méthode de paiement (retrait)", "StripeConnectStrategy, BankTransferStrategy", "Paramètre `method` de WithdrawalRequest"],
+             ["Type de contrat", "FixedPriceStrategy, HourlyStrategy", "Champ `type` de Contract (fixed / hourly)"],
+             ["Canal de notification", "DatabaseChannel, MailChannel, BroadcastChannel, PushChannel", "Préférences utilisateur (`notification_preferences`)"],
+             ["Génération IA", "ProposalGenerationStrategy, MatchingStrategy, AnalysisStrategy", "Type d'action demandée dans AIController"]],
+            caption="Applications du pattern Strategy dans Panda",
+            widths=[0.26, 0.38, 0.36]),
+
+        H3("5", "Pattern Factory — construction d'objets complexes"),
+        P("Le **pattern Factory** est appliqué pour la construction des objets complexes dont l'instanciation "
+          "implique plusieurs étapes de validation et d'initialisation. Laravel propose nativement deux "
+          "mécanismes : les **Factories** Eloquent (tests) et les méthodes de fabrique dans les services."),
+        TBL(["Objet créé", "Factory / Méthode de création", "Logique encapsulée"],
+            [["Contract (depuis Proposal)", "ContractService::createFromProposal(Proposal)", "Copie champs offre, calcule commission, crée Wallet escrow, notifie"],
+             ["Contract (depuis CatalogOrder)", "ContractService::createFromCatalogOrder(CatalogOrder)", "Récupère palier, instancie jalons, lie à l'order"],
+             ["Stripe Checkout Session", "StripeService::createCheckoutSession(amount, user)", "Calcule métadonnées, ligne d'article, URL succès/annulation"],
+             ["Proposition IA", "AIService::buildProposalPrompt(job, profile)", "Construit le prompt contextuel avec instructions système"]],
+            caption="Applications du pattern Factory dans Panda",
+            widths=[0.26, 0.38, 0.36]),
+        P("L'utilisation combinée de ces cinq patterns constitue la **signature architecturale** de Panda : "
+          "Repository pour l'accès aux données, Service Layer pour la logique métier, Observer pour le "
+          "découplage des effets de bord, Strategy pour la flexibilité algorithmique, Factory pour la "
+          "construction d'objets complexes. Cette cohérence architecturale facilite les tests unitaires "
+          "et d'intégration, et prépare l'évolution de la plateforme vers de nouvelles fonctionnalités."),
+
+        H2("VIII", "Conclusion du chapitre"),
         P("Ce chapitre a présenté la conception complète de Panda : une architecture découplée et en "
           "couches, des mécanismes de sécurité en profondeur, une modélisation objet structurée autour du "
-          "contrat, des comportements dynamiques formalisés par des diagrammes de séquence, et les choix "
-          "technologiques retenus. Cette conception fournit un plan directeur cohérent. Le chapitre suivant "
+          "contrat, des comportements dynamiques formalisés par des diagrammes de séquence, les choix "
+          "technologiques retenus, et les patterns de conception qui garantissent la maintenabilité du code. "
+          "Cette conception fournit un plan directeur cohérent et rigoureux. Le chapitre suivant "
           "en présente la **réalisation** concrète, illustrée par des extraits de code et la présentation "
           "des interfaces."),
     ]

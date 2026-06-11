@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Chapitre 2 : Analyse et spécification des besoins."""
-from blocks_helpers import H1, H2, H3, P, B, NOTE, FIG, TBL
+from blocks_helpers import H1, H2, H3, P, B, NOTE, FIG, TBL, PB
 
 
 def _uc(acteur, pre, nominal, alt, post):
@@ -134,7 +134,100 @@ def ch2():
             caption="Besoins non fonctionnels de la plateforme",
             widths=[0.24, 0.76]),
 
-        H2("IV", "Langage de modélisation adopté"),
+        H2("IV", "Règles de gestion"),
+        P("Les règles de gestion formalisent les contraintes métier que le système doit respecter en toute "
+          "circonstance. Elles complètent les besoins fonctionnels en précisant les invariants, les limites "
+          "et les comportements obligatoires indépendamment des scénarios d'utilisation."),
+        TBL(["Réf.", "Règle de gestion", "Module"],
+            [["RG-01",
+              "Un utilisateur ne peut avoir qu'un seul rôle actif (Client OU Freelance). "
+              "Le rôle est choisi à l'inscription et ne peut être modifié ultérieurement.",
+              "Auth"],
+             ["RG-02",
+              "La connexion via Google OAuth crée automatiquement un compte si l'email n'existe "
+              "pas encore ; sinon elle authentifie le compte existant sans modifier le mot de passe.",
+              "Auth"],
+             ["RG-03",
+              "L'activation des retraits (Stripe Connect) est conditionnée à la validation KYC. "
+              "Tout freelance non vérifié ne peut pas soumettre de demande de retrait.",
+              "Finance / KYC"],
+             ["RG-04",
+              "Le solde d'un portefeuille ne peut jamais être négatif. Toute opération qui "
+              "entraînerait un solde négatif est rejetée avant exécution.",
+              "Finance"],
+             ["RG-05",
+              "Le financement du séquestre est irréversible une fois le contrat démarré. "
+              "Les fonds ne peuvent revenir au client qu'en cas de litige arbitré par l'admin.",
+              "Finance / Contrats"],
+             ["RG-06",
+              "La commission de la plateforme est prélevée à la libération de chaque jalon "
+              "(taux paramétrable dans platform_settings, 10 % par défaut). "
+              "Elle ne peut jamais dépasser le montant du jalon.",
+              "Finance"],
+             ["RG-07",
+              "Un jalon doit être dans l'état 'soumis' avant d'être validé ou rejeté. "
+              "Un jalon 'payé' ne peut plus être ni modifié ni rejeté.",
+              "Contrats"],
+             ["RG-08",
+              "Le déclenchement d'un litige gèle toutes les libérations de jalons du contrat "
+              "jusqu'à résolution par l'administrateur.",
+              "Contrats"],
+             ["RG-09",
+              "Une offre ne peut recevoir de nouvelles propositions si son statut est 'closed', "
+              "'expired' ou 'in_progress'. Les propositions en attente restent visibles.",
+              "Marketplace"],
+             ["RG-10",
+              "Un freelance ne peut soumettre qu'une seule proposition par offre. "
+              "Une seconde soumission écrase la première si elle est encore en attente.",
+              "Marketplace"],
+             ["RG-11",
+              "L'acceptation d'une proposition ferme automatiquement l'offre aux nouvelles "
+              "candidatures et crée un contrat entre les deux parties.",
+              "Marketplace / Contrats"],
+             ["RG-12",
+              "Un service catalogue doit être approuvé par l'administrateur avant d'être "
+              "visible et achetable. Tout service modifié repasse en file de modération.",
+              "Catalogue"],
+             ["RG-13",
+              "Un message ne peut être édité que par son auteur et seulement dans les "
+              "15 minutes suivant son envoi. La suppression est permanente.",
+              "Messagerie"],
+             ["RG-14",
+              "Les notifications Web Push sont envoyées uniquement si l'utilisateur a "
+              "accordé la permission navigateur ET activé le type de notification concerné.",
+              "Notifications"],
+             ["RG-15",
+              "L'assistant IA est limité à 20 requêtes par minute par utilisateur. "
+              "Toute réponse IA est historisée dans ai_histories et ne peut être supprimée.",
+              "IA"],
+             ["RG-16",
+              "Un retrait ne peut être soumis que si le montant est supérieur au minimum "
+              "de 10 € et inférieur ou égal au solde disponible. "
+              "Les fonds passent immédiatement en 'pending' à la soumission.",
+              "Finance"],
+             ["RG-17",
+              "L'idempotence est obligatoire pour toutes les opérations financières : "
+              "une clé d'idempotence unique est associée à chaque écriture, "
+              "un appel dupliqué retourne le résultat initial sans re-traitement.",
+              "Finance"],
+             ["RG-18",
+              "Un webhook Stripe sans signature HMAC valide est rejeté avec un code 400. "
+              "Un webhook déjà traité (id présent dans stripe_webhook_events) retourne 200 "
+              "sans traitement pour garantir l'idempotence.",
+              "Stripe"],
+             ["RG-19",
+              "Un utilisateur non authentifié n'a accès qu'aux pages publiques, "
+              "à l'inscription et à la connexion. Toute route protégée retourne 401.",
+              "Sécurité"],
+             ["RG-20",
+              "L'élévation de privilèges est interdite : un Client ne peut pas "
+              "agir comme Freelance et vice-versa. Un non-admin ne peut accéder "
+              "à aucune route /admin/* (403 Forbidden).",
+              "Sécurité"]],
+            caption="Règles de gestion de la plateforme Panda (RG-01 à RG-20)",
+            widths=[0.10, 0.71, 0.19]),
+
+        H2("V", "Langage de modélisation UML adopté"),
         P("Pour formaliser l'analyse et la conception, nous avons adopté le langage **UML** (*Unified "
           "Modeling Language*), standard de la modélisation des systèmes logiciels orientés objet. UML "
           "offre une famille de diagrammes complémentaires permettant de représenter aussi bien la "
@@ -146,7 +239,7 @@ def ch2():
           "une vision globale et fonctionnelle du système, intelligible par toutes les parties prenantes. "
           "Les diagrammes structurels et dynamiques sont présentés au chapitre 3, consacré à la conception."),
 
-        H2("V", "Diagramme de cas d'utilisation global"),
+        H2("VI", "Diagramme de cas d'utilisation global"),
         P("Le diagramme de cas d'utilisation global synthétise les interactions entre les acteurs et les "
           "grandes fonctionnalités du système. Chaque *cas d'utilisation* représente une unité de service "
           "rendue à un acteur. En raison de sa richesse fonctionnelle, le diagramme complet est présenté "
@@ -158,6 +251,7 @@ def ch2():
           "On y observe que **S'authentifier** est la porte d'entrée systématique — toutes les actions "
           "métier en dépendent par inclusion. L'Administrateur dispose de cas exclusifs (modération, "
           "arbitrage, vérification KYC) inaccessibles aux autres rôles."),
+        PB(),
         FIG("usecase_part1", "Diagramme de cas d'utilisation — Partie 1 : Authentification, Administrateur & Annonces"),
         B(["**Acteurs** : Visiteur, Client, Freelance, Administrateur ;",
            "**Cas clés** : Créer un compte, Se connecter (email / Google OAuth), Activer la 2FA, "
@@ -174,6 +268,7 @@ def ch2():
           "temps réel. C'est ici que la valeur centrale de Panda — **la confiance financière** — est "
           "pleinement matérialisée. Les acteurs externes Stripe et Laravel Reverb interviennent "
           "respectivement sur les paiements et la communication."),
+        PB(),
         FIG("usecase_part2", "Diagramme de cas d'utilisation — Partie 2 : Catalogue, Contrats, Paiements & Communication"),
         B(["**Catalogue** : Créer un service packagé (Freelance), Passer commande (Client), "
               "Livrer une commande, Évaluer la prestation ;",
@@ -191,6 +286,7 @@ def ch2():
           "les fonctionnalités différenciantes de Panda par rapport aux plateformes classiques : "
           "l'IA pour accélérer les tâches répétitives et les agences pour structurer les équipes "
           "de freelances."),
+        PB(),
         FIG("usecase_part3", "Diagramme de cas d'utilisation — Partie 3 : Notifications, IA, Agences & Marketplace"),
         B(["**Notifications** : Recevoir des alertes in-app, Activer les notifications Web Push, "
               "Gérer les préférences de notification ;",
@@ -332,7 +428,7 @@ def ch2():
            "**Gérer les préférences** : chaque utilisateur configure les types "
            "d'événements pour lesquels il souhaite être notifié."]),
 
-        H2("VI", "Description textuelle des cas d'utilisation"),
+        H2("VII", "Description textuelle des cas d'utilisation"),
         P("Afin de préciser le comportement attendu, nous détaillons ci-après quelques cas d'utilisation "
           "représentatifs sous forme de fiches descriptives."),
 
@@ -439,7 +535,7 @@ def ch2():
             caption="Matrice de traçabilité des exigences vers les composants",
             widths=[0.40, 0.42, 0.18]),
 
-        H2("VII", "Conclusion du chapitre"),
+        H2("VIII", "Conclusion du chapitre"),
         P("Ce chapitre a recensé et structuré les besoins de la plateforme. Nous avons identifié les "
           "acteurs, détaillé les besoins fonctionnels par module et précisé les exigences non "
           "fonctionnelles — au premier rang desquelles la sécurité et l'intégrité financière. Le langage "

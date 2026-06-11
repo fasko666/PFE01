@@ -82,26 +82,32 @@ const MANAGE_FINANCES = [
   {
     heading: null,
     items: [
-      { label: 'Financial overview',      href: '/payments' },
-      { label: 'Your reports',            href: '/reports' },
-      { label: 'Billings and earnings',   href: '/payments' },
-      { label: 'Transactions',            href: '/payments' },
-      { label: 'Certificate of earnings', href: '/payments', external: true },
+      { label: 'Your reports', href: '/reports' },
+    ],
+  },
+  {
+    heading: 'Reports',
+    headingStyle: 'label',
+    items: [
+      { label: 'Financial overview',      href: '/reports/overview'     },
+      { label: 'Billings and earnings',   href: '/reports/earnings'     },
+      { label: 'Transactions',            href: '/reports/transactions' },
+      { label: 'Certificate of earnings', href: '/reports/certificate'  },
     ],
   },
   {
     heading: 'Payments',
     headingStyle: 'label',
     items: [
-      { label: 'Withdraw earnings', href: '/payments' },
+      { label: 'Withdraw earnings', href: '/reports/withdraw' },
     ],
   },
   {
     heading: 'Taxes',
     headingStyle: 'label',
     items: [
-      { label: 'Tax forms',       href: '/payments' },
-      { label: 'Tax information', href: '/payments' },
+      { label: 'Tax forms',       href: '/reports/tax-forms' },
+      { label: 'Tax information', href: '/reports/tax-info'  },
     ],
   },
 ];

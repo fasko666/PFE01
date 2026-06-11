@@ -18,9 +18,11 @@ class JobController extends Controller
             ->where('visibility', 'public');
 
         if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('title', 'like', "%{$request->search}%")
-                  ->orWhere('description', 'like', "%{$request->search}%");
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereRaw('LOWER(skills) LIKE ?', ['%' . strtolower($search) . '%']);
             });
         }
         if ($request->category_id)  $query->where('category_id', $request->category_id);
@@ -29,10 +31,10 @@ class JobController extends Controller
         if ($request->budget_min)   $query->where('budget_min', '>=', $request->budget_min);
         if ($request->budget_max)   $query->where('budget_max', '<=', $request->budget_max);
 
-        $sortMap = ['created_at' => 'created_at', 'budget_max' => 'budget_max', 'proposals_count' => 'proposals_count'];
-        $sortBy  = $sortMap[$request->sort ?? 'created_at'] ?? 'created_at';
-        $query->orderBy($sortBy, $sortBy === 'proposals_count' ? 'asc' : 'desc')
-              ->orderBy('is_featured', 'desc');
+        $sortMap = ['newest' => 'created_at', 'created_at' => 'created_at', 'budget_max' => 'budget_max', 'proposals_count' => 'proposals_count'];
+        $sortBy  = $sortMap[$request->sort ?? 'newest'] ?? 'created_at';
+        $query->orderBy('is_featured', 'desc')
+              ->orderBy($sortBy, $sortBy === 'proposals_count' ? 'asc' : 'desc');
 
         $jobs = $query->paginate($request->per_page ?? 12);
 
