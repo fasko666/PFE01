@@ -119,7 +119,7 @@ export default function ResourceSubNav() {
 
           <div className="ml-auto hidden md:flex items-center gap-2 text-2xs text-dark-500">
             <span>New? Learn</span>
-            <Link to="/jobs" className="text-primary-400 hover:text-primary-300 underline underline-offset-4">how to start freelancing</Link>
+            <Link to="/search?type=jobs" className="text-primary-400 hover:text-primary-300 underline underline-offset-4">how to start freelancing</Link>
             <span>or</span>
             <Link to="/freelancers" className="text-primary-400 hover:text-primary-300 underline underline-offset-4">hire freelancers</Link>
           </div>

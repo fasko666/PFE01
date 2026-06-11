@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 render_docx.py — render the shared block list to a classic-BTS-styled Word document.
-Times New Roman body, Calibri blue headings (Heading 1/2/3 → native TOC), Word TOC +
+Times New Roman body, Times New Roman blue headings (Heading 1/2/3 → native TOC), Word TOC +
 Table of figures fields (auto page numbers on open), captions with SEQ fields,
 page numbers in footer.
 """
@@ -132,9 +132,9 @@ def setup_styles(doc):
             st.paragraph_format.left_indent = Cm(indent)
         st.font.italic = False
 
-    head("Heading 1", "Calibri", 18, T.TITLE_BLUE, align=WD_ALIGN_PARAGRAPH.CENTER, before=10, after=14)
-    head("Heading 2", "Calibri", 14, T.HEADING_BLUE, before=14, after=6)
-    head("Heading 3", "Calibri", 12.5, T.SUBHEAD_BLUE, before=10, after=4, indent=0.5)
+    head("Heading 1", "Times New Roman", 18, T.TITLE_BLUE, align=WD_ALIGN_PARAGRAPH.CENTER, before=10, after=14)
+    head("Heading 2", "Times New Roman", 14, T.HEADING_BLUE, before=14, after=6)
+    head("Heading 3", "Times New Roman", 12.5, T.SUBHEAD_BLUE, before=10, after=4, indent=0.5)
     head("Heading 4", "Times New Roman", 11.5, "#333333", before=8, after=3, indent=0.9)
     doc.styles["Heading 4"].font.italic = True
 
@@ -155,7 +155,7 @@ def fm_title(doc, text):
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.paragraph_format.space_after = Pt(16)
     r = p.add_run(text)
-    r.font.name = "Calibri"; r.font.size = Pt(20); r.bold = True
+    r.font.name = "Times New Roman"; r.font.size = Pt(20); r.bold = True
     r.font.color.rgb = _rgb(T.TITLE_BLUE)
     return p
 
@@ -204,7 +204,7 @@ def add_table(doc, headers, rows, n, cap, widths=None):
         for j, htext in enumerate(headers):
             shade(hc[j], T.TABLE_HEAD)
             para = hc[j].paragraphs[0]; para.alignment = WD_ALIGN_PARAGRAPH.LEFT
-            r = para.add_run(htext); r.font.name = "Calibri"; r.font.size = Pt(9.5)
+            r = para.add_run(htext); r.font.name = "Times New Roman"; r.font.size = Pt(9.5)
             r.bold = True; r.font.color.rgb = _rgb("#FFFFFF")
     for ri, row in enumerate(rows):
         rc = table.add_row().cells
@@ -228,13 +228,21 @@ def add_code(doc, cap, txt):
     if cap:
         p = doc.add_paragraph()
         p.paragraph_format.space_before = Pt(6); p.paragraph_format.space_after = Pt(2)
-        r = p.add_run(cap); r.font.name = "Calibri"; r.bold = True; r.font.size = Pt(9.5)
+        r = p.add_run(cap); r.font.name = "Times New Roman"; r.bold = True; r.font.size = Pt(9.5)
         r.font.color.rgb = _rgb(T.HEADING_BLUE)
     table = doc.add_table(rows=1, cols=1)
     cell = table.cell(0, 0)
-    shade(cell, "#F4F6F8")
-    cell_left_bar(cell, T.HEADING_BLUE, sz=20)
+    shade(cell, "#F5F7FA")
+    set_table_borders(table, "#C5CDD8", sz=4)
     cell.paragraphs[0].text = ""
+    # add generous left padding via cell margin
+    tcPr = cell._tc.get_or_add_tcPr()
+    tcMar = OxmlElement("w:tcMar")
+    for side, val in [("left", "200"), ("right", "120"), ("top", "100"), ("bottom", "100")]:
+        e = OxmlElement(f"w:{side}")
+        e.set(qn("w:w"), val); e.set(qn("w:type"), "dxa")
+        tcMar.append(e)
+    tcPr.append(tcMar)
     first = True
     for line in txt.split("\n"):
         para = cell.paragraphs[0] if first else cell.add_paragraph()
@@ -243,7 +251,7 @@ def add_code(doc, cap, txt):
         para.paragraph_format.line_spacing = 1.0
         r = para.add_run(line if line else " ")
         r.font.name = "Consolas"; r.font.size = Pt(8.5); r.font.color.rgb = _rgb("#1B2430")
-    doc.add_paragraph().paragraph_format.space_after = Pt(2)
+    doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
 
 def add_note(doc, text):
@@ -268,45 +276,84 @@ def add_bullets(doc, items, level=0):
         add_runs(p, it)
 
 
+def _cpara(doc, text, size=12, bold=False, italic=False, color=None, sa=4, sb=0, align=WD_ALIGN_PARAGRAPH.CENTER):
+    p = doc.add_paragraph()
+    p.alignment = align
+    p.paragraph_format.space_after = Pt(sa)
+    p.paragraph_format.space_before = Pt(sb)
+    for i, line in enumerate(text.split("\n")):
+        if i > 0:
+            p.add_run("\n")
+        r = p.add_run(line)
+        r.font.name = "Times New Roman"; r.font.size = Pt(size)
+        r.bold = bold; r.italic = italic
+        if color:
+            r.font.color.rgb = _rgb(color)
+    return p
+
+
 def cover(doc):
     cov = T.COVER
-    for line in [cov["academie"], cov["direction"], cov["centre"], cov["lycee"]]:
-        p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.paragraph_format.space_after = Pt(2)
-        r = p.add_run(line); r.font.name = "Times New Roman"; r.font.size = Pt(12)
-    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run(cov["filiere"]); r.italic = True; r.font.size = Pt(12); r.font.name = "Times New Roman"
 
-    for _ in range(3):
-        doc.add_paragraph()
-    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run(cov["report_kind"]); r.font.name = "Calibri"; r.bold = True; r.font.size = Pt(17)
-    r.font.color.rgb = _rgb(T.HEADING_BLUE)
-    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.space_before = Pt(14)
-    r = p.add_run(cov["project_title"]); r.font.name = "Calibri"; r.bold = True; r.font.size = Pt(54)
-    r.font.color.rgb = _rgb(T.TITLE_BLUE)
-    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run(cov["project_sub"]); r.italic = True; r.font.size = Pt(15); r.font.name = "Times New Roman"
-    r.font.color.rgb = _rgb("#333333")
+    # Royal header
+    _cpara(doc, "Royaume du Maroc", size=11, sa=2)
+    _cpara(doc, cov["ministere"], size=10, italic=True, sa=10)
 
-    for _ in range(4):
-        doc.add_paragraph()
-    tb = doc.add_table(rows=1, cols=2)
+    # Institution bordered box
+    tb = doc.add_table(rows=1, cols=1)
     tb.alignment = WD_TABLE_ALIGNMENT.CENTER
-    for idx, (lbl, val) in enumerate([("Réalisé par :", cov["students"]), ("Encadré par :", [cov["encadrant"]])]):
-        c = tb.cell(0, idx)
-        pp = c.paragraphs[0]; pp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r = pp.add_run(lbl); r.font.name = "Calibri"; r.bold = True; r.font.size = Pt(13)
-        r.font.color.rgb = _rgb(T.HEADING_BLUE)
-        for v in val:
-            vp = c.add_paragraph(); vp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            rr = vp.add_run(v); rr.font.name = "Times New Roman"; rr.font.size = Pt(13)
-    for _ in range(5):
-        doc.add_paragraph()
+    set_table_borders(tb, T.TITLE_BLUE, sz=8)
+    cell = tb.cell(0, 0)
+    cell.width = Cm(13)
+    first = True
+    for line in [cov["academie"], cov["direction"], cov["centre"]]:
+        para = cell.paragraphs[0] if first else cell.add_paragraph()
+        first = False
+        para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        para.paragraph_format.space_after = Pt(5)
+        para.paragraph_format.space_before = Pt(5)
+        rr = para.add_run(line)
+        rr.font.name = "Times New Roman"; rr.font.size = Pt(12)
+
+    # Spacer
+    sp = doc.add_paragraph(); sp.paragraph_format.space_after = Pt(36)
+
+    # RAPPORT DE PFE
+    _cpara(doc, cov["report_kind"], size=16, bold=True, color=T.HEADING_BLUE, sa=20)
+
+    # Project title (bold, dark)
+    _cpara(doc, cov["project_title"], size=17, bold=True, sa=32)
+
+    # Réalisé par / Encadrant table (no border)
+    tb2 = doc.add_table(rows=1, cols=2)
+    tb2.alignment = WD_TABLE_ALIGNMENT.CENTER
+    for idx, (lbl, vals) in enumerate([
+            ("Réalisé par :", cov["students"]),
+            ("Encadrant :", [cov["encadrant"]])]):
+        c = tb2.cell(0, idx)
+        c.width = Cm(8)
+        lp = c.paragraphs[0]
+        lp.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        lp.paragraph_format.space_after = Pt(4)
+        lr = lp.add_run(lbl)
+        lr.font.name = "Times New Roman"; lr.font.size = Pt(12); lr.bold = True
+        for v in vals:
+            vp = c.add_paragraph()
+            vp.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            vp.paragraph_format.space_after = Pt(2)
+            vr = vp.add_run(v)
+            vr.font.name = "Times New Roman"; vr.font.size = Pt(12)
+
+    sp2 = doc.add_paragraph(); sp2.paragraph_format.space_after = Pt(30)
+
+    # Centre de formation
     p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = p.add_run(f"Année universitaire {cov['year']}")
-    r.font.name = "Calibri"; r.bold = True; r.font.size = Pt(14); r.font.color.rgb = _rgb(T.HEADING_BLUE)
+    p.paragraph_format.space_after = Pt(4)
+    r = p.add_run("Centre de formation :"); r.font.name = "Times New Roman"; r.font.size = Pt(12); r.bold = True
+    _cpara(doc, cov["lycee"], size=12, sa=40)
+
+    # Year
+    _cpara(doc, cov["year"], size=13, bold=True, sa=0)
     doc.add_page_break()
 
 
@@ -319,7 +366,6 @@ def render(blocks, out_path):
     section.top_margin = Cm(2.0); section.bottom_margin = Cm(1.8)
     setup_styles(doc)
     footer_page_number(section)
-    add_page_border(section)
 
     prev_break = False
 

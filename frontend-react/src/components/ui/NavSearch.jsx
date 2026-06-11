@@ -78,7 +78,12 @@ export default function NavSearch({ variant = 'public' }) {
     const q = query.trim();
     if (!q) return;
     setResultsOpen(false);
-    navigate(`/search?q=${encodeURIComponent(q)}&type=${type}`);
+    setQuery('');
+    if (type === 'jobs') {
+      navigate(`/search?type=jobs&q=${encodeURIComponent(q)}`);
+    } else {
+      navigate(`/search?q=${encodeURIComponent(q)}&type=${type}`);
+    }
   }, [query, type, navigate]);
 
   const goTo = (path) => {

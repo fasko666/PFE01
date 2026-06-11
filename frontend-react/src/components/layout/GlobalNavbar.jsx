@@ -3,9 +3,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bell, ChevronDown, LogOut, Settings,
-  UserCircle2,
-  ShieldCheck, BadgeCheck, UserPlus, Sun, Moon, Monitor,
-  Menu, X, Search as SearchIcon,
+  UserCircle2, User, TrendingUp, Zap,
+  ShieldCheck, BadgeCheck, Sun, Moon, Monitor,
+  Menu, X, Search as SearchIcon, ExternalLink,
 } from 'lucide-react';
 import PandaLogo from '../ui/PandaLogo';
 import NotificationPanel from '../ui/NotificationPanel';
@@ -49,22 +49,59 @@ const HIRE_TALENT = [
 
 const FIND_WORK = [
   {
-    heading: 'Find work',
-    headingStyle: 'bold',
+    heading: null,
     items: [
-      { label: 'Search for jobs',      href: '/jobs' },
-      { label: 'Saved jobs',           href: '/jobs' },
+      { label: 'Find work',            href: '/search?type=jobs' },
+      { label: 'Saved jobs',           href: '/jobs/saved' },
       { label: 'Proposals and offers', href: '/my-proposals' },
     ],
   },
   {
-    heading: 'My work',
+    heading: 'Reach more clients',
     headingStyle: 'label',
     items: [
-      { label: 'My contracts',   href: '/my-jobs' },
-      { label: 'My timesheets',  href: '/my-jobs' },
-      { label: 'Work diary',     href: '/my-jobs' },
-      { label: 'AI assistant',   href: '/ai-assistant' },
+      { label: 'Your services',    href: '/freelancer/profile' },
+      { label: 'Promote with ads', href: '/settings', external: true },
+      { label: 'Direct contracts', href: '/contracts' },
+    ],
+  },
+];
+
+const DELIVER_WORK = [
+  {
+    heading: null,
+    items: [
+      { label: 'Your active contracts', href: '/contracts?tab=active'    },
+      { label: 'Contract history',      href: '/contracts?tab=completed' },
+      { label: 'Hourly work diary',     href: '/my-jobs'                 },
+    ],
+  },
+];
+
+const MANAGE_FINANCES = [
+  {
+    heading: null,
+    items: [
+      { label: 'Financial overview',      href: '/payments' },
+      { label: 'Your reports',            href: '/reports' },
+      { label: 'Billings and earnings',   href: '/payments' },
+      { label: 'Transactions',            href: '/payments' },
+      { label: 'Certificate of earnings', href: '/payments', external: true },
+    ],
+  },
+  {
+    heading: 'Payments',
+    headingStyle: 'label',
+    items: [
+      { label: 'Withdraw earnings', href: '/payments' },
+    ],
+  },
+  {
+    heading: 'Taxes',
+    headingStyle: 'label',
+    items: [
+      { label: 'Tax forms',       href: '/payments' },
+      { label: 'Tax information', href: '/payments' },
     ],
   },
 ];
@@ -73,8 +110,8 @@ const MANAGE_WORK = [
   {
     heading: 'Active and past work',
     items: [
-      { label: 'Your contracts',           href: '/my-jobs' },
-      { label: 'Hourly contract activity', href: '/my-jobs' },
+      { label: 'Your contracts',           href: '/contracts' },
+      { label: 'Hourly contract activity', href: '/contracts' },
     ],
   },
   {
@@ -245,8 +282,8 @@ const FIND_WORK_CATS = [
 ];
 
 const FIND_WORK_FOOTER = [
-  { label: 'See all jobs',        href: '/jobs' },
-  { label: 'Win work with ads',   href: '/jobs' },
+  { label: 'See all jobs',        href: '/search?type=jobs' },
+  { label: 'Win work with ads',   href: '/search?type=jobs' },
   { label: 'Ways to earn',        href: '/how-it-works' },
 ];
 
@@ -345,7 +382,7 @@ export default function GlobalNavbar() {
   const mobileNavItems = !token
     ? [
         { label: 'Find Talent', href: '/freelancers' },
-        { label: 'Find Work',   href: '/jobs' },
+        { label: 'Find Work',   href: '/search?type=jobs' },
         { label: 'Pricing',     href: '/pricing' },
         { label: 'Enterprise',  href: '/enterprise' },
         { label: 'How it works', href: '/how-it-works' },
@@ -365,7 +402,7 @@ export default function GlobalNavbar() {
     : isFreelancer
     ? [
         { label: 'Dashboard',     href: '/freelancer/dashboard' },
-        { label: 'Find Work',     href: '/jobs' },
+        { label: 'Find Work',     href: '/search?type=jobs' },
         { label: 'My Proposals',  href: '/my-proposals' },
         { label: 'My Jobs',       href: '/my-jobs' },
         { label: 'Messages',      href: '/messages' },
@@ -377,7 +414,7 @@ export default function GlobalNavbar() {
     : [
         { label: 'Admin Dashboard', href: '/admin/dashboard' },
         { label: 'Users',           href: '/freelancers' },
-        { label: 'Jobs',            href: '/jobs' },
+        { label: 'Jobs',            href: '/search?type=jobs' },
         { label: 'Messages',        href: '/messages' },
         { label: 'Payments',        href: '/payments' },
       ];
@@ -415,34 +452,47 @@ export default function GlobalNavbar() {
         {/* ── Authenticated nav ── */}
         {token && (
           <div className="hidden md:flex items-center gap-0 flex-1">
-            {isClient ? (
-              <Trigger label="Hire talent" isOpen={openMenu === 'talent'} onEnter={() => open('talent')} onLeave={close}>
-                <PlainGrouped sections={HIRE_TALENT} onGo={go} width={240} />
-              </Trigger>
-            ) : isFreelancer ? (
-              <Trigger label="Find work" isOpen={openMenu === 'talent'} onEnter={() => open('talent')} onLeave={close}>
-                <PlainGrouped sections={FIND_WORK} onGo={go} width={220} />
-              </Trigger>
+            {isFreelancer ? (
+              <>
+                <Trigger label="Find work" isOpen={openMenu === 'talent'} onEnter={() => open('talent')} onLeave={close}>
+                  <PlainGrouped sections={FIND_WORK} onGo={go} width={230} />
+                </Trigger>
+                <Trigger label="Deliver work" isOpen={openMenu === 'manage'} onEnter={() => open('manage')} onLeave={close}>
+                  <PlainGrouped sections={DELIVER_WORK} onGo={go} width={230} />
+                </Trigger>
+                <Trigger label="Manage finances" isOpen={openMenu === 'reports'} onEnter={() => open('reports')} onLeave={close}>
+                  <PlainGrouped sections={MANAGE_FINANCES} onGo={go} width={250} />
+                </Trigger>
+              </>
+            ) : isClient ? (
+              <>
+                <Trigger label="Hire talent" isOpen={openMenu === 'talent'} onEnter={() => open('talent')} onLeave={close}>
+                  <PlainGrouped sections={HIRE_TALENT} onGo={go} width={240} />
+                </Trigger>
+                <Trigger label="Manage work" isOpen={openMenu === 'manage'} onEnter={() => open('manage')} onLeave={close}>
+                  <PlainGrouped sections={MANAGE_WORK} onGo={go} width={230} />
+                </Trigger>
+                <Trigger label="Reports" isOpen={openMenu === 'reports'} onEnter={() => open('reports')} onLeave={close}>
+                  <div className="py-2" style={{ width: 240 }}>
+                    {REPORTS.map((item) => (
+                      <button key={item.label} onClick={() => go(item.href)}
+                        className="w-full text-left px-4 py-2.5 text-[13px] text-dark-300 hover:bg-dark-800 hover:text-dark-100 transition-colors">
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </Trigger>
+              </>
             ) : (
-              <Trigger label="Find Talent" isOpen={openMenu === 'talent'} onEnter={() => { open('talent'); setActiveCat(0); }} onLeave={close}>
-                <MegaMenu cats={TALENT_CATS} activeCat={activeCat} setActiveCat={setActiveCat} onGo={go} onClose={() => setOpenMenu(null)} />
-              </Trigger>
+              <>
+                <Trigger label="Find Talent" isOpen={openMenu === 'talent'} onEnter={() => { open('talent'); setActiveCat(0); }} onLeave={close}>
+                  <MegaMenu cats={TALENT_CATS} activeCat={activeCat} setActiveCat={setActiveCat} onGo={go} onClose={() => setOpenMenu(null)} />
+                </Trigger>
+                <Trigger label="Manage work" isOpen={openMenu === 'manage'} onEnter={() => open('manage')} onLeave={close}>
+                  <PlainGrouped sections={MANAGE_WORK} onGo={go} width={230} />
+                </Trigger>
+              </>
             )}
-
-            <Trigger label="Manage work" isOpen={openMenu === 'manage'} onEnter={() => open('manage')} onLeave={close}>
-              <PlainGrouped sections={MANAGE_WORK} onGo={go} width={230} />
-            </Trigger>
-
-            <Trigger label="Reports" isOpen={openMenu === 'reports'} onEnter={() => open('reports')} onLeave={close}>
-              <div className="py-2" style={{ width: 240 }}>
-                {REPORTS.map((item) => (
-                  <button key={item.label} onClick={() => go(item.href)}
-                    className="w-full text-left px-4 py-2.5 text-[13px] text-dark-300 hover:bg-dark-800 hover:text-dark-100 transition-colors">
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </Trigger>
 
             <Link to="/messages"
               className="px-3 py-2 text-[13px] font-medium text-dark-400 hover:bg-dark-800/70 hover:text-dark-100 rounded-lg transition-all">
@@ -573,15 +623,10 @@ export default function GlobalNavbar() {
                   >
                     {/* User header */}
                     <div className="px-4 py-3.5 flex items-center gap-3 border-b border-dark-800">
-                      <UserAvatar user={user} size={36} className="ring-2 ring-dark-700 shrink-0" />
+                      <UserAvatar user={user} size={40} className="ring-2 ring-dark-700 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[13px] font-semibold text-dark-100 truncate">{user?.name}</span>
-                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-dark-800 text-dark-400 border border-dark-700">
-                            Free
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-dark-500 truncate mt-0.5">{user?.email}</div>
+                        <div className="text-[13px] font-semibold text-dark-100 truncate">{user?.name}</div>
+                        <div className="text-[11px] text-dark-400 capitalize truncate mt-0.5">{user?.role}</div>
                       </div>
                     </div>
 
@@ -599,22 +644,25 @@ export default function GlobalNavbar() {
                       </button>
                     </div>
 
-                    {/* Upgrade CTA */}
-                    <div className="px-4 py-2.5 border-b border-dark-800">
-                      <button onClick={() => go('/settings')}
-                        className="w-full text-left px-3 py-2.5 rounded-xl border border-yellow-500/25 bg-yellow-500/8 hover:bg-yellow-500/12 transition-colors">
-                        <div className="text-[13px] font-semibold text-yellow-400">Try Business Plus →</div>
-                        <div className="text-[11px] text-yellow-600/80 mt-0.5 leading-snug">
-                          Upgrade for faster access to the top 1% of talent.
-                        </div>
-                      </button>
-                    </div>
-
                     {/* Menu items */}
                     <div className="py-1 border-b border-dark-800">
+                      <PRow icon={User}        label="Your profile"      onClick={() => go(isFreelancer ? '/freelancer/profile' : '/settings')} />
+                      {isFreelancer && (
+                        <PRow icon={TrendingUp} label="Stats and trends"  onClick={() => go('/reports')} />
+                      )}
                       <PRow icon={ShieldCheck} label="Account health"    onClick={() => go('/settings')} />
                       <PRow icon={BadgeCheck}  label="Membership plan"   onClick={() => go('/settings')} />
-                      <PRow icon={UserPlus}    label="Invite a coworker" onClick={() => go('/settings')} />
+                      {isFreelancer && (
+                        <button
+                          onClick={() => go('/settings')}
+                          className="w-full flex items-center gap-2.5 px-4 py-2 text-[13px] text-dark-300 hover:bg-dark-800/70 hover:text-dark-100 transition-colors">
+                          <Zap className="w-3.5 h-3.5 text-dark-500 shrink-0" strokeWidth={1.75} />
+                          <span>Connects</span>
+                          <span className="ml-auto text-[11px] text-dark-500 font-medium">
+                            {user?.subscription?.connects_balance ?? 0} left
+                          </span>
+                        </button>
+                      )}
 
                       {/* Theme submenu */}
                       <div>
@@ -849,8 +897,9 @@ function PlainGrouped({ sections, onGo, width }) {
             <button
               key={item.label}
               onClick={() => onGo(item.href)}
-              className="w-full text-left px-4 py-2 text-[13px] text-dark-300 hover:bg-dark-800/70 hover:text-dark-100 transition-colors leading-snug">
-              {item.label}
+              className="w-full text-left px-4 py-2 text-[13px] text-dark-300 hover:bg-dark-800/70 hover:text-dark-100 transition-colors leading-snug flex items-center gap-1.5">
+              <span className="flex-1">{item.label}</span>
+              {item.external && <ExternalLink className="w-3 h-3 text-dark-600 shrink-0" strokeWidth={1.75} />}
             </button>
           ))}
         </div>

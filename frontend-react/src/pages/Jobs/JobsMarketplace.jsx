@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Bookmark, BookmarkCheck, DollarSign, BarChart3,
-  FileText, MapPin, Clock, ChevronDown, SlidersHorizontal,
+  FileText, MapPin, ChevronDown, SlidersHorizontal,
   Briefcase, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { api } from '../../api';
@@ -11,52 +11,54 @@ import useAuthStore from '../../store/authStore';
 import toast from 'react-hot-toast';
 
 const SORT_OPTIONS = [
-  { value: 'created_at', label: 'Newest first' },
-  { value: 'budget_max', label: 'Highest budget' },
+  { value: 'created_at',      label: 'Newest first' },
+  { value: 'budget_max',      label: 'Highest budget' },
   { value: 'proposals_count', label: 'Fewest proposals' },
 ];
 
 const EXP_LEVELS = [
-  { v: '', l: 'All Levels' },
-  { v: 'entry', l: 'Entry Level' },
+  { v: '',             l: 'All Levels' },
+  { v: 'entry',        l: 'Entry Level' },
   { v: 'intermediate', l: 'Intermediate' },
-  { v: 'expert', l: 'Expert' },
+  { v: 'expert',       l: 'Expert' },
 ];
 
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
+  initial:    { opacity: 0, y: 12 },
+  animate:    { opacity: 1, y: 0 },
   transition: { duration: 0.35, delay, ease: [0.4, 0, 0.2, 1] },
 });
 
 export default function JobsMarketplace() {
-  const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const { user } = useAuthStore();
+  const navigate   = useNavigate();
+  const [params]   = useSearchParams();
+  const { user }   = useAuthStore();
 
-  const [jobs, setJobs] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [meta, setMeta] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [savedJobs, setSavedJobs] = useState(new Set());
-  const [sortOpen, setSortOpen] = useState(false);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [jobs,             setJobs]             = useState([]);
+  const [categories,       setCategories]       = useState([]);
+  const [meta,             setMeta]             = useState({});
+  const [loading,          setLoading]          = useState(true);
+  const [savedJobs,        setSavedJobs]        = useState(new Set());
+  const [sortOpen,         setSortOpen]         = useState(false);
+  const [mobileFiltersOpen,setMobileFiltersOpen]= useState(false);
 
   const [filters, setFilters] = useState({
-    search: params.get('search') || '',
-    category_id: params.get('category_id') || '',
-    job_type: '',
+    search:           params.get('search') || '',
+    category_id:      params.get('category_id') || '',
+    job_type:         '',
     experience_level: '',
-    budget_min: '',
-    budget_max: '',
-    sort: 'created_at',
-    page: 1,
+    budget_min:       '',
+    budget_max:       '',
+    sort:             'created_at',
+    page:             1,
   });
 
   const fetchJobs = useCallback(async (f = filters) => {
     setLoading(true);
     try {
-      const clean = Object.fromEntries(Object.entries(f).filter(([, v]) => v !== '' && v !== null));
+      const clean = Object.fromEntries(
+        Object.entries(f).filter(([, v]) => v !== '' && v !== null)
+      );
       const res = await api.jobs.list(clean);
       setJobs(res.data.data?.data || []);
       setMeta(res.data.data?.meta || {});
@@ -69,16 +71,25 @@ export default function JobsMarketplace() {
 
   useEffect(() => {
     api.jobs.categories().then((r) => setCategories(r.data.data || []));
+    if (user) {
+      api.jobs.getSaved({ per_page: 200 })
+        .then((r) => {
+          const ids = (r.data.data?.data || []).map((j) => j.id);
+          setSavedJobs(new Set(ids));
+        })
+        .catch(() => {});
+    }
   }, []);
+
+  // Sync search from URL params (set by NavSearch in the top navbar)
+  useEffect(() => {
+    const s = params.get('search') || '';
+    setFilters((f) => (f.search === s ? f : { ...f, search: s, page: 1 }));
+  }, [params]);
 
   useEffect(() => {
     fetchJobs(filters);
-  }, [filters.page, filters.sort, filters.category_id, filters.job_type, filters.experience_level]);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchJobs({ ...filters, page: 1 });
-  };
+  }, [filters.page, filters.sort, filters.category_id, filters.job_type, filters.experience_level, filters.search]);
 
   const updateFilter = (k, v) => setFilters((f) => ({ ...f, [k]: v, page: 1 }));
 
@@ -96,47 +107,48 @@ export default function JobsMarketplace() {
     }
   };
 
-  const budgetLabel = (job) => {
-    if (job.job_type === 'hourly') return `$${job.budget_min}–$${job.budget_max}/hr`;
-    return `$${job.budget_min}–$${job.budget_max}`;
-  };
+  const budgetLabel = (job) =>
+    job.job_type === 'hourly'
+      ? `$${job.budget_min}–$${job.budget_max}/hr`
+      : `$${job.budget_min}–$${job.budget_max}`;
 
   const timeAgo = (date) => {
-    const diff = Date.now() - new Date(date);
-    const h = Math.floor(diff / 3600000);
-    if (h < 24) return `${h}h ago`;
-    return `${Math.floor(h / 24)}d ago`;
+    const h = Math.floor((Date.now() - new Date(date)) / 3600000);
+    return h < 24 ? `${h}h ago` : `${Math.floor(h / 24)}d ago`;
   };
 
   const selectedSort = SORT_OPTIONS.find((o) => o.value === filters.sort);
 
   return (
     <div className="max-w-6xl mx-auto space-y-5">
-      {/* Header */}
+
+      {/* ── Page header ── */}
       <motion.div {...fadeUp(0)}>
         <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">Find Work</h1>
-        <p className="text-sm text-dark-500 mt-1">Browse {meta.total || 0} available opportunities</p>
+        <p className="text-sm text-dark-500 mt-1">
+          Browse {meta.total || 0} available opportunities
+        </p>
       </motion.div>
 
-      {/* Search bar */}
-      <motion.form {...fadeUp(0.05)} onSubmit={handleSearch} className="flex gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500" strokeWidth={2} />
-          <input
-            value={filters.search}
-            onChange={(e) => updateFilter('search', e.target.value)}
-            className="input pl-10"
-            placeholder="Search by title, skill, or keyword…"
-          />
-        </div>
-        <button type="submit" className="btn btn-primary px-6 gap-2">
-          <Search className="w-3.5 h-3.5" strokeWidth={2} />
-          Search
-        </button>
-      </motion.form>
+      {/* ── Active search pill (only when navbar search is active) ── */}
+      {filters.search && (
+        <motion.div {...fadeUp(0.03)} className="flex items-center gap-2">
+          <span className="text-sm text-dark-400">Results for:</span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-500/10 border border-primary-500/30 text-primary-300 text-sm font-semibold">
+            "{filters.search}"
+            <button
+              onClick={() => updateFilter('search', '')}
+              className="ml-1 text-primary-400 hover:text-white transition-colors"
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          </span>
+        </motion.div>
+      )}
 
-      {/* Mobile filter toggle */}
-      <div className="lg:hidden -mb-2">
+      {/* ── Mobile filter toggle ── */}
+      <div className="lg:hidden">
         <button
           onClick={() => setMobileFiltersOpen((v) => !v)}
           className="flex items-center gap-2 px-4 py-2 rounded-full border border-dark-700 bg-dark-900 text-xs font-semibold text-dark-100 hover:border-dark-500 transition-colors"
@@ -147,14 +159,22 @@ export default function JobsMarketplace() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Filters sidebar — collapsible on mobile */}
-        <motion.aside {...fadeUp(0.08)} className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block w-full lg:w-56 lg:shrink-0 space-y-5`}>
+
+        {/* ── Filters sidebar ── */}
+        <motion.aside
+          {...fadeUp(0.05)}
+          className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block w-full lg:w-56 lg:shrink-0 space-y-5`}
+        >
           {/* Category */}
           <div className="card p-4 space-y-1">
             <p className="text-2xs font-semibold text-dark-500 uppercase tracking-widest mb-2 px-1">Category</p>
             <button
               onClick={() => updateFilter('category_id', '')}
-              className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${!filters.category_id ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'}`}
+              className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${
+                !filters.category_id
+                  ? 'bg-primary-500/10 text-primary-400'
+                  : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'
+              }`}
             >
               All Categories
             </button>
@@ -162,7 +182,11 @@ export default function JobsMarketplace() {
               <button
                 key={c.id}
                 onClick={() => updateFilter('category_id', c.id)}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${filters.category_id == c.id ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'}`}
+                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${
+                  filters.category_id == c.id
+                    ? 'bg-primary-500/10 text-primary-400'
+                    : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'
+                }`}
               >
                 {c.name}
               </button>
@@ -172,11 +196,19 @@ export default function JobsMarketplace() {
           {/* Job type */}
           <div className="card p-4 space-y-1">
             <p className="text-2xs font-semibold text-dark-500 uppercase tracking-widest mb-2 px-1">Job Type</p>
-            {[{ v: '', l: 'All Types' }, { v: 'hourly', l: 'Hourly Rate' }, { v: 'fixed', l: 'Fixed Price' }].map((o) => (
+            {[
+              { v: '',       l: 'All Types' },
+              { v: 'hourly', l: 'Hourly Rate' },
+              { v: 'fixed',  l: 'Fixed Price' },
+            ].map((o) => (
               <button
                 key={o.v}
                 onClick={() => updateFilter('job_type', o.v)}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${filters.job_type === o.v ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'}`}
+                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${
+                  filters.job_type === o.v
+                    ? 'bg-primary-500/10 text-primary-400'
+                    : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'
+                }`}
               >
                 {o.l}
               </button>
@@ -190,7 +222,11 @@ export default function JobsMarketplace() {
               <button
                 key={o.v}
                 onClick={() => updateFilter('experience_level', o.v)}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${filters.experience_level === o.v ? 'bg-primary-500/10 text-primary-400' : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'}`}
+                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${
+                  filters.experience_level === o.v
+                    ? 'bg-primary-500/10 text-primary-400'
+                    : 'text-dark-400 hover:text-dark-100 hover:bg-dark-800/70'
+                }`}
               >
                 {o.l}
               </button>
@@ -216,16 +252,20 @@ export default function JobsMarketplace() {
                 className="input input-sm flex-1 text-xs"
               />
             </div>
-            <button onClick={() => fetchJobs({ ...filters, page: 1 })} className="btn btn-ghost btn-sm w-full text-xs">
+            <button
+              onClick={() => fetchJobs({ ...filters, page: 1 })}
+              className="btn btn-ghost btn-sm w-full text-xs"
+            >
               Apply Range
             </button>
           </div>
         </motion.aside>
 
-        {/* Jobs list */}
+        {/* ── Jobs list ── */}
         <div className="flex-1 min-w-0 space-y-4">
+
           {/* Sort bar */}
-          <motion.div {...fadeUp(0.1)} className="flex items-center justify-between">
+          <motion.div {...fadeUp(0.08)} className="flex items-center justify-between">
             <span className="text-sm text-dark-500 flex items-center gap-1.5">
               <SlidersHorizontal className="w-3.5 h-3.5" strokeWidth={2} />
               {loading ? 'Loading…' : `${meta.total || 0} jobs found`}
@@ -251,7 +291,11 @@ export default function JobsMarketplace() {
                       <button
                         key={o.value}
                         onClick={() => { updateFilter('sort', o.value); setSortOpen(false); }}
-                        className={`w-full text-left px-3.5 py-2.5 text-sm transition-colors ${filters.sort === o.value ? 'text-primary-400 bg-primary-500/10' : 'text-dark-300 hover:bg-dark-800'}`}
+                        className={`w-full text-left px-3.5 py-2.5 text-sm transition-colors ${
+                          filters.sort === o.value
+                            ? 'text-primary-400 bg-primary-500/10'
+                            : 'text-dark-300 hover:bg-dark-800'
+                        }`}
                       >
                         {o.label}
                       </button>
@@ -262,6 +306,7 @@ export default function JobsMarketplace() {
             </div>
           </motion.div>
 
+          {/* Job cards / skeleton / empty */}
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
@@ -284,7 +329,7 @@ export default function JobsMarketplace() {
                 <Search className="w-7 h-7 text-dark-600" strokeWidth={1.5} />
               </div>
               <h3 className="text-base font-semibold text-white mb-2">No jobs found</h3>
-              <p className="text-sm text-dark-500">Try adjusting your filters or search terms</p>
+              <p className="text-sm text-dark-500">Try adjusting your filters or use the search bar in the top navigation</p>
             </motion.div>
           ) : (
             <AnimatePresence>
@@ -305,7 +350,9 @@ export default function JobsMarketplace() {
                             {job.title}
                           </h3>
                           {job.is_featured && (
-                            <span className="badge text-2xs bg-yellow-500/10 text-yellow-400 border-yellow-500/20">Featured</span>
+                            <span className="badge text-2xs bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+                              Featured
+                            </span>
                           )}
                         </div>
                         <p className="text-xs text-dark-500 mb-2">
@@ -319,7 +366,9 @@ export default function JobsMarketplace() {
                               <span key={s} className="badge badge-primary text-2xs">{s}</span>
                             ))}
                             {job.skills_required.length > 5 && (
-                              <span className="text-xs text-dark-600">+{job.skills_required.length - 5}</span>
+                              <span className="text-xs text-dark-600">
+                                +{job.skills_required.length - 5}
+                              </span>
                             )}
                           </div>
                         )}
@@ -352,7 +401,7 @@ export default function JobsMarketplace() {
                       >
                         {savedJobs.has(job.id)
                           ? <BookmarkCheck className="w-4 h-4 text-primary-400" strokeWidth={2} />
-                          : <Bookmark className="w-4 h-4" strokeWidth={1.75} />
+                          : <Bookmark      className="w-4 h-4"                  strokeWidth={1.75} />
                         }
                       </button>
                     </div>
@@ -370,20 +419,21 @@ export default function JobsMarketplace() {
                 disabled={filters.page === 1}
                 className="btn btn-ghost btn-sm gap-1 disabled:opacity-40"
               >
-                <ChevronLeft className="w-3.5 h-3.5" strokeWidth={2} />
-                Prev
+                <ChevronLeft className="w-3.5 h-3.5" strokeWidth={2} /> Prev
               </button>
-              <span className="text-sm text-dark-400 px-2">Page {filters.page} of {meta.last_page}</span>
+              <span className="text-sm text-dark-400 px-2">
+                Page {filters.page} of {meta.last_page}
+              </span>
               <button
                 onClick={() => updateFilter('page', Math.min(meta.last_page, filters.page + 1))}
                 disabled={filters.page === meta.last_page}
                 className="btn btn-ghost btn-sm gap-1 disabled:opacity-40"
               >
-                Next
-                <ChevronRight className="w-3.5 h-3.5" strokeWidth={2} />
+                Next <ChevronRight className="w-3.5 h-3.5" strokeWidth={2} />
               </button>
             </div>
           )}
+
         </div>
       </div>
     </div>

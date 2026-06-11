@@ -197,6 +197,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{job}',         [JobController::class, 'destroy']);
         Route::post('/{job}/save',      [JobController::class, 'save']);
         Route::get('/my/postings',      [JobController::class, 'myJobs']);
+        Route::get('/my/saved',         [JobController::class, 'mySavedJobs']);
 
         // Proposals
         Route::get('/{job}/proposals',  [ProposalController::class, 'index']);

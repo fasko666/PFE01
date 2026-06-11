@@ -50,7 +50,7 @@ export default function MyProposals() {
           <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">My Proposals</h1>
           <p className="text-sm text-dark-500 mt-1">{proposals.length} proposals submitted</p>
         </div>
-        <Link to="/jobs" className="btn btn-primary btn-sm gap-1.5">
+        <Link to="/search?type=jobs" className="btn btn-primary btn-sm gap-1.5">
           <Search className="w-3.5 h-3.5" strokeWidth={2} />
           Find More Jobs
         </Link>
@@ -98,7 +98,7 @@ export default function MyProposals() {
             {filter !== 'all' ? `No ${filter} proposals` : 'No proposals yet'}
           </p>
           <p className="text-xs text-dark-600 mb-5">Start applying to jobs to see your proposals here</p>
-          <Link to="/jobs" className="btn btn-primary btn-sm inline-flex gap-1.5">
+          <Link to="/search?type=jobs" className="btn btn-primary btn-sm inline-flex gap-1.5">
             <Search className="w-3.5 h-3.5" strokeWidth={2} />
             Browse Jobs
           </Link>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Chapitre 6 : Bilan et perspectives."""
-from blocks_helpers import H1, H2, P, B, NOTE
+from blocks_helpers import H1, H2, P, B, NOTE, TBL
 
 
 def ch6():
@@ -71,17 +71,48 @@ def ch6():
           "pistes d'amélioration."),
 
         H2("V", "Perspectives d'évolution"),
-        P("Panda a été conçue pour évoluer. Plusieurs axes d'enrichissement se dessinent naturellement :"),
-        B(["**Application mobile native** (iOS/Android) consommant l'API existante ;",
-           "**Internationalisation** : multi-langues et multi-devises, avec conversion et conformité fiscale ;",
-           "**Recommandation avancée** : moteur de mise en correspondance plus fin, fondé sur l'IA et "
-           "l'historique des collaborations ;",
-           "**Tableau de bord analytique** enrichi pour les freelances, les agences et l'administration ;",
-           "**Programme de confiance** : badges, niveaux, garanties et résolution de litiges assistée ;",
-           "**Passage à l'échelle** : mise en cache avancée, montée en charge horizontale, observabilité "
-           "(métriques, traces, alertes)."]),
+        P("Panda a été conçue pour évoluer. Plusieurs axes d'enrichissement se dessinent naturellement, "
+          "regroupés ci-dessous par ordre de priorité et d'impact attendu."),
+        TBL(["Axe d'évolution", "Description", "Impact attendu"],
+            [["Application mobile native", "Application iOS/Android consommant l'API REST existante, "
+                                           "avec notifications push natives", "Portée élargie"],
+             ["Internationalisation", "Support multi-langues (i18n) et multi-devises avec conversion "
+                                      "en temps réel et conformité fiscale par pays", "Expansion géographique"],
+             ["Recommandation IA avancée", "Moteur de mise en correspondance fondé sur l'historique "
+                                           "des collaborations, les compétences et les évaluations", "Qualité des mises en relation"],
+             ["Tableau de bord analytique", "Statistiques détaillées pour freelances (revenus, taux "
+                                            "d'acceptation) et administration (KPIs financiers, GMV)", "Pilotage et rétention"],
+             ["Programme de confiance", "Badges de certification, niveaux d'expérience, garanties "
+                                        "de remboursement et résolution assistée des litiges", "Confiance et conversion"],
+             ["Passage à l'échelle", "Cache avancé, CDN, montée en charge horizontale, "
+                                     "observabilité (Prometheus, Grafana, alertes)", "Performance et fiabilité"],
+             ["Intégrations comptables", "Export vers des outils de facturation et de comptabilité "
+                                         "(QuickBooks, Zoho, Sage) pour les agences et freelances", "Valeur pour les pros"],
+             ["Messagerie vocale/vidéo", "Appels intégrés entre clients et freelances, sans quitter "
+                                         "la plateforme, pour accélérer les prises de décision", "Collaboration enrichie"]],
+            caption="Axes d'évolution envisagés pour la plateforme Panda",
+            widths=[0.26, 0.52, 0.22]),
 
-        H2("VI", "Conclusion du chapitre"),
+        H2("VI", "Synthèse du projet"),
+        P("Le tableau suivant dresse une synthèse comparative du projet, en regard des objectifs initiaux "
+          "fixés dans le cahier des charges."),
+        TBL(["Objectif initial", "Réalisé ?", "Observations"],
+            [["Authentification multi-rôles (Sanctum, 2FA, OAuth)", "Oui", "Complète : email, Google, 2FA TOTP"],
+             ["Gestion des profils freelance, client, agence", "Oui", "Profils riches avec portfolio et compétences"],
+             ["Offres, propositions et catalogue de services", "Oui", "Deux modèles complets (appels d'offres + catalogue)"],
+             ["Contrats, jalons, suivi du temps, fichiers", "Oui", "Extensions, activité et PDF de contrat inclus"],
+             ["Moteur de paiement par séquestre (escrow)", "Oui", "LedgerService avec double-entrée et idempotence"],
+             ["Messagerie temps réel (WebSockets)", "Oui", "Laravel Reverb + Echo, réactions et pièces jointes"],
+             ["Intelligence artificielle (5 services)", "Oui", "Génération, matching, analyse, recherche, assistant"],
+             ["Vérification d'identité KYC", "Oui", "Upload documents, revue admin, badge profil"],
+             ["Back-office d'administration complet", "Oui", "Dashboard, modération, KYC, finance, retraits"],
+             ["Déploiement conteneurisé Docker", "Oui", "Docker Compose avec nginx, PHP-FPM, MySQL, Redis, Reverb"],
+             ["Tests automatisés", "Oui", "PHPUnit : unitaires + fonctionnels, moteur financier couvert"],
+             ["Abonnements (plans payants)", "Partiel", "Structure en place, flows de paiement à affiner"]],
+            caption="Récapitulatif des objectifs initiaux et de leur réalisation",
+            widths=[0.44, 0.12, 0.44]),
+
+        H2("VII", "Conclusion du chapitre"),
         P("Ce chapitre a dressé un bilan globalement très positif : Panda a permis de mobiliser un large "
           "spectre de compétences et de livrer une plateforme cohérente et ambitieuse. Les difficultés "
           "rencontrées ont nourri des apprentissages durables, et les limites identifiées ouvrent des "

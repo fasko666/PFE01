@@ -672,7 +672,7 @@ export default function Messages() {
             </div>
             <h3 className="text-base font-semibold text-white mb-2">Welcome to Messages</h3>
             <p className="text-xs text-dark-500 leading-relaxed mb-6">Once you connect with a client, you'll be able to send and receive messages here.</p>
-            <Link to="/jobs" className="btn btn-primary btn-sm inline-flex gap-1.5">
+            <Link to="/search?type=jobs" className="btn btn-primary btn-sm inline-flex gap-1.5">
               Search for jobs <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

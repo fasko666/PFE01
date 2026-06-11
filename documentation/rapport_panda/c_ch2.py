@@ -149,12 +149,188 @@ def ch2():
         H2("V", "Diagramme de cas d'utilisation global"),
         P("Le diagramme de cas d'utilisation global synthétise les interactions entre les acteurs et les "
           "grandes fonctionnalités du système. Chaque *cas d'utilisation* représente une unité de service "
-          "rendue à un acteur. La figure suivante présente cette vue d'ensemble."),
-        FIG("usecase", "Diagramme de cas d'utilisation global de la plateforme Panda"),
-        P("On observe que de nombreux cas dépendent du cas *« S'authentifier »* (relation d'inclusion) et "
+          "rendue à un acteur. En raison de sa richesse fonctionnelle, le diagramme complet est présenté "
+          "en **trois parties** successives, chacune couvrant un ensemble cohérent de modules."),
+
+        H3("a", "Partie 1 — Authentification, Administrateur & Annonces"),
+        P("La première partie couvre les modules fondamentaux : la gestion du compte (inscription, "
+          "connexion, 2FA, OAuth, KYC), l'espace administrateur et la place de marché des annonces. "
+          "On y observe que **S'authentifier** est la porte d'entrée systématique — toutes les actions "
+          "métier en dépendent par inclusion. L'Administrateur dispose de cas exclusifs (modération, "
+          "arbitrage, vérification KYC) inaccessibles aux autres rôles."),
+        FIG("usecase_part1", "Diagramme de cas d'utilisation — Partie 1 : Authentification, Administrateur & Annonces"),
+        B(["**Acteurs** : Visiteur, Client, Freelance, Administrateur ;",
+           "**Cas clés** : Créer un compte, Se connecter (email / Google OAuth), Activer la 2FA, "
+              "Réinitialiser le mot de passe, Vérifier l'identité (KYC) ;",
+           "**Administrateur** : Gérer les utilisateurs, Valider les vérifications KYC, "
+              "Modérer le catalogue, Consulter le tableau de bord ;",
+           "**Annonces** : Publier une offre (Client), Rechercher des freelances, "
+              "Consulter les profils, Enregistrer des favoris."]),
+
+        H3("b", "Partie 2 — Catalogue, Contrats, Paiements & Communication"),
+        P("La deuxième partie décrit le cœur opérationnel de la plateforme : la création et l'achat de "
+          "services packagés (catalogue), la gestion complète du cycle de vie d'un contrat (jalons, "
+          "fichiers, suivi du temps, extensions), le moteur de paiement par séquestre et la messagerie "
+          "temps réel. C'est ici que la valeur centrale de Panda — **la confiance financière** — est "
+          "pleinement matérialisée. Les acteurs externes Stripe et Laravel Reverb interviennent "
+          "respectivement sur les paiements et la communication."),
+        FIG("usecase_part2", "Diagramme de cas d'utilisation — Partie 2 : Catalogue, Contrats, Paiements & Communication"),
+        B(["**Catalogue** : Créer un service packagé (Freelance), Passer commande (Client), "
+              "Livrer une commande, Évaluer la prestation ;",
+           "**Contrats** : Créer un jalon, Soumettre/approuver/rejeter un jalon, "
+              "Partager des fichiers, Suivre le temps, Demander une extension ;",
+           "**Paiements** : Déposer des fonds (via Stripe), Financer le séquestre, "
+              "Libérer un jalon, Demander un retrait, Gérer les litiges ;",
+           "**Communication** : Envoyer/recevoir des messages (temps réel), "
+              "Partager des pièces jointes, Réagir aux messages."]),
+
+        H3("c", "Partie 3 — Notifications, Agences, IA & Marketplace"),
+        P("La troisième partie regroupe les modules transverses et enrichissants : le système de "
+          "notifications (in-app et Web Push), la gestion des agences et des listes de talents, "
+          "l'assistant d'intelligence artificielle et la place de marché des freelances. Elle illustre "
+          "les fonctionnalités différenciantes de Panda par rapport aux plateformes classiques : "
+          "l'IA pour accélérer les tâches répétitives et les agences pour structurer les équipes "
+          "de freelances."),
+        FIG("usecase_part3", "Diagramme de cas d'utilisation — Partie 3 : Notifications, IA, Agences & Marketplace"),
+        B(["**Notifications** : Recevoir des alertes in-app, Activer les notifications Web Push, "
+              "Gérer les préférences de notification ;",
+           "**IA** : Générer une proposition, Obtenir une mise en correspondance, "
+              "Analyser un profil, Recherche intelligente, Assistant conversationnel ;",
+           "**Agences** : Créer une agence, Inviter des membres, Gérer les membres, "
+              "Transférer la propriété ;",
+           "**Talents** : Constituer une liste de talents, Gérer les favoris."]),
+        P("Ce diagramme complet couvre neuf modules fonctionnels distincts. On observe que de nombreux "
+          "cas dépendent du cas *« S'authentifier »* (relation d'inclusion) et "
           "que les acteurs externes (Stripe, IA) interviennent en support de cas spécifiques. Les rôles "
           "Client et Freelance partagent certains cas transverses (messagerie, gestion du profil), tandis "
           "que l'Administrateur dispose de cas de supervision exclusifs."),
+
+        H3("1", "Module I — Authentification et gestion du compte"),
+        P("Ce module constitue le **point d'entrée** obligatoire de la plateforme. Tout utilisateur "
+          "doit s'authentifier avant d'accéder aux fonctionnalités principales. La relation "
+          "d'**inclusion** (*include*) entre la majorité des autres cas et « S'authentifier » "
+          "matérialise la contrainte de sécurité : aucune action métier n'est possible sans session "
+          "valide. Les cas d'utilisation couverts sont :"),
+        B(["**Créer un compte** : inscription par e-mail et mot de passe, avec vérification de l'adresse "
+           "e-mail par lien de confirmation envoyé automatiquement ;",
+           "**Se connecter** : authentification par identifiants ou via Google (OAuth 2.0) grâce à "
+           "Laravel Socialite — le jeton Bearer Sanctum est émis à l'issue de cette étape ;",
+           "**Activer / gérer la 2FA** : mise en place de l'authentification à deux facteurs (code "
+           "TOTP généré par application, codes de secours à usage unique) ;",
+           "**Réinitialiser le mot de passe** : envoi d'un lien signé et limité dans le temps par e-mail ;",
+           "**Vérifier l'identité (KYC)** : soumission de pièces justificatives pour validation "
+           "par l'administrateur avant l'accès aux fonctions financières ;",
+           "**Gérer le profil** : mise à jour des informations personnelles, avatar, biographie "
+           "et préférences de notification."]),
+
+        H3("2", "Module II — Espace Administrateur"),
+        P("L'administrateur dispose d'un espace de supervision qui lui permet de contrôler "
+          "l'ensemble de l'activité de la plateforme. Ses cas exclusifs sont :"),
+        B(["**Gérer les utilisateurs** : consultation, suspension ou suppression des comptes, "
+           "réinitialisation des accès en cas de compromission ;",
+           "**Modérer le catalogue** : approbation ou rejet des services soumis par les freelances, "
+           "avec communication du motif de refus ;",
+           "**Valider les vérifications d'identité (KYC)** : examen de la file de demandes "
+           "en attente, prise de décision et notification à l'utilisateur ;",
+           "**Gérer les retraits** : approbation ou refus des demandes de retrait des freelances, "
+           "déclenchement des versements Stripe Connect ;",
+           "**Arbitrer les litiges** : résolution des conflits entre clients et freelances, "
+           "avec possibilité de débloquer ou d'annuler un contrat gelé ;",
+           "**Consulter le tableau de bord** : statistiques globales (revenus, utilisateurs "
+           "actifs, commissions collectées, activité transactionnelle)."]),
+
+        H3("3", "Module III — Annonces et Freelances"),
+        P("Ce module couvre le premier modèle de mise en relation, à l'initiative du **client** "
+          "qui publie un besoin auquel les freelances répondent :"),
+        B(["**Publier une offre** : création d'une annonce avec titre, description, catégorie, "
+           "budget et type de mission (forfait ou tarif horaire) ;",
+           "**Rechercher des freelances** : filtrage multicritères par compétences, catégorie, "
+           "tarif, disponibilité et localisation géographique ;",
+           "**Consulter un profil freelance** : visualisation du portfolio, des compétences, "
+           "des évaluations et de l'historique de missions réalisées ;",
+           "**Enregistrer des favoris** : constitution de listes de talents pour accès rapide "
+           "lors de prochains projets ;",
+           "**Gérer son profil freelance** : renseignement du titre, de la biographie, "
+           "des compétences, du portfolio, de la disponibilité et du tarif horaire."]),
+
+        H3("4", "Module IV — Freelance et Services (Catalogue)"),
+        P("Ce module matérialise le second modèle de mise en relation, à l'initiative du "
+          "**freelance** qui propose des services packagés directement achetables :"),
+        B(["**Créer un service packagé** : définition de trois paliers (basique, standard, "
+           "premium) avec description, prix fixé, délai de livraison et liste des livrables ;",
+           "**Gérer son portfolio** : ajout et organisation de réalisations passées "
+           "illustrant les compétences et la qualité du travail du freelance ;",
+           "**Livrer une commande** : soumission des livrables dans le délai imparti, "
+           "communication avec le client, gestion des révisions demandées ;",
+           "**Gérer sa disponibilité** : paramétrage du statut (disponible, occupé, "
+           "en pause) et du délai de réponse moyen visible sur le profil public."]),
+
+        H3("5", "Module V — Propositions et Offres"),
+        P("Ce module gère le cycle de vie complet des propositions soumises par les "
+          "freelances en réponse aux offres publiées par les clients :"),
+        B(["**Soumettre une proposition** : rédaction d'une lettre de motivation, "
+           "fixation du montant proposé et du délai estimé ; l'assistant IA "
+           "peut générer un premier jet que le freelance édite et personnalise ;",
+           "**Consulter les propositions reçues** : le client visualise, compare "
+           "et évalue toutes les candidatures reçues sur son offre ;",
+           "**Accepter ou refuser une proposition** : l'acceptation déclenche "
+           "automatiquement la création d'un contrat actif entre les deux parties ;",
+           "**Retirer une proposition** : le freelance peut annuler sa candidature "
+           "tant qu'elle n'a pas encore été acceptée par le client."]),
+
+        H3("6", "Module VI — Gestion des Paiements (Séquestre / Escrow)"),
+        P("Ce module est le **cœur financier** de la plateforme. Il implémente le "
+          "mécanisme de séquestre qui garantit la confiance entre les parties :"),
+        B(["**Déposer des fonds** : alimentation du portefeuille via Stripe Checkout ; "
+           "la confirmation du paiement arrive de façon asynchrone par webhook signé ;",
+           "**Financer le séquestre** : le client bloque les fonds d'un contrat ; "
+           "ils quittent son solde disponible et entrent en séquestre, inaccessibles "
+           "jusqu'à validation d'un jalon ;",
+           "**Soumettre et valider un jalon** : le freelance livre le travail, "
+           "le client approuve et les fonds sont libérés automatiquement, "
+           "déduction faite de la commission de la plateforme ;",
+           "**Demander un retrait** : le freelance transfère son solde disponible "
+           "vers son compte bancaire via Stripe Connect/Payout ;",
+           "**Consulter l'historique financier** : visualisation de toutes les "
+           "transactions et du journal comptable en double-entrée."]),
+
+        H3("7", "Module VII — Dialogue Structuré (Messagerie et Contrats)"),
+        P("Ce module assure la communication et le suivi opérationnel dans le "
+          "cadre des contrats actifs :"),
+        B(["**Échanger des messages** : messagerie temps réel par WebSocket "
+           "(Laravel Reverb + Echo) avec pièces jointes, accusés de lecture "
+           "et réactions aux messages ;",
+           "**Découper le contrat en jalons** : définition de jalons mesurables "
+           "avec montant, description et date d'échéance ;",
+           "**Partager des fichiers versionnés** : envoi de livrables et "
+           "documents de travail attachés au contrat ;",
+           "**Suivre le temps** : chronométrage en temps réel pour les contrats "
+           "horaires, avec récapitulatif hebdomadaire et facturation automatique ;",
+           "**Demander une extension de délai** : le freelance peut solliciter "
+           "un délai supplémentaire que le client accepte ou refuse."]),
+
+        H3("8", "Module VIII — Agences et Talents"),
+        P("Ce module permet à des freelances de se regrouper sous une même "
+          "bannière professionnelle et aux clients d'organiser leurs prestataires :"),
+        B(["**Créer une agence** : le propriétaire définit le nom, la présentation "
+           "et l'identité visuelle de l'agence ;",
+           "**Inviter des membres** : envoi d'invitations par jeton sécurisé "
+           "aux freelances que l'agence souhaite intégrer ;",
+           "**Gérer les membres** : acceptation des invitations, retrait de "
+           "membres, transfert de la propriété de l'agence ;",
+           "**Constituer des listes de talents** : les clients organisent leurs "
+           "freelances favoris en listes thématiques pour simplifier la "
+           "sélection lors de futurs projets."]),
+
+        H3("9", "Module IX — Notifications"),
+        P("Ce module transverse assure que chaque acteur est informé en temps "
+          "réel des événements qui le concernent sur la plateforme :"),
+        B(["**Notifications in-app** : alertes dans l'interface pour toute "
+           "action sur une offre, proposition, contrat, paiement ou message ;",
+           "**Notifications Web Push** : alertes navigateur (VAPID/Service Worker) "
+           "même lorsque l'application n'est pas ouverte en premier plan ;",
+           "**Gérer les préférences** : chaque utilisateur configure les types "
+           "d'événements pour lesquels il souhaite être notifié."]),
 
         H2("VI", "Description textuelle des cas d'utilisation"),
         P("Afin de préciser le comportement attendu, nous détaillons ci-après quelques cas d'utilisation "

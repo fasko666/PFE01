@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Bell, Menu, Settings, User, LogOut, ChevronDown,
-  TrendingUp, ShieldCheck, BadgeCheck, Zap, BarChart3, HelpCircle,
+  TrendingUp, ShieldCheck, BadgeCheck, Zap,
   MessageSquare,
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
@@ -32,7 +32,7 @@ export default function TopBar() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/jobs?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/search?type=jobs&q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
     }
   };
@@ -156,10 +156,12 @@ export default function TopBar() {
 
             {/* Navigation items */}
             <div className="py-1.5">
-              <DropItem icon={User}       label="My Profile"       onClick={() => go(isFreelancer ? '/freelancer/profile' : '/settings')} />
-              <DropItem icon={BarChart3}  label="Reports"          onClick={() => go('/reports')} />
-              <DropItem icon={ShieldCheck}label="Account Health"   onClick={() => go('/settings')} />
-              <DropItem icon={BadgeCheck} label="Membership Plan"  onClick={() => go('/settings')} />
+              <DropItem icon={User}        label="Your profile"     onClick={() => go(isFreelancer ? '/freelancer/profile' : '/settings')} />
+              {isFreelancer && (
+                <DropItem icon={TrendingUp} label="Stats and trends" onClick={() => go('/reports')} />
+              )}
+              <DropItem icon={ShieldCheck} label="Account health"   onClick={() => go('/settings')} />
+              <DropItem icon={BadgeCheck}  label="Membership plan"  onClick={() => go('/settings')} />
               {isFreelancer && (
                 <button className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-dark-300 hover:text-dark-100 hover:bg-dark-800/70 transition-colors" onClick={() => go('/settings')}>
                   <Zap className="w-3.5 h-3.5 text-dark-500 shrink-0" strokeWidth={1.75} />
@@ -172,8 +174,7 @@ export default function TopBar() {
             </div>
 
             <div className="py-1.5 border-t border-dark-800">
-              <DropItem icon={Settings}   label="Account Settings" onClick={() => go('/settings')} />
-              <DropItem icon={HelpCircle} label="Help Center"       onClick={() => {}} />
+              <DropItem icon={Settings} label="Account settings" onClick={() => go('/settings')} />
             </div>
 
             <div className="py-1.5 border-t border-dark-800">

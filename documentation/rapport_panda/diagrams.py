@@ -837,6 +837,23 @@ def generate_all():
                                  "Génération de propositions, matching et analyse de profil par IA.", D_GREEN)
     return out
 
+
+def make_emblem():
+    """Stylised Moroccan emblem (green pentagram) for the report cover."""
+    import math
+    S = 360
+    img, d = canvas(S, S, "#FFFFFF")
+    cx, cy, R = S / 2, S / 2 + 4, 122
+    pts = []
+    for i in range(5):
+        a = -math.pi / 2 + i * 2 * math.pi / 5
+        pts.append((cx + R * math.cos(a), cy + R * math.sin(a)))
+    order = [0, 2, 4, 1, 3, 0]
+    poly = [pts[o] for o in order]
+    d.line(poly, fill=C("#0B6B3A"), width=15, joint="curve")
+    return save(img, "emblem.png")
+
+
 if __name__ == "__main__":
     res = generate_all()
     for k, v in res.items():

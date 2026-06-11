@@ -75,7 +75,49 @@ def ch5():
              "aux attentes, y compris dans les scénarios concurrents et d'erreur. La cohérence des soldes "
              "est garantie par construction (transactions, verrous, double-entrée)."),
 
-        H2("III", "Synthèse de la sécurité"),
+        H2("III", "Scénarios de tests fonctionnels"),
+        P("En complément des tests automatisés, une **recette fonctionnelle manuelle** a été réalisée afin "
+          "de valider les parcours utilisateurs de bout en bout, dans un navigateur et avec les données "
+          "de test. Chaque scénario est défini par ses préconditions, la séquence d'actions effectuée et "
+          "le résultat attendu. Le tableau suivant en présente un panorama représentatif, couvrant "
+          "l'ensemble des modules fonctionnels."),
+        TBL(["Scénario", "Module", "Résultat attendu", "Statut"],
+            [["Inscription d'un freelance avec choix de rôle", "Auth", "Compte créé, e-mail de vérification envoyé, redirection vers dashboard", "Conforme"],
+             ["Connexion Google OAuth (premier accès)", "Auth", "Compte créé via OAuth, rôle demandé, jeton Sanctum émis", "Conforme"],
+             ["Activation 2FA (TOTP) depuis les paramètres", "Auth / Sécurité", "QR code affiché, code TOTP validé, 2FA activée", "Conforme"],
+             ["Soumission KYC (passeport + selfie)", "Sécurité / Admin", "Documents uploadés, statut = pending, admin notifié", "Conforme"],
+             ["Approbation KYC par l'administrateur", "Admin", "Statut = approved, badge KYC visible sur le profil", "Conforme"],
+             ["Publication d'une offre par un client", "Marketplace", "Offre visible dans la liste, statut = open, catégorie filtrée", "Conforme"],
+             ["Recherche d'offres par catégorie et budget", "Marketplace", "Résultats filtrés correctement, pagination fonctionnelle", "Conforme"],
+             ["Soumission d'une proposition avec assistance IA", "Marketplace / IA", "Proposition enregistrée, IA génère un texte de couverture, client notifié", "Conforme"],
+             ["Acceptation d'une proposition par le client", "Contrats", "Contrat créé automatiquement, les deux parties notifiées", "Conforme"],
+             ["Création d'un jalon par le freelance", "Contrats", "Jalon enregistré (status=pending), visible dans l'onglet jalons", "Conforme"],
+             ["Dépôt de fonds via Stripe Checkout", "Paiements", "Redirection Stripe, webhook reçu, solde disponible crédité", "Conforme"],
+             ["Financement du séquestre par le client", "Paiements", "balance ↓, escrow_balance ↑, contrat mis à jour", "Conforme"],
+             ["Soumission d'un jalon livré", "Contrats", "Status = submitted, client notifié pour révision", "Conforme"],
+             ["Validation (libération) d'un jalon", "Paiements", "Freelance crédité (net 90 %), commission prélevée (10 %), jalon = paid", "Conforme"],
+             ["Rejet d'un jalon par le client", "Contrats", "Status = rejected, motif enregistré, freelance notifié", "Conforme"],
+             ["Déclenchement d'un litige sur un contrat", "Contrats", "Status = disputed, libérations bloquées, admin alerté", "Conforme"],
+             ["Résolution du litige par l'administrateur", "Admin / Paiements", "Fonds distribués selon décision admin, litige clos", "Conforme"],
+             ["Commande d'un service catalogue (palier standard)", "Catalogue", "Commande créée, paiement traité, freelance notifié", "Conforme"],
+             ["Envoi et réception de message temps réel", "Messagerie", "Message affiché instantanément chez le destinataire (WebSocket)", "Conforme"],
+             ["Réaction et édition d'un message", "Messagerie", "Réaction visible en temps réel, message édité mis à jour", "Conforme"],
+             ["Demande de retrait (Stripe Connect)", "Paiements", "Demande enregistrée (pending), admin notifié pour approbation", "Conforme"],
+             ["Approbation et transfert du retrait", "Admin / Paiements", "Transfert Stripe déclenché, statut = completed, historique mis à jour", "Conforme"],
+             ["Dépôt d'un fichier sur un contrat", "Collaboration", "Fichier stocké, versionné, téléchargeable par les deux parties", "Conforme"],
+             ["Suivi du temps (démarrer / arrêter)", "Collaboration", "Entrée de temps créée, récapitulatif hebdomadaire mis à jour", "Conforme"],
+             ["Soumission d'une évaluation post-contrat", "Évaluations", "Note et commentaire visibles sur le profil public du destinataire", "Conforme"],
+             ["Tentative d'accès admin sans rôle admin", "Sécurité", "Réponse 403 Forbidden, aucune donnée exposée", "Conforme"],
+             ["Enregistrement d'une offre en favori", "Marketplace", "Offre sauvegardée, visible dans la liste des favoris du client", "Conforme"],
+             ["Constitution d'une liste de talents", "Talents", "Liste créée, freelances ajoutés, liste renommable et partageable", "Conforme"]],
+            caption="Scénarios de tests fonctionnels manuels — résultats de recette",
+            widths=[0.34, 0.18, 0.34, 0.14]),
+        P("L'ensemble des parcours critiques a été validé avec succès. Les quelques points d'amélioration "
+          "relevés — principalement des cas limites d'interface (messages d'erreur à affiner, transitions "
+          "d'état à harmoniser) — ont été corrigés avant la livraison finale. La couverture fonctionnelle "
+          "est donc complète et conforme aux exigences initiales."),
+
+        H2("V", "Synthèse de la sécurité"),
         P("La sécurité de Panda repose sur une **défense en profondeur** : plutôt qu'une barrière unique, "
           "plusieurs couches indépendantes se renforcent mutuellement. Le tableau suivant synthétise les "
           "mesures mises en œuvre et la menace qu'elles adressent."),
@@ -93,7 +135,7 @@ def ch5():
             caption="Synthèse des mesures de sécurité (défense en profondeur)",
             widths=[0.46, 0.54]),
 
-        H2("IV", "Déploiement"),
+        H2("VI", "Déploiement"),
         P("Pour garantir la portabilité et la reproductibilité de l'environnement, Panda est conçu pour "
           "être **conteneurisé** avec **Docker**. Chaque service tourne dans son propre conteneur, "
           "orchestré par **Docker Compose**, ce qui élimine les divergences entre les postes de "
@@ -130,7 +172,7 @@ def ch5():
           "nouvelle fonctionnalité n'altère pas les comportements existants, condition essentielle de la "
           "confiance sur une plateforme financière."),
 
-        H2("V", "Conclusion du chapitre"),
+        H2("VII", "Conclusion du chapitre"),
         P("Ce chapitre a démontré que Panda n'est pas seulement fonctionnelle, mais **fiable**, "
           "**sécurisée** et **déployable**. La stratégie de tests, focalisée sur le moteur financier, a "
           "confirmé l'intégrité des opérations critiques. La synthèse de la sécurité a mis en évidence une "

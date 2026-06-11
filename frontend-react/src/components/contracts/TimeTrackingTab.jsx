@@ -21,6 +21,7 @@ export default function TimeTrackingTab({ contract }) {
   const [tick, setTick] = useState(0);
   const [description, setDescription] = useState('');
   const [screenshot, setScreenshot] = useState('');
+  const [screenshotError, setScreenshotError] = useState('');
 
   const load = async () => {
     try {
@@ -42,7 +43,18 @@ export default function TimeTrackingTab({ contract }) {
     try { await api.contracts.timeStart(contract.id, { description }); await load(); setDescription(''); }
     catch (e) { toast.error(e?.response?.data?.message || 'Failed'); }
   };
+  const isValidUrl = (val) => {
+    if (!val) return true;
+    try { const u = new URL(val); return u.protocol === 'http:' || u.protocol === 'https:'; }
+    catch { return false; }
+  };
+
   const stop = async () => {
+    if (screenshot && !isValidUrl(screenshot)) {
+      setScreenshotError('Must be a valid URL starting with http:// or https://');
+      return;
+    }
+    setScreenshotError('');
     try { await api.contracts.timeStop(contract.id, { description: description || null, screenshot_url: screenshot || null }); await load(); setDescription(''); setScreenshot(''); }
     catch (e) { toast.error(e?.response?.data?.message || 'Failed'); }
   };
@@ -74,7 +86,17 @@ export default function TimeTrackingTab({ contract }) {
           </div>
           <input value={description} onChange={e=>setDescription(e.target.value)} placeholder="What are you working on?" className="w-full bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-xs text-dark-100" />
           {running && (
-            <input value={screenshot} onChange={e=>setScreenshot(e.target.value)} placeholder="Screenshot URL (optional)" className="w-full bg-dark-800 border border-dark-700 rounded-lg px-3 py-2 text-xs text-dark-100" />
+            <div className="space-y-1">
+              <input
+                value={screenshot}
+                onChange={e => { setScreenshot(e.target.value); setScreenshotError(''); }}
+                placeholder="Screenshot URL — e.g. https://imgur.com/abc.png (optional)"
+                className={`w-full bg-dark-800 border rounded-lg px-3 py-2 text-xs text-dark-100 ${screenshotError ? 'border-red-500' : 'border-dark-700'}`}
+              />
+              {screenshotError && (
+                <p className="text-2xs text-red-400 px-1">{screenshotError}</p>
+              )}
+            </div>
           )}
         </div>
       )}

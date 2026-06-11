@@ -464,7 +464,7 @@ export default function Updates() {
                 <h3 className="text-lg md:text-xl font-bold font-display text-dark-100 mb-5 leading-tight">
                   Find work you love with like-minded clients.
                 </h3>
-                <Link to="/jobs"
+                <Link to="/search?type=jobs"
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary-500 text-white text-xs font-semibold hover:bg-primary-600 hover:shadow-glow transition-all">
                   Find Work <ArrowRight className="w-3.5 h-3.5" />
                 </Link>

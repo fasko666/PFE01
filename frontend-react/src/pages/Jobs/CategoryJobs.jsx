@@ -254,7 +254,7 @@ export default function CategoryJobs() {
               Check out a sample of the <span className="font-bold text-dark-100">{preset.count.toLocaleString()}</span> {preset.title} jobs posted on PANDA
             </h2>
             <div className="text-2xs mb-2">
-              <Link to="/jobs" className="text-primary-400 hover:text-primary-300 underline">Find freelance jobs</Link>
+              <Link to="/search?type=jobs" className="text-primary-400 hover:text-primary-300 underline">Find freelance jobs</Link>
               <span className="text-dark-700 mx-2">/</span>
               <span className="text-dark-300">{preset.title} Jobs</span>
             </div>

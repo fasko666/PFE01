@@ -8,69 +8,52 @@ def front():
         COVER,
 
         FM("Remerciement",
-           "Au terme de ce projet de fin d'études, nous tenons à exprimer notre profonde gratitude "
-           "à toutes les personnes qui ont contribué, de près ou de loin, à la réussite de ce travail.",
-           "Nous adressons nos remerciements les plus sincères à notre **encadrant pédagogique** pour "
-           "sa disponibilité, ses conseils avisés et son suivi attentif tout au long de la réalisation "
-           "de la plateforme **Panda**. Son accompagnement et ses orientations techniques ont été "
-           "déterminants pour mener ce projet à son terme.",
-           "Nous remercions également l'ensemble du corps professoral de la filière "
-           "**Développement Digital — option Web Full Stack** du Centre de Préparation au BTS du "
-           "Lycée Technique de Taza, pour la qualité de la formation dispensée durant ces deux années "
-           "et pour les compétences techniques et humaines qu'ils nous ont transmises.",
-           "Nos remerciements vont enfin à nos **familles** et à nos **proches**, pour leur soutien "
-           "moral constant, leur patience et leurs encouragements, sans lesquels ce travail n'aurait "
-           "pu aboutir. Que toutes les personnes ayant participé à ce projet trouvent ici l'expression "
-           "de notre reconnaissance."),
-
-        FM("Dédicace",
-           "Nous dédions ce modeste travail à nos parents, pour leurs sacrifices et leur amour "
-           "inconditionnel ; à nos enseignants, qui ont éclairé notre parcours ; et à tous ceux qui "
-           "croient que la technologie peut rendre le travail plus juste, plus libre et plus accessible."),
+           "Nous tenons à exprimer nos plus sincères remerciements à **M. Hamid EL BOURAKKADI**, "
+           "notre encadrant pédagogique, pour son accompagnement tout au long de ce projet. Sa "
+           "disponibilité, ses conseils et son soutien ont été précieux pour mener à bien ce travail.",
+           "Nous remercions également l'ensemble de l'équipe pédagogique de la filière **Développement "
+           "Web Full Stack** du centre BTS de Taza pour les connaissances et compétences transmises "
+           "durant ces deux années de formation.",
+           "Un remerciement spécial à nos **familles** et nos **proches** pour leur patience, leur "
+           "soutien moral constant et leurs encouragements, sans lesquels ce projet n'aurait pas été "
+           "possible.",
+           "Enfin, nous remercions toutes les personnes qui ont contribué de près ou de loin à la "
+           "réussite de ce projet."),
 
         FM("Résumé",
-           "Ce rapport présente la conception et le développement de **Panda**, une plateforme web "
-           "full-stack de mise en relation entre **freelances** et **clients**, réalisée dans le cadre "
-           "de notre projet de fin d'études en BTS Développement Digital. L'objectif est de proposer une "
-           "place de marché numérique complète couvrant l'ensemble du cycle de collaboration : "
-           "publication d'offres et candidatures, vente de services packagés, contractualisation, suivi "
-           "des jalons et du temps, et surtout un système de **paiement sécurisé par séquestre (escrow)** "
-           "garantissant la confiance entre les parties.",
-           "Sur le plan technique, l'application repose sur une architecture moderne découplée : une "
-           "**API REST Laravel 12** (PHP 8.2) exposant la logique métier, une **interface React 19** "
-           "(single-page application) côté client, et une base de données **MySQL**. L'authentification "
-           "s'appuie sur **Laravel Sanctum** (jetons Bearer), renforcée par l'authentification à deux "
-           "facteurs (2FA) et une vérification d'identité (KYC). Le cœur financier est assuré par un "
-           "**moteur de grand livre comptable** à écriture double, transactionnel et idempotent, intégré "
-           "à **Stripe** pour les dépôts et les versements. La plateforme intègre par ailleurs une "
-           "**messagerie temps réel** (Laravel Reverb / WebSockets), des fonctions d'**intelligence "
-           "artificielle** (génération de propositions, mise en correspondance) et un module d'agences.",
-           "Les tests menés ont confirmé la fiabilité du moteur de paiement et la robustesse de "
-           "l'architecture. En conclusion, ce projet illustre la mise en œuvre concrète d'une application "
-           "professionnelle complète, sécurisée et évolutive, répondant à un besoin réel du marché du "
-           "travail indépendant.",
-           "**Mots-clés :** marketplace, freelance, escrow, Laravel, React, MySQL, Sanctum, Stripe, "
+           "Ce projet consiste en la conception et le développement d'une **plateforme web de mise en "
+           "relation entre freelances et clients**. L'objectif principal est de faciliter la publication "
+           "de services, la recherche de prestataires et la gestion des missions en ligne. La plateforme "
+           "permet aux utilisateurs de créer un profil, de proposer ou rechercher des services, et de "
+           "gérer les missions avec un suivi clair et efficace.",
+           "Sur le plan technique, l'application repose sur une architecture découplée : une "
+           "**API REST Laravel 12** côté serveur, une **interface React 19** côté client, et une base "
+           "de données **MySQL**. L'authentification s'appuie sur Laravel Sanctum, renforcée par la "
+           "double authentification (2FA). Le module de paiement implémente un système de **séquestre "
+           "(escrow)** sécurisé intégré à Stripe. La plateforme intègre également une **messagerie "
+           "temps réel** (WebSockets) et des fonctions d'**intelligence artificielle**.",
+           "Ce travail inclut l'analyse des besoins, la conception de l'architecture du système, "
+           "le développement complet de l'application et la validation des fonctionnalités. "
+           "L'ensemble du projet vise à offrir une solution pratique, intuitive et sécurisée pour "
+           "les freelances et leurs clients, améliorant ainsi l'efficacité des collaborations en ligne.",
+           "**Mots-clés :** marketplace, freelance, séquestre, Laravel, React, MySQL, Sanctum, Stripe, "
            "WebSocket, API REST, paiement sécurisé, intelligence artificielle."),
 
         FM("Abstract",
-           "This report presents the design and development of **Panda**, a full-stack web platform "
-           "connecting **freelancers** with **clients**, carried out as part of our final-year project in "
-           "the BTS Digital Development program. The goal is to deliver a complete digital marketplace "
-           "covering the entire collaboration lifecycle: job posting and proposals, productized service "
-           "selling, contracting, milestone and time tracking, and — most importantly — a secure "
-           "**escrow-based payment system** that guarantees trust between parties.",
-           "Technically, the application relies on a modern decoupled architecture: a **Laravel 12 REST "
-           "API** (PHP 8.2) exposing the business logic, a **React 19 single-page application** on the "
-           "client side, and a **MySQL** database. Authentication is built on **Laravel Sanctum** (Bearer "
-           "tokens), hardened with two-factor authentication (2FA) and identity verification (KYC). The "
-           "financial core is handled by a transactional, idempotent **double-entry ledger engine** "
-           "integrated with **Stripe** for deposits and payouts. The platform also features **real-time "
-           "messaging** (Laravel Reverb / WebSockets), **artificial-intelligence** helpers (proposal "
-           "generation, matching) and an agency module.",
-           "The tests carried out confirmed the reliability of the payment engine and the robustness of "
-           "the architecture. In conclusion, this project demonstrates the concrete implementation of a "
-           "complete, secure and scalable professional application that addresses a real need in the "
-           "freelance labour market.",
+           "This project focuses on the design and development of a **web platform connecting "
+           "freelancers with clients**. The main objective is to simplify service posting, freelancer "
+           "search, and online project management.",
+           "The platform allows users to create profiles, offer or search for services, and manage "
+           "tasks with clear and effective tracking. Technically, the application is built on a "
+           "decoupled architecture: a **Laravel 12 REST API** on the server side, a **React 19** "
+           "single-page application on the client side, and a **MySQL** database. Authentication uses "
+           "Laravel Sanctum with two-factor authentication (2FA). Payments are secured through an "
+           "**escrow system** integrated with Stripe, alongside **real-time messaging** (WebSockets) "
+           "and **AI-powered** features.",
+           "The work includes requirements analysis, system architecture design, application "
+           "development, and functional validation. Overall, the project aims to provide a practical, "
+           "intuitive, and accessible solution for freelancers and clients, enhancing the efficiency "
+           "of online collaborations.",
            "**Keywords:** marketplace, freelance, escrow, Laravel, React, MySQL, Sanctum, Stripe, "
            "WebSocket, REST API, secure payment, artificial intelligence."),
 

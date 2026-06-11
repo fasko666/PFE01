@@ -1,27 +1,22 @@
 import { useState } from 'react';
-import { CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, ShieldCheck, Loader2, Lock, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { api } from '../../api';
+import useAuthStore from '../../store/authStore';
 import DisputeModal from './DisputeModal';
 
-/**
- * Role-aware action buttons for the contract details page.
- *
- * The backend returns `allowed_actions` per-contract from ContractController::show,
- * so we don't replicate the policy in JS — we just render the buttons that the
- * server says are currently legal.
- *
- * Admin dispute resolution lives inline (collapsible panel) because it has a
- * radio-group with three outcomes + optional split amount.
- */
 export default function ContractActions({ contract, onChanged }) {
-  const [busy, setBusy] = useState(null); // 'complete' | 'cancel' | 'dispute' | 'resolve'
+  const { user } = useAuthStore();
+  const [busy, setBusy] = useState(null);
   const [showDispute, setShowDispute] = useState(false);
   const [showCancel,  setShowCancel]  = useState(false);
   const [showResolve, setShowResolve] = useState(false);
+  const [showFund,    setShowFund]    = useState(false);
 
-  const allowed = contract.allowed_actions || {};
+  const allowed  = contract.allowed_actions || {};
+  const isClient = Number(user?.id) === Number(contract.client_id);
+  const canFundEscrow = isClient && contract.status === 'active';
 
   const run = async (key, promise, successMsg) => {
     setBusy(key);
@@ -44,7 +39,7 @@ export default function ContractActions({ contract, onChanged }) {
   const onCancel  = (reason) => run('cancel',  api.contracts.cancel(contract.id, reason),  'Contract cancelled').then(() => setShowCancel(false));
   const onDispute = (reason) => run('dispute', api.contracts.dispute(contract.id, reason), 'Dispute opened').then(() => setShowDispute(false));
 
-  const nothingAvailable = !allowed.complete && !allowed.cancel && !allowed.dispute && !allowed.resolve_dispute;
+  const nothingAvailable = !allowed.complete && !allowed.cancel && !allowed.dispute && !allowed.resolve_dispute && !canFundEscrow;
 
   if (nothingAvailable) {
     return (
@@ -56,6 +51,18 @@ export default function ContractActions({ contract, onChanged }) {
 
   return (
     <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {canFundEscrow && (
+          <button
+            onClick={() => setShowFund(true)}
+            disabled={busy !== null}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-semibold hover:bg-blue-500/25 disabled:opacity-40 transition-colors"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            Fund escrow
+          </button>
+        )}
+        </div>
       <div className="flex flex-wrap gap-2">
         {allowed.complete && (
           <button
@@ -120,7 +127,98 @@ export default function ContractActions({ contract, onChanged }) {
 
       <DisputeModal open={showDispute} mode="dispute" onClose={() => setShowDispute(false)} onSubmit={onDispute} />
       <DisputeModal open={showCancel}  mode="cancel"  onClose={() => setShowCancel(false)}  onSubmit={onCancel}  />
+      <FundEscrowModal
+        open={showFund}
+        contract={contract}
+        onClose={() => setShowFund(false)}
+        onFunded={() => { setShowFund(false); onChanged?.(); }}
+      />
     </div>
+  );
+}
+
+function FundEscrowModal({ open, contract, onClose, onFunded }) {
+  const [amount, setAmount] = useState('');
+  const [busy,   setBusy]   = useState(false);
+
+  const escrow = Number(contract.escrow_amount || 0);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const n = Number(amount);
+    if (!n || n <= 0) return toast.error('Enter a valid amount');
+    setBusy(true);
+    try {
+      await api.payments.fundEscrow(contract.id, { amount: n });
+      toast.success(`$${n.toFixed(2)} moved to escrow`);
+      setAmount('');
+      onFunded();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to fund escrow');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 8 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 8 }}
+          className="rounded-2xl border border-dark-700 bg-dark-900 w-full max-w-sm p-6 space-y-5"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-white flex items-center gap-2">
+                <Lock className="w-4 h-4 text-blue-400" /> Fund Escrow
+              </h3>
+              <p className="text-2xs text-dark-500 mt-0.5">Currently locked: ${escrow.toFixed(2)}</p>
+            </div>
+            <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-dark-500 hover:text-white hover:bg-dark-800 transition-all">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <p className="text-xs text-dark-400 leading-relaxed">
+            Move funds from your wallet balance into this contract's escrow. The freelancer gets paid when you approve a milestone.
+          </p>
+
+          <form onSubmit={submit} className="space-y-3">
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dark-500 text-sm">$</span>
+              <input
+                type="number"
+                min="1"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Amount to lock in escrow"
+                className="w-full pl-8 pr-3 py-2.5 rounded-xl border border-dark-700 bg-dark-800 text-sm text-dark-100 outline-none focus:border-blue-500/50"
+              />
+            </div>
+            <p className="text-2xs text-dark-600">Funds are deducted from your wallet balance and held securely.</p>
+            <button
+              type="submit"
+              disabled={busy || !amount}
+              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold disabled:opacity-40 transition-colors"
+            >
+              {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
+              {busy ? 'Processing…' : 'Lock in escrow'}
+            </button>
+          </form>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

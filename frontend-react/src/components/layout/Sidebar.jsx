@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 
 const freelancerNav = [
   { to: '/freelancer/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/jobs',                 icon: Search,          label: 'Find Work' },
+  { to: '/search?type=jobs',     icon: Search,          label: 'Find Work' },
   { to: '/jobs/post',            icon: PenSquare,       label: 'Post a Job' },
   { to: '/my-jobs',              icon: Briefcase,       label: 'My Jobs' },
   { to: '/freelancers',          icon: Users,           label: 'Talent Market' },

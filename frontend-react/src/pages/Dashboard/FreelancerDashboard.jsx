@@ -103,7 +103,7 @@ export default function FreelancerDashboard() {
           <p className="text-sm text-dark-500 mt-1">Here's your freelance overview</p>
         </div>
         <div className="flex gap-2">
-          <Link to="/jobs" className="btn btn-ghost btn-sm gap-1.5">
+          <Link to="/search?type=jobs" className="btn btn-ghost btn-sm gap-1.5">
             <Briefcase className="w-3.5 h-3.5" />
             Browse Jobs
           </Link>
@@ -201,7 +201,7 @@ export default function FreelancerDashboard() {
                   </div>
                   <p className="text-sm text-dark-400 font-medium">No proposals yet</p>
                   <p className="text-xs text-dark-600 mt-1">Start applying to jobs that match your skills</p>
-                  <Link to="/jobs" className="btn btn-primary btn-sm mt-4 inline-flex">Find Jobs</Link>
+                  <Link to="/search?type=jobs" className="btn btn-primary btn-sm mt-4 inline-flex">Find Jobs</Link>
                 </div>
               )}
             </div>
@@ -214,7 +214,7 @@ export default function FreelancerDashboard() {
                 <TrendingUp className="w-4 h-4 text-primary-400" />
                 <h2 className="text-sm font-semibold text-white">Recommended Jobs</h2>
               </div>
-              <Link to="/jobs" className="flex items-center gap-1 text-xs text-primary-400 hover:text-primary-300 font-medium">
+              <Link to="/search?type=jobs" className="flex items-center gap-1 text-xs text-primary-400 hover:text-primary-300 font-medium">
                 See all <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -299,7 +299,7 @@ export default function FreelancerDashboard() {
             <h3 className="text-xs font-semibold text-dark-500 uppercase tracking-wide mb-3 px-1">Quick Actions</h3>
             <div className="space-y-0.5">
               {[
-                { icon: Briefcase,      label: 'Browse jobs',    to: '/jobs' },
+                { icon: Briefcase,      label: 'Browse jobs',    to: '/search?type=jobs' },
                 { icon: MessageSquare,  label: 'Messages',       to: '/messages' },
                 { icon: CreditCard,     label: 'Payments',       to: '/payments' },
                 { icon: Sparkles,       label: 'AI Assistant',   to: '/ai-assistant' },

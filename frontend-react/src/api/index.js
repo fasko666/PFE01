@@ -102,6 +102,7 @@ export const jobs = {
   delete:     (id)     => http.delete(`/jobs/${id}`),
   save:       (id)     => http.post(`/jobs/${id}/save`),
   myJobs:     (params) => http.get('/jobs/my/postings', { params }),
+  getSaved:   (params) => http.get('/jobs/my/saved', { params }),
   categories: ()       => http.get('/categories'),
 };
 

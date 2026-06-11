@@ -45,6 +45,8 @@ const PostJob         = lazy(() => import('./pages/Jobs/PostJob'));
 const CategoryJobs    = lazy(() => import('./pages/Jobs/CategoryJobs'));
 const MyJobs          = lazy(() => import('./pages/Jobs/MyJobs'));
 const MyProposals     = lazy(() => import('./pages/Jobs/MyProposals'));
+const SavedJobs       = lazy(() => import('./pages/Jobs/SavedJobs'));
+const JobProposals    = lazy(() => import('./pages/Jobs/JobProposals'));
 
 const FreelancerProfile    = lazy(() => import('./pages/Freelancer/FreelancerProfile'));
 const FreelancerSettings   = lazy(() => import('./pages/Freelancer/FreelancerSettings'));
@@ -144,11 +146,10 @@ function AppRoot() {
 
           {/* ── Public marketplace listings (browse without login) ── */}
           <Route path="/freelancers"           element={<FreelancerMarketplace />} />
-          <Route path="/jobs"                  element={<JobsMarketplace />} />
+          <Route path="/jobs"                  element={<Navigate to="/search?type=jobs" replace />} />
 
-          {/* ── Profile / job detail require login ── */}
+          {/* ── Profile page requires login but no AppLayout ── */}
           <Route path="/freelancers/:username" element={<ProtectedRoute><FreelancerProfile /></ProtectedRoute>} />
-          <Route path="/jobs/:id"              element={<ProtectedRoute><JobDetail /></ProtectedRoute>} />
 
           {/* App (requires login) */}
           <Route path="/dashboard" element={<ProtectedRoute><DashboardRedirect /></ProtectedRoute>} />
@@ -162,7 +163,10 @@ function AppRoot() {
             <Route path="/client/dashboard" element={<ProtectedRoute roles={['client']}><ClientDashboard /></ProtectedRoute>} />
 
             {/* Jobs (post + manage require login) */}
-            <Route path="/jobs/post"    element={<ProtectedRoute roles={['freelancer', 'client']}><PostJob /></ProtectedRoute>} />
+            <Route path="/jobs/:id"               element={<ProtectedRoute><JobDetail /></ProtectedRoute>} />
+            <Route path="/jobs/post"              element={<ProtectedRoute roles={['freelancer', 'client']}><PostJob /></ProtectedRoute>} />
+            <Route path="/jobs/saved"             element={<ProtectedRoute roles={['freelancer']}><SavedJobs /></ProtectedRoute>} />
+            <Route path="/jobs/:id/proposals"     element={<ProtectedRoute roles={['client']}><JobProposals /></ProtectedRoute>} />
             <Route path="/my-jobs"      element={<ProtectedRoute roles={['freelancer', 'client']}><MyJobs /></ProtectedRoute>} />
             <Route path="/my-proposals" element={<ProtectedRoute roles={['freelancer']}><MyProposals /></ProtectedRoute>} />
 
@@ -176,12 +180,12 @@ function AppRoot() {
             {/* Other */}
             <Route path="/messages"      element={<Messages />} />
             <Route path="/messages/:id"  element={<Messages />} />
-            <Route path="/payments"            element={<Payments />} />
-            <Route path="/payments/withdraw"   element={<Withdraw />} />
-            <Route path="/payments/success"    element={<PaymentSuccess />} />
-            <Route path="/payments/cancel"     element={<PaymentCancel />} />
-            <Route path="/payments/connect/return"  element={<StripeConnectReturn />} />
-            <Route path="/payments/connect/refresh" element={<StripeConnectReturn />} />
+            <Route path="/payments"            element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+            <Route path="/payments/withdraw"   element={<ProtectedRoute><Withdraw /></ProtectedRoute>} />
+            <Route path="/payments/success"    element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
+            <Route path="/payments/cancel"     element={<ProtectedRoute><PaymentCancel /></ProtectedRoute>} />
+            <Route path="/payments/connect/return"  element={<ProtectedRoute><StripeConnectReturn /></ProtectedRoute>} />
+            <Route path="/payments/connect/refresh" element={<ProtectedRoute><StripeConnectReturn /></ProtectedRoute>} />
             <Route path="/admin/finance"       element={<ProtectedRoute roles={['admin']}><AdminFinance /></ProtectedRoute>} />
 
             {/* Account security & verification */}

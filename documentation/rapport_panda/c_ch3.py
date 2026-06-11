@@ -102,189 +102,193 @@ def ch3():
 
         H2("IV", "Diagramme de classes"),
         P("Le diagramme de classes modélise la structure statique du système : les entités métier, leurs "
-          "attributs et leurs relations. Il constitue la traduction objet du domaine et la base de la "
-          "conception de la base de données. La figure suivante en présente les classes principales."),
-        FIG("class", "Diagramme de classes — entités métier principales"),
-        P("On distingue plusieurs regroupements cohérents : les entités d'**identité** (`User`, "
-          "`FreelancerProfile`, `ClientProfile`, `Agency`) ; le **flux de mise en relation** (`JobPosting` "
-          "→ `Proposal` → `Contract` → `Milestone`) ; le **noyau financier** (`Wallet`, `Transaction`) ; "
-          "la **communication** (`Conversation`, `Message`, `Review`) ; et le **catalogue** "
-          "(`CatalogProject`, `CatalogOrder`). La classe `Contract` joue un rôle pivot : elle relie un "
-          "client et un freelance, agrège des jalons et constitue le contexte des mouvements financiers et "
-          "des conversations."),
+          "attributs et leurs relations. Il constitue la traduction objet du domaine et le fondement de "
+          "l'architecture de la base de données. En raison de la richesse du modèle (plus de 30 classes), "
+          "il est présenté en **trois sous-systèmes** distincts, chacun regroupant des classes cohérentes "
+          "par domaine fonctionnel."),
+
+        H3("a", "Sous-système 1 — Identité, Sécurité & Finance"),
+        P("Ce premier sous-système regroupe les entités liées à la **gestion des utilisateurs**, à la "
+          "**sécurité** et au **noyau financier**. On y trouve la classe centrale `User` avec ses profils "
+          "associés (`FreelancerProfile`, `ClientProfile`) et la vérification d'identité "
+          "(`IdentityVerification`). Le noyau financier comprend `Wallet` (portefeuille à trois soldes : "
+          "disponible, séquestre, en attente), `Transaction` (grand livre en double-entrée, immuable) et "
+          "`WithdrawalRequest` (demandes de retrait avec cycle de validation)."),
+        FIG("class_part1", "Diagramme de classes — Sous-système 1 : Identité, Sécurité & Finance"),
+        TBL(["Classe", "Rôle dans le sous-système"],
+            [["User", "Entité centrale : agrège l'identité, le rôle et les préférences de chaque acteur"],
+             ["FreelancerProfile", "Profil freelance : compétences, tarif horaire, disponibilité, portfolio"],
+             ["ClientProfile", "Profil client : entreprise, secteur, localisation"],
+             ["IdentityVerification", "KYC : pièces justificatives, statut (pending/approved/rejected)"],
+             ["Wallet", "Portefeuille : 3 soldes distincts (balance, escrow_balance, pending_balance)"],
+             ["Transaction", "Grand livre : chaque mouvement financier, immuable, avec balance_after"],
+             ["WithdrawalRequest", "Demande de retrait vers Stripe Connect, validée par l'admin"]],
+            caption="Classes du sous-système Identité, Sécurité & Finance",
+            widths=[0.28, 0.72]),
+
+        H3("b", "Sous-système 2 — Marketplace, Contrats & Communication"),
+        P("Ce deuxième sous-système constitue le **cœur opérationnel** de la plateforme. La classe "
+          "`Contract` en est le pivot absolu : elle naît de l'acceptation d'une `Proposal` ou d'une "
+          "`CatalogOrder`, relie le client et le freelance, et constitue le contexte de tous les "
+          "jalons, fichiers, transactions et conversations. Le flux complet de mise en relation "
+          "est visible : `JobPosting` → `Proposal` → `Contract` → `Milestone` → paiement libéré."),
+        FIG("class_part2", "Diagramme de classes — Sous-système 2 : Marketplace, Contrats & Communication"),
+        TBL(["Classe", "Rôle dans le sous-système"],
+            [["JobPosting", "Offre publiée par le client : titre, budget, catégorie, statut"],
+             ["Proposal", "Candidature du freelance : lettre, montant, délai, statut"],
+             ["Contract", "Pivot : lie client + freelance, porte l'escrow_amount et le statut (litige)"],
+             ["Milestone", "Jalon d'un contrat : montant, soumission, approbation, libération"],
+             ["ContractFile", "Fichier versionné attaché au contrat (livrables)"],
+             ["TimeEntry", "Entrée de suivi du temps (contrats horaires)"],
+             ["Conversation", "Canal de messagerie lié à un contrat ou une offre"],
+             ["Message", "Message temps réel avec accusé de lecture et réactions"],
+             ["Review", "Évaluation bilatérale post-mission (note + commentaire)"]],
+            caption="Classes du sous-système Marketplace, Contrats & Communication",
+            widths=[0.28, 0.72]),
+
+        H3("c", "Sous-système 3 — Catalogue, Agences & Talents"),
+        P("Ce troisième sous-système couvre les fonctionnalités différenciantes de Panda : le "
+          "**catalogue de services packagés** (inspiré de Fiverr), la **gestion des agences** "
+          "(regroupement de freelances sous une bannière) et les **listes de talents**. L'IA est "
+          "représentée par `AiHistory` qui historise chaque interaction avec le modèle de langage. "
+          "`TaxDocument` trace les obligations fiscales annuelles des freelances."),
+        FIG("class_part3", "Diagramme de classes — Sous-système 3 : Catalogue, Agences & Talents"),
+        TBL(["Classe", "Rôle dans le sous-système"],
+            [["CatalogProject", "Service packagé du freelance : 3 paliers tarifaires, modération admin"],
+             ["CatalogOrder", "Commande d'un palier par un client : cycle de livraison complet"],
+             ["CatalogReview", "Évaluation d'une commande catalogue"],
+             ["Agency", "Agence : bannière regroupant plusieurs freelances, propriétaire désigné"],
+             ["AgencyMember", "Appartenance d'un freelance à une agence (rôle : owner/admin/member)"],
+             ["AgencyInvitation", "Invitation sécurisée par jeton à rejoindre une agence"],
+             ["TalentList", "Liste de freelances favoris constituée par un client"],
+             ["SavedFreelancer", "Favori d'un freelance dans une liste de talents"],
+             ["AiHistory", "Historique des interactions IA (prompt, réponse, tokens utilisés)"],
+             ["TaxDocument", "Document fiscal annuel généré pour les freelances actifs"]],
+            caption="Classes du sous-système Catalogue, Agences & Talents",
+            widths=[0.28, 0.72]),
+        P("On distingue plusieurs regroupements cohérents dans l'ensemble du modèle : les entités "
+          "d'**identité** (`User`, profils) ; le **flux de mise en relation** (`JobPosting` → `Proposal` "
+          "→ `Contract` → `Milestone`) ; le **noyau financier** (`Wallet`, `Transaction`) ; la "
+          "**communication** (`Conversation`, `Message`, `Review`) ; et le **catalogue** "
+          "(`CatalogProject`, `CatalogOrder`). La classe `Contract` joue un rôle pivot absolu : elle relie "
+          "un client et un freelance, agrège des jalons et constitue le contexte des mouvements financiers "
+          "et des conversations."),
+
+        H3("1", "Groupe Identité et Authentification"),
+        P("Ce groupe regroupe les classes liées à la gestion des utilisateurs et de leurs profils :"),
+        TBL(["Classe", "Attributs principaux", "Relations clés"],
+            [["User", "id, name, email, password, role, email_verified_at, two_factor_secret", "1 FreelancerProfile, 1 ClientProfile, 1 Wallet"],
+             ["FreelancerProfile", "user_id, title, bio, skills, hourly_rate, availability, rating", "many Proposals, many CatalogProjects"],
+             ["ClientProfile", "user_id, company_name, description, location, website", "many JobPostings, many CatalogOrders"],
+             ["Agency", "id, owner_id, name, description, slug, logo", "many FreelancerProfiles (membres)"],
+             ["IdentityVerification", "user_id, status, document_type, document_path, reviewed_at", "1 User"]],
+            caption="Classes du groupe Identité",
+            widths=[0.24, 0.44, 0.32]),
+
+        H3("2", "Groupe Marketplace (Offres et Propositions)"),
+        P("Ce groupe modélise le premier circuit de mise en relation (le client publie, le freelance postule) :"),
+        TBL(["Classe", "Attributs principaux", "Relations clés"],
+            [["JobPosting", "id, client_id, title, description, category, budget, type, status", "many Proposals, 0..1 Contract"],
+             ["Proposal", "id, job_id, freelancer_id, cover_letter, amount, duration, status", "1 JobPosting, 1 Freelancer"],
+             ["CatalogProject", "id, freelancer_id, title, description, category, status, slug", "3 CatalogTiers, many CatalogOrders"],
+             ["CatalogTier", "id, catalog_id, tier, price, delivery_days, description, revisions", "1 CatalogProject"],
+             ["CatalogOrder", "id, client_id, tier_id, status, delivery_at, requirements", "1 CatalogTier, 1 Contract"]],
+            caption="Classes du groupe Marketplace",
+            widths=[0.24, 0.46, 0.30]),
+
+        H3("3", "Groupe Contrats et Jalons"),
+        P("Ce groupe modélise la collaboration une fois l'accord conclu. Le `Contract` est la "
+          "**classe pivot** autour de laquelle gravitent toutes les activités opérationnelles :"),
+        TBL(["Classe", "Attributs principaux", "Relations clés"],
+            [["Contract", "id, client_id, freelancer_id, source_type, source_id, status, total_amount", "many Milestones, 1 Conversation"],
+             ["Milestone", "id, contract_id, title, amount, due_date, status, submitted_at", "1 Contract, many Transactions"],
+             ["ContractFile", "id, contract_id, uploader_id, filename, path, size, version", "1 Contract"],
+             ["TimeEntry", "id, contract_id, freelancer_id, started_at, stopped_at, duration_minutes", "1 Contract"],
+             ["ExtensionRequest", "id, contract_id, requested_by, new_due_date, reason, status", "1 Contract"]],
+            caption="Classes du groupe Contrats et Jalons",
+            widths=[0.24, 0.46, 0.30]),
+
+        H3("4", "Groupe Finance (Wallet et Transactions)"),
+        P("Ce groupe constitue le **noyau financier** de la plateforme. Il implémente un "
+          "**grand livre comptable en double-entrée** garantissant l'intégrité de chaque "
+          "mouvement de fonds :"),
+        TBL(["Classe", "Attributs principaux", "Rôle"],
+            [["Wallet", "id, user_id, balance_available, balance_escrow, balance_pending, currency", "Portefeuille de l'utilisateur"],
+             ["Transaction", "id, wallet_id, type, amount, balance_after, reference_type, reference_id, idempotency_key", "Écriture comptable unitaire"],
+             ["WithdrawalRequest", "id, freelancer_id, amount, method, status, stripe_payout_id, processed_at", "Demande de retrait"],
+             ["StripeWebhookEvent", "id, stripe_event_id, type, payload, processed, processed_at", "Idempotence des webhooks"]],
+            caption="Classes du groupe Finance",
+            widths=[0.22, 0.48, 0.30]),
+
+        H3("5", "Groupe Communication et Évaluations"),
+        P("Ce groupe couvre la messagerie temps réel entre les parties et le système d'évaluations "
+          "post-mission, essentiels à la confiance sur la plateforme :"),
+        TBL(["Classe", "Attributs principaux", "Relations clés"],
+            [["Conversation", "id, contract_id, type, last_message_at", "2 Users (participants), many Messages"],
+             ["Message", "id, conversation_id, sender_id, content, type, read_at", "1 Conversation, many Attachments"],
+             ["MessageReaction", "id, message_id, user_id, emoji", "1 Message"],
+             ["Review", "id, contract_id, reviewer_id, reviewee_id, rating, comment, type", "1 Contract, 2 Users"],
+             ["Notification", "id, user_id, type, data, read_at, notifiable_type, notifiable_id", "1 User"]],
+            caption="Classes du groupe Communication et Évaluations",
+            widths=[0.24, 0.46, 0.30]),
 
         H2("V", "Diagrammes de séquence dynamiques"),
         P("Au-delà de la structure, les diagrammes de séquence décrivent les **interactions temporelles** "
-          "entre objets pour les scénarios les plus critiques. Nous en présentons trois."),
+          "entre objets pour les scénarios les plus critiques. Nous en présentons trois, complétés par une "
+          "description pas-à-pas mettant en évidence les invariants et les garde-fous."),
         H3("1", "Financement du séquestre et libération de jalon"),
         P("Ce scénario est le cœur transactionnel de la plateforme. Il met en jeu le `LedgerService`, qui "
           "garantit l'atomicité et l'intégrité de chaque mouvement de fonds."),
         FIG("seq_escrow", "Diagramme de séquence — financement du séquestre et libération de jalon"),
-        P("À la libération, le service calcule la **commission** de la plateforme, crédite le freelance du "
-          "montant net, débite le séquestre et enregistre chaque écriture en **double-entrée** avec son "
-          "solde résultant (`balance_after`), le tout dans une **transaction verrouillée** et "
-          "**idempotente**."),
+        P("Le scénario se déroule en deux temps. Lors du **financement du séquestre** :"),
+        B(["1. Le client appelle `POST /payments/contracts/{id}/fund-escrow` avec le montant souhaité ;",
+           "2. Le contrôleur délègue au `LedgerService.fundEscrow()` ;",
+           "3. Le service ouvre une transaction SQL et verrouille le portefeuille du client (`FOR UPDATE`) ;",
+           "4. Il vérifie que le solde disponible est suffisant ; sinon, il lève une exception métier ;",
+           "5. Il décrémente `balance` et incrémente `escrow_balance` du portefeuille ;",
+           "6. Il incrémente `escrow_amount` du contrat et crée une écriture dans `transactions` ;",
+           "7. La transaction SQL est validée (commit) ; le freelance est notifié."]),
+        P("Lors de la **libération d'un jalon** :"),
+        B(["1. Le client approuve le jalon (`POST /milestones/{id}/approve`) ;",
+           "2. `LedgerService.releaseMilestone()` vérifie que le contrat n'est pas en litige ;",
+           "3. Il calcule la commission (taux paramétrable dans `platform_settings`) ;",
+           "4. Sous verrou SQL, il effectue trois écritures atomiques : drainage séquestre (client), "
+              "crédit commission (plateforme), crédit net (freelance) ;",
+           "5. Chaque écriture enregistre `balance_after` (solde résultant), garantissant la réconciliabilité ;",
+           "6. Le jalon passe à l'état `paid` et le contrat est réévalué (complet si tous les jalons sont payés) ;",
+           "7. Le freelance reçoit une notification de crédit et un événement est consigné dans l'activité du contrat."]),
+        NOTE("La **clé d'idempotence** jointe à chaque opération garantit qu'un appel dupliqué (rejeu réseau, "
+             "double clic) ne produit qu'une seule écriture — propriété critique sur une plateforme financière."),
         H3("2", "Dépôt de fonds via Stripe"),
         P("Le dépôt s'appuie sur Stripe Checkout. La confirmation du paiement parvient de façon asynchrone "
           "par un **webhook** signé, dont l'idempotence est assurée par la table `stripe_webhook_events`."),
         FIG("seq_stripe", "Diagramme de séquence — dépôt de fonds via Stripe"),
+        P("La séquence de dépôt illustre la gestion des événements asynchrones :"),
+        B(["1. Le client initie un dépôt : `POST /payments/deposit` — le contrôleur demande à Stripe une session Checkout ;",
+           "2. L'interface React redirige l'utilisateur vers la page de paiement hébergée par Stripe ;",
+           "3. L'utilisateur saisit ses informations de carte ; Stripe valide le paiement ;",
+           "4. Stripe envoie un webhook `payment_intent.succeeded` au point d'accès public `/payments/stripe/webhook` ;",
+           "5. Le contrôleur vérifie la signature HMAC (secret de webhook Stripe) ; toute requête non signée est rejetée ;",
+           "6. L'idempotence est vérifiée : si l'identifiant de l'événement existe déjà dans `stripe_webhook_events`, "
+              "la requête est ignorée (renvoi 200 sans traitement) ;",
+           "7. Le `LedgerService.deposit()` est appelé avec la clé d'idempotence = identifiant de l'événement Stripe ;",
+           "8. Le portefeuille du client est crédité et une écriture immuable est ajoutée au grand livre."]),
         H3("3", "Génération de proposition par IA"),
         P("Le freelance peut solliciter l'assistant IA pour rédiger une première version de proposition, "
           "qu'il édite ensuite. L'appel au modèle est limité en débit pour maîtriser les coûts, et chaque "
           "interaction est historisée."),
         FIG("seq_ai", "Diagramme de séquence — génération de proposition assistée par IA"),
+        P("La séquence de génération IA met en évidence le rôle de l'historisation et de la limitation :"),
+        B(["1. Le freelance consulte une offre et clique sur « Générer une proposition avec l'IA » ;",
+           "2. La requête `POST /ai/generate-proposal` est soumise au middleware de limitation "
+              "(`throttle:20,1` — 20 requêtes par minute) ;",
+           "3. `AIController` extrait l'offre et le profil du freelance, puis construit le prompt contextualisé ;",
+           "4. Le service IA envoie le prompt au serveur Ollama (Mistral) en HTTP local ;",
+           "5. Le modèle génère le texte de proposition ; la réponse est renvoyée au contrôleur ;",
+           "6. L'échange (prompt + réponse + tokens utilisés) est persisté dans `ai_histories` ;",
+           "7. Le texte généré est retourné au front-end ; le freelance le lit, l'adapte et soumet la proposition."]),
 
-        H2("VI", "Diagrammes d'états"),
-        P("Les diagrammes d'états-transitions décrivent le **cycle de vie** des objets métier soumis à des "
-          "changements d'état. Deux entités le justifient particulièrement : le contrat et le jalon."),
-        FIG("state_contract", "Diagramme d'états — cycle de vie d'un contrat"),
-        P("Un contrat naît **actif** à l'acceptation d'une proposition. Il peut être mené à son terme "
-          "(**terminé**) lorsque tous les jalons sont payés, **annulé**, ou basculer en **litige** ; dans "
-          "ce dernier cas, l'arbitrage de l'administrateur le fait évoluer vers un état **résolu**. Le gel "
-          "d'un contrat en litige suspend toute libération de fonds — garde-fou implémenté directement "
-          "dans le moteur de paiement."),
-        FIG("state_milestone", "Diagramme d'états — cycle de vie d'un jalon"),
-        P("Un jalon est initialement **en attente**. Le freelance le **soumet** une fois le travail livré ; "
-          "le client l'**approuve** (déclenchant le versement, état **payé**) ou le **rejette** avec un "
-          "motif, autorisant une re-soumission."),
-
-        H2("VII", "Conception de la base de données"),
-        P("La base de données relationnelle est la colonne vertébrale de la persistance. Sa conception a "
-          "suivi la méthode **Merise** : un modèle conceptuel (MCD) indépendant de toute technologie, puis "
-          "sa traduction en modèle logique (MLD) directement implémentable en MySQL."),
-        H3("1", "Modèle Conceptuel de Données (MCD)"),
-        P("Le MCD représente les **entités**, leurs **attributs** et les **associations** qui les relient, "
-          "assorties de leurs cardinalités. La figure suivante en présente une vue centrée sur les "
-          "entités principales."),
-        FIG("mcd", "Modèle Conceptuel de Données (MCD) — vue principale"),
-        H3("2", "Modèle Logique de Données (MLD)"),
-        P("Le MLD traduit le MCD en **schéma relationnel** : chaque entité devient une table, chaque "
-          "association se matérialise par des clés étrangères (notées #) ou des tables de liaison. Les "
-          "clés primaires sont soulignées. Le schéma simplifié des tables principales est le suivant :"),
-        CODE("Modèle Logique de Données (extrait des tables principales)",
-             "users(id, name, email, password, role, is_platform, two_factor_secret, ...)\n"
-             "freelancer_profiles(id, #user_id, title, bio, hourly_rate, availability, ...)\n"
-             "client_profiles(id, #user_id, company, website, ...)\n"
-             "job_postings(id, #client_id, #category_id, title, description, budget, type, status)\n"
-             "proposals(id, #job_id, #freelancer_id, cover_letter, bid_amount, status)\n"
-             "contracts(id, #client_id, #freelancer_id, #job_id, #proposal_id, title, type,\n"
-             "          escrow_amount, status, disputed_at, dispute_reason)\n"
-             "milestones(id, #contract_id, title, amount, status, approved_at, #created_by)\n"
-             "wallets(id, #user_id, balance, pending_balance, escrow_balance, currency)\n"
-             "transactions(id, #wallet_id, #user_id, #contract_id, #milestone_id, reference,\n"
-             "             type, direction, amount, fee, balance_after, idempotency_key, status)\n"
-             "withdrawals(id, #user_id, #wallet_id, amount, fee, net, method, status, #reviewed_by)\n"
-             "conversations(id, type, #contract_id, #job_id, last_message_at)\n"
-             "messages(id, #conversation_id, #sender_id, body, type, attachments, read_at, #reply_to_id)\n"
-             "reviews(id, #contract_id, #reviewer_id, #reviewee_id, rating, comment)\n"
-             "catalog_projects(id, #freelancer_id, title, slug, tiers, status)\n"
-             "catalog_orders(id, #catalog_project_id, #buyer_id, tier, amount, status)\n"
-             "agencies(id, #owner_id, name, slug, bio)   ·   subscriptions(id, #user_id, plan, status)"),
-        H3("3", "Dictionnaire de données (extrait)"),
-        P("Le dictionnaire de données précise, pour chaque table, le type et la signification des champs. "
-          "Nous en donnons un extrait pour les deux tables au cœur de l'intégrité financière : `wallets` "
-          "et `transactions`."),
-        TBL(["Champ (wallets)", "Type", "Description"],
-            [["id", "BIGINT (PK)", "Identifiant du portefeuille"],
-             ["user_id", "BIGINT (FK)", "Propriétaire du portefeuille"],
-             ["balance", "DECIMAL(12,2)", "Solde disponible (retirable)"],
-             ["pending_balance", "DECIMAL(12,2)", "Fonds en attente (retrait en cours)"],
-             ["escrow_balance", "DECIMAL(12,2)", "Fonds bloqués en séquestre"],
-             ["currency", "VARCHAR", "Devise (USD par défaut)"]],
-            caption="Dictionnaire de données — table wallets",
-            widths=[0.26, 0.22, 0.52]),
-        TBL(["Champ (transactions)", "Type", "Description"],
-            [["id", "BIGINT (PK)", "Identifiant de la transaction"],
-             ["wallet_id / user_id", "BIGINT (FK)", "Portefeuille et utilisateur concernés"],
-             ["contract_id / milestone_id", "BIGINT (FK, nul.)", "Contexte financier éventuel"],
-             ["reference", "VARCHAR (unique)", "Référence lisible (DEP-…, ESC-…, PAY-…)"],
-             ["type", "ENUM", "credit, debit, escrow, release, refund, withdrawal, fee"],
-             ["direction", "ENUM", "in / out (sens du mouvement)"],
-             ["amount / fee", "DECIMAL(12,2)", "Montant et frais associés"],
-             ["balance_after", "DECIMAL(12,2)", "Solde résultant (immuable, pour l'audit)"],
-             ["idempotency_key", "VARCHAR (nul.)", "Clé garantissant l'unicité de l'opération"],
-             ["status", "ENUM", "pending, completed, failed, cancelled"]],
-            caption="Dictionnaire de données — table transactions",
-            widths=[0.26, 0.22, 0.52]),
-        P("La table `transactions` constitue un **grand livre** (*ledger*) : chaque ligne y est immuable "
-          "et conserve le solde résultant, ce qui permet de **reconstituer et de vérifier** à tout moment "
-          "le solde d'un portefeuille par simple sommation — propriété fondamentale pour l'auditabilité."),
-        P("Les tables `contracts` et `milestones`, qui structurent la collaboration, sont également "
-          "centrales. Leur dictionnaire est présenté ci-dessous."),
-        TBL(["Champ (contracts)", "Type", "Description"],
-            [["id", "BIGINT (PK)", "Identifiant du contrat"],
-             ["client_id / freelancer_id", "BIGINT (FK)", "Parties au contrat"],
-             ["job_id / proposal_id", "BIGINT (FK, nul.)", "Origine du contrat (offre/proposition)"],
-             ["title", "VARCHAR", "Intitulé du contrat"],
-             ["type", "ENUM", "fixed (forfait) / hourly (horaire)"],
-             ["escrow_amount", "DECIMAL(12,2)", "Montant actuellement sous séquestre"],
-             ["status", "ENUM", "active, completed, cancelled, disputed"],
-             ["disputed_at / dispute_reason", "DATETIME / TEXT", "Informations de litige éventuel"]],
-            caption="Dictionnaire de données — table contracts",
-            widths=[0.30, 0.22, 0.48]),
-        TBL(["Champ (milestones)", "Type", "Description"],
-            [["id", "BIGINT (PK)", "Identifiant du jalon"],
-             ["contract_id", "BIGINT (FK)", "Contrat de rattachement"],
-             ["title", "VARCHAR", "Description du jalon"],
-             ["amount", "DECIMAL(12,2)", "Montant associé"],
-             ["status", "ENUM", "pending, submitted, paid, rejected"],
-             ["approved_at", "DATETIME (nul.)", "Date de validation/paiement"],
-             ["created_by", "BIGINT (FK)", "Auteur de la création du jalon"]],
-            caption="Dictionnaire de données — table milestones",
-            widths=[0.30, 0.22, 0.48]),
-        TBL(["Champ (job_postings / proposals)", "Type", "Description"],
-            [["job.title / description", "VARCHAR / TEXT", "Intitulé et énoncé de l'offre"],
-             ["job.budget / type", "DECIMAL / ENUM", "Budget et nature (forfait/horaire)"],
-             ["job.category_id", "BIGINT (FK)", "Catégorie de compétence"],
-             ["job.status", "ENUM", "open, closed, draft"],
-             ["proposal.bid_amount", "DECIMAL(12,2)", "Montant proposé par le freelance"],
-             ["proposal.cover_letter", "TEXT", "Lettre de motivation"],
-             ["proposal.status", "ENUM", "pending, accepted, rejected, withdrawn"]],
-            caption="Dictionnaire de données — tables job_postings et proposals",
-            widths=[0.30, 0.22, 0.48]),
-
-        H3("4", "Règles de gestion"),
-        P("La cohérence du système est garantie par un ensemble de **règles de gestion** explicites, "
-          "implémentées dans les services et les politiques d'autorisation :"),
-        B(["**RG1** — Un contrat naît exclusivement de l'acceptation d'une proposition ou d'une commande ;",
-           "**RG2** — Seul le client d'un contrat peut financer son séquestre et libérer ses jalons ;",
-           "**RG3** — Un jalon ne peut être libéré que s'il a été *soumis* et que le séquestre est suffisant ;",
-           "**RG4** — Un contrat *en litige* bloque toute libération de fonds jusqu'à arbitrage ;",
-           "**RG5** — La commission de la plateforme est prélevée à la libération (10 % par défaut) ;",
-           "**RG6** — Un retrait est soumis à un montant minimum et à un frais fixe, puis validé par un admin ;",
-           "**RG7** — Toute opération financière est atomique, verrouillée et idempotente ;",
-           "**RG8** — Un service du catalogue n'est visible qu'après modération par l'administrateur."]),
-
-        H3("5", "Vue d'ensemble des tables de la base"),
-        P("Le schéma complet compte une cinquantaine de tables. Le tableau suivant les regroupe par "
-          "domaine fonctionnel afin d'en offrir une vision synthétique."),
-        TBL(["Domaine", "Tables principales"],
-            [["Identité & comptes", "users, freelancer_profiles, client_profiles, identity_verifications, "
-                                    "personal_access_tokens"],
-             ["Offres & propositions", "job_postings, proposals, saved_jobs, categories, skills, "
-                                       "freelancer_skills"],
-             ["Catalogue de services", "catalog_projects, catalog_project_images, catalog_orders, "
-                                       "catalog_reviews, saved_catalog_projects"],
-             ["Contrats & collaboration", "contracts, milestones, contract_files, contract_activities, "
-                                          "time_logs, contract_extensions"],
-             ["Finance", "wallets, transactions, withdrawals, weekly_invoices, platform_settings, "
-                         "stripe_webhook_events"],
-             ["Abonnements", "subscriptions, subscription_items"],
-             ["Communication", "conversations, conversation_participants, messages, message_reactions"],
-             ["Notifications", "notifications, push_subscriptions"],
-             ["Talents & agences", "saved_freelancers, talent_lists, talent_list_freelancers, agencies, "
-                                   "agency_members, agency_invitations"],
-             ["Évaluations & IA", "reviews, ai_histories"],
-             ["Transverses & système", "audit_logs, tax_documents, portfolios, sessions, cache, jobs, "
-                                       "failed_jobs"]],
-            caption="Vue d'ensemble des tables de la base, par domaine",
-            widths=[0.26, 0.74]),
-        P("Cette organisation reflète fidèlement les modules fonctionnels de l'application et illustre la "
-          "richesse du domaine couvert par Panda. Les contraintes d'intégrité référentielle (clés "
-          "étrangères) garantissent la cohérence entre ces tables — par exemple, la suppression d'un "
-          "utilisateur propage en cascade la suppression de son portefeuille et de ses profils."),
-
-        H2("VIII", "Choix technologiques"),
+        H2("VI", "Choix technologiques"),
         P("Les technologies ont été sélectionnées pour leur maturité, leur écosystème et leur adéquation "
           "au besoin. Les tableaux suivants récapitulent la pile retenue."),
         TBL(["Back-end", "Rôle"],
@@ -306,12 +310,68 @@ def ch3():
              ["Framer Motion · Recharts", "Animations et visualisation de données"]],
             caption="Pile technologique front-end",
             widths=[0.34, 0.66]),
+        TBL(["Services tiers & IA", "Rôle"],
+            [["Stripe (Checkout + Connect)", "Encaissement des dépôts et versement des retraits"],
+             ["Google OAuth (Socialite)", "Connexion sociale en un clic"],
+             ["Ollama + Mistral 7B", "Serveur local de modèle de langage (IA générative)"],
+             ["Laravel Reverb", "Serveur WebSocket open-source pour le temps réel"],
+             ["Web Push (VAPID)", "Notifications push navigateur sans application mobile"]],
+            caption="Services tiers et IA intégrés",
+            widths=[0.34, 0.66]),
 
-        H2("IX", "Conclusion du chapitre"),
+        H3("1", "Environnement et outils de développement"),
+        P("Au-delà de la pile applicative, un ensemble d'outils a structuré l'environnement de "
+          "développement tout au long du projet. Leur choix a été guidé par la productivité, "
+          "la collaboration et la reproductibilité."),
+        TBL(["Outil", "Catégorie", "Usage dans le projet"],
+            [["Visual Studio Code", "Éditeur de code", "Développement back-end (PHP/Laravel) et front-end (React/JSX) avec extensions dédiées"],
+             ["Composer", "Gestionnaire PHP", "Installation et mise à jour des dépendances Laravel et paquets PHP"],
+             ["npm + Vite", "Build front-end", "Gestion des paquets JavaScript et serveur de développement avec rechargement instantané"],
+             ["Git + GitHub", "Versionnement", "Historique du code, branches, revues et sauvegarde distante du projet"],
+             ["Postman", "Test d'API", "Test manuel et documentation interactive de tous les points d'API REST"],
+             ["phpMyAdmin", "Administration BDD", "Visualisation et manipulation de la base de données MySQL en développement"],
+             ["Docker + Compose", "Conteneurisation", "Environnement de déploiement reproductible (nginx, PHP-FPM, MySQL, Redis, Reverb)"],
+             ["Ollama", "IA locale", "Serveur de modèle de langage exécuté en local (Mistral 7B) pour les services IA"],
+             ["Stripe CLI", "Test paiements", "Simulation de webhooks Stripe en local pour tester le cycle de paiement complet"],
+             ["Draw.io / PlantUML", "Modélisation", "Création des diagrammes UML (cas d'utilisation, classes, séquence, états)"],
+             ["Figma", "UI/UX", "Maquettage des interfaces avant implémentation React"]],
+            caption="Outils et environnement de développement du projet Panda",
+            widths=[0.24, 0.20, 0.56]),
+
+        H3("2", "Pourquoi Laravel et React ?"),
+        P("Le choix de **Laravel 12** comme framework back-end repose sur plusieurs avantages décisifs "
+          "pour ce projet :"),
+        B(["**Écosystème complet** : Sanctum (auth), Sanctum (tokens), Socialite (OAuth), Reverb "
+           "(WebSockets), Horizon (queues), Telescope (debug) — tout est natif ou premier niveau ;",
+           "**Éloquent ORM** : syntaxe expressive des relations, migrations versionnées, factories "
+           "et seeders pour les tests automatisés ;",
+           "**Artisan CLI** : génération de code, migrations, tests et tâches planifiées depuis "
+           "la ligne de commande ;",
+           "**Architecture MVC enrichie** : séparation claire des responsabilités, politiques "
+           "d'autorisation natives, FormRequests pour la validation centralisée ;",
+           "**Communauté et documentation** : base d'utilisateurs mondiale, documentation exhaustive "
+           "et mises à jour régulières."]),
+        P("Le choix de **React 19** comme bibliothèque front-end est justifié par :"),
+        B(["**Composants réutilisables** : chaque élément d'interface est un composant autonome, "
+           "facilitant la maintenance et la cohérence visuelle ;",
+           "**State management** : Zustand offre une gestion d'état globale légère sans la "
+           "complexité de Redux ;",
+           "**Vite** : serveur de développement ultra-rapide avec HMR (remplacement de module à "
+           "chaud), idéal pour les itérations rapides ;",
+           "**Écosystème** : React Router pour la navigation SPA, Axios pour les requêtes API, "
+           "Framer Motion pour les animations, Recharts pour la visualisation ;",
+           "**TailwindCSS** : classes utilitaires permettant un design cohérent et responsive "
+           "sans écrire de CSS personnalisé."]),
+        NOTE("La combinaison **Laravel REST API + React SPA** est aujourd'hui le standard de "
+             "facto pour les applications web modernes nécessitant performance, sécurité et "
+             "évolutivité. Cette architecture découplée permet également d'envisager une "
+             "application mobile native consommant la même API sans modification du back-end."),
+
+        H2("VII", "Conclusion du chapitre"),
         P("Ce chapitre a présenté la conception complète de Panda : une architecture découplée et en "
           "couches, des mécanismes de sécurité en profondeur, une modélisation objet structurée autour du "
-          "contrat, des comportements dynamiques formalisés par des diagrammes de séquence et d'états, et "
-          "une base de données rigoureusement conçue selon Merise. Cette conception fournit un plan "
-          "directeur cohérent. Le chapitre suivant en présente la **réalisation** concrète, illustrée par "
-          "des extraits de code et la présentation des interfaces."),
+          "contrat, des comportements dynamiques formalisés par des diagrammes de séquence, et les choix "
+          "technologiques retenus. Cette conception fournit un plan directeur cohérent. Le chapitre suivant "
+          "en présente la **réalisation** concrète, illustrée par des extraits de code et la présentation "
+          "des interfaces."),
     ]

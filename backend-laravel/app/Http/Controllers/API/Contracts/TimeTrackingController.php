@@ -49,10 +49,12 @@ class TimeTrackingController extends Controller
             'screenshot_url' => 'nullable|url|max:500',
         ]);
 
-        $endedAt = now();
+        $endedAt  = now();
+        $duration = max(0, $endedAt->timestamp - $log->started_at->timestamp);
+
         $log->update([
             'ended_at'         => $endedAt,
-            'duration_seconds' => $endedAt->diffInSeconds($log->started_at),
+            'duration_seconds' => $duration,
             'description'      => $data['description'] ?? $log->description,
             'screenshot_url'   => $data['screenshot_url'] ?? $log->screenshot_url,
         ]);

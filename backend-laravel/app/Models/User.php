@@ -72,7 +72,7 @@ class User extends Authenticatable
     public function proposals()         { return $this->hasMany(Proposal::class,'freelancer_id'); }
     public function clientContracts()   { return $this->hasMany(Contract::class,'client_id'); }
     public function freelancerContracts(){ return $this->hasMany(Contract::class,'freelancer_id'); }
-    public function savedJobs()         { return $this->belongsToMany(JobPosting::class,'saved_jobs')->withTimestamps(); }
+    public function savedJobs()         { return $this->belongsToMany(JobPosting::class,'saved_jobs','user_id','job_id')->withTimestamps(); }
     public function conversations()     { return $this->belongsToMany(Conversation::class,'conversation_participants')->withPivot('last_read_at','is_muted')->withTimestamps(); }
     public function sentMessages()      { return $this->hasMany(Message::class,'sender_id'); }
     public function aiHistories()       { return $this->hasMany(AiHistory::class); }

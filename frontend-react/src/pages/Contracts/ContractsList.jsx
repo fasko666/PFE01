@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Search, FileSignature, ChevronLeft, ChevronRight, Loader2, Briefcase, Filter,
@@ -24,8 +24,12 @@ const fmtDate  = (iso) => iso ? new Date(iso).toLocaleDateString([], { month: 's
 export default function ContractsList() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
+  const [searchParams] = useSearchParams();
 
-  const [tab, setTab]               = useState('active');
+  const validTabs = TABS.map((t) => t.id);
+  const initialTab = validTabs.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'active';
+
+  const [tab, setTab]               = useState(initialTab);
   const [statusFilter, setStatus]   = useState('');
   const [search, setSearch]         = useState('');
   const [page, setPage]             = useState(1);

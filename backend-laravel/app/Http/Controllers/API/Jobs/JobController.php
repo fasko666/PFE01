@@ -151,10 +151,31 @@ class JobController extends Controller
         ]);
     }
 
+    public function mySavedJobs(Request $request): JsonResponse
+    {
+        $jobs = $request->user()
+            ->savedJobs()
+            ->with(['client', 'category'])
+            ->orderBy('saved_jobs.created_at', 'desc')
+            ->paginate($request->per_page ?? 12);
+
+        return response()->json([
+            'data' => [
+                'data' => $jobs->items(),
+                'meta' => [
+                    'total'        => $jobs->total(),
+                    'per_page'     => $jobs->perPage(),
+                    'current_page' => $jobs->currentPage(),
+                    'last_page'    => $jobs->lastPage(),
+                ],
+            ],
+        ]);
+    }
+
     public function save(Request $request, JobPosting $job): JsonResponse
     {
         $user = $request->user();
-        if ($user->savedJobs()->where('job_id', $job->id)->exists()) {
+        if ($user->savedJobs()->where('saved_jobs.job_id', $job->id)->exists()) {
             $user->savedJobs()->detach($job->id);
             return response()->json(['data' => ['saved' => false]]);
         }

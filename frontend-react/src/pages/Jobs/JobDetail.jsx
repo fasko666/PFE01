@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DollarSign, BarChart3, Clock, FileText, FolderOpen, MapPin,
-  Globe, X, Sparkles, Loader2, ChevronRight, MessageSquare, Send,
+  Globe, X, Sparkles, Loader2, MessageSquare, Send,
 } from 'lucide-react';
 import { api } from '../../api';
 import useAuthStore from '../../store/authStore';
@@ -30,7 +30,7 @@ export default function JobDetail() {
   useEffect(() => {
     api.jobs.get(id)
       .then((r) => setJob(r.data.data))
-      .catch(() => { toast.error('Job not found'); navigate('/jobs'); })
+      .catch(() => { toast.error('Job not found'); navigate('/search?type=jobs'); })
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -91,15 +91,8 @@ export default function JobDetail() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-5">
-      {/* Breadcrumb */}
-      <motion.div {...fadeUp(0)} className="flex items-center gap-1.5 text-sm text-dark-500">
-        <Link to="/jobs" className="hover:text-white transition-colors">Find Work</Link>
-        <ChevronRight className="w-3.5 h-3.5" strokeWidth={2} />
-        <span className="text-dark-300 truncate">{job.title}</span>
-      </motion.div>
-
       {/* Main card */}
-      <motion.div {...fadeUp(0.05)} className="card p-6 space-y-6">
+      <motion.div {...fadeUp(0)} className="card p-6 space-y-6">
         {/* Title row */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex-1 min-w-0">
@@ -192,7 +185,7 @@ export default function JobDetail() {
       </motion.div>
 
       {/* Client info */}
-      <motion.div {...fadeUp(0.1)} className="card p-5">
+      <motion.div {...fadeUp(0.05)} className="card p-5">
         <h3 className="text-sm font-semibold text-dark-100 mb-3">About the Client</h3>
         <div className="flex items-center gap-3">
           <img
@@ -238,7 +231,7 @@ export default function JobDetail() {
               transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
               className="card w-full max-w-lg p-6 space-y-5 max-h-[90vh] overflow-y-auto scrollbar-none"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pb-4 border-b border-dark-800">
                 <h2 className="text-lg font-bold text-dark-100">Submit Proposal</h2>
                 <button
                   onClick={() => setShowModal(false)}

@@ -368,7 +368,7 @@ export default function Blog() {
                   Find work you love with like-minded clients.
                 </h3>
                 <Link
-                  to="/jobs"
+                  to="/search?type=jobs"
                   className="inline-flex items-center gap-2 self-start px-6 py-2.5 rounded-full bg-primary-500 text-white text-xs font-semibold hover:bg-primary-600 hover:shadow-glow transition-all"
                 >
                   Find work <ArrowRight className="w-3.5 h-3.5" />

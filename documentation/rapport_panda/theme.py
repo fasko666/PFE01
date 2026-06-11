@@ -39,19 +39,21 @@ D_FILL_O  = "#FBEFDD"   # light orange fill
 D_FILL_P  = "#EFE7F8"   # light purple fill
 D_FILL_K  = "#F1F4F8"   # light grey fill
 
-# ── Cover / identity (EDITABLE — confirm names with the user) ──────────────────
+# ── Cover / identity ───────────────────────────────────────────────────────────
 COVER = {
-    "academie":    "Académie Régionale de Fès - Meknès",
-    "direction":   "Direction Provinciale de TAZA",
-    "centre":      "Centre de Préparation au Brevet de Technicien Supérieur",
+    "royaume":     "Royaume du Maroc",
+    "ministere":   "Ministère de l'Éducation Nationale\ndu préscolaire & des sports",
+    "academie":    "Académie régionale de Fès - Meknès",
+    "direction":   "Direction provinciale de TAZA",
+    "centre":      "Centre de préparation Brevet de Technicien Supérieur",
     "lycee":       "Lycée Technique - Taza",
-    "filiere":     "Filière « Développement Digital — option Web Full Stack »",
-    "report_kind": "RAPPORT DE PROJET DE FIN D'ÉTUDES",
-    "project_title": "PANDA",
-    "project_sub": "Plateforme web full-stack de mise en relation entre freelances et clients",
-    "students":    ["Youness BENABBOU"],
-    "encadrant":   "Mme. / M. [Encadrant pédagogique]",
-    "year":        "2024 – 2025",
+    "filiere":     "Filière : Développement Digital — option Web Full Stack",
+    "report_kind": "RAPPORT DE PFE",
+    "project_title": "Conception et réalisation d'une plateforme\nde mise en relation entre freelances et clients",
+    "students":    ["EL MERNISSI Ayoub", "EL AZZOUZI Omar"],
+    "encadrant":   "Hamid EL BOURAKKADI",
+    "centre_formation": "Lycée Technique - Taza",
+    "year":        "2025 – 2026",
 }
 
 

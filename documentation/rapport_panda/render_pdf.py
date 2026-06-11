@@ -32,11 +32,10 @@ def _reg(name, file, fallback="arial.ttf"):
 
 
 def register_fonts():
-    _reg("TNR", "times.ttf"); _reg("TNR-B", "timesbd.ttf"); _reg("TNR-I", "timesi.ttf"); _reg("TNR-BI", "timesbi.ttf")
-    _reg("CAL", "calibri.ttf", "arial.ttf"); _reg("CAL-B", "calibrib.ttf", "arialbd.ttf")
-    _reg("CAL-I", "calibrii.ttf", "ariali.ttf"); _reg("CAL-BI", "calibriz.ttf", "arialbd.ttf")
+    # Times New Roman everywhere (regular / bold / italic / bold-italic)
+    _reg("TNR", "times.ttf"); _reg("TNR-B", "timesbd.ttf")
+    _reg("TNR-I", "timesi.ttf"); _reg("TNR-BI", "timesbi.ttf")
     pdfmetrics.registerFontFamily("TNR", normal="TNR", bold="TNR-B", italic="TNR-I", boldItalic="TNR-BI")
-    pdfmetrics.registerFontFamily("CAL", normal="CAL", bold="CAL-B", italic="CAL-I", boldItalic="CAL-BI")
 
 
 CONTENT_W = A4[0] - 2 * 2.2 * cm
@@ -59,20 +58,14 @@ class PandaDoc(BaseDocTemplate):
         canv.saveState()
         canv.setFont("TNR", 11)
         canv.setFillColor(HexColor("#333333"))
-        canv.drawString(2.2 * cm, 1.1 * cm, str(doc.page))
+        canv.drawString(2.4 * cm, 1.3 * cm, str(doc.page))
         canv.restoreState()
 
     def _cover_page(self, canv, doc):
         canv.saveState()
-        canv.setStrokeColor(HexColor(T.TITLE_BLUE))
-        canv.setLineWidth(2)
-        canv.rect(1.3 * cm, 1.3 * cm, A4[0] - 2.6 * cm, A4[1] - 2.6 * cm)
-        canv.setLineWidth(0.6)
-        canv.setStrokeColor(HexColor(T.RULE_GRAY))
-        canv.rect(1.55 * cm, 1.55 * cm, A4[0] - 3.1 * cm, A4[1] - 3.1 * cm)
         canv.setFont("TNR", 11)
         canv.setFillColor(HexColor("#333333"))
-        canv.drawString(2.2 * cm, 1.1 * cm, str(doc.page))
+        canv.drawString(2.4 * cm, 1.3 * cm, str(doc.page))
         canv.restoreState()
 
     def afterFlowable(self, flowable):
@@ -113,7 +106,7 @@ def build_styles():
     S["h1"] = ParagraphStyle("H1Chapter", fontName="TNR-B", fontSize=19, leading=24,
                              alignment=TA_CENTER, textColor=HexColor(T.TITLE_BLUE),
                              spaceBefore=10, spaceAfter=16)
-    S["h2"] = ParagraphStyle("H2Sec", fontName="TNR-B", fontSize=14.5, leading=19,
+    S["h2"] = ParagraphStyle("H2Sec", fontName="TNR-BI", fontSize=14.5, leading=19,
                              textColor=HexColor(T.HEADING_BLUE), spaceBefore=17, spaceAfter=9)
     S["h3"] = ParagraphStyle("H3Sub", fontName="TNR-B", fontSize=12.5, leading=16,
                              textColor=HexColor(T.SUBHEAD_BLUE), spaceBefore=13, spaceAfter=6,
@@ -121,7 +114,7 @@ def build_styles():
     S["h4"] = ParagraphStyle("H4", fontName="TNR-BI", fontSize=11.5, leading=15,
                              textColor=HexColor("#333333"), spaceBefore=7, spaceAfter=3, leftIndent=22)
     S["fm_title"] = ParagraphStyle("FMTitle", fontName="TNR-B", fontSize=20, leading=26,
-                                    alignment=TA_CENTER, textColor=HexColor(T.TITLE_BLUE), spaceAfter=18)
+                                    alignment=TA_CENTER, textColor=HexColor(T.FRONT_BLUE), spaceAfter=18)
     S["bullet"] = ParagraphStyle("bullet", parent=S["body"], leftIndent=24, firstLineIndent=-12,
                                  spaceAfter=5, leading=18, alignment=TA_LEFT)
     S["bullet2"] = ParagraphStyle("bullet2", parent=S["bullet"], leftIndent=46, firstLineIndent=-12)
@@ -203,46 +196,59 @@ def _code(block, S):
     lines = [Preformatted(txt, S["code"])]
     inner = Table([[lines]], colWidths=[CONTENT_W])
     inner.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), HexColor("#F4F6F8")),
-        ("BOX", (0, 0), (-1, -1), 0.6, HexColor("#CBD3DD")),
-        ("LEFTPADDING", (0, 0), (-1, -1), 10), ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-        ("TOPPADDING", (0, 0), (-1, -1), 7), ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-        ("LINEBEFORE", (0, 0), (0, -1), 3, HexColor(T.HEADING_BLUE)),
+        ("BACKGROUND", (0, 0), (-1, -1), HexColor("#F5F7FA")),
+        ("BOX", (0, 0), (-1, -1), 1, HexColor("#C5CDD8")),
+        ("LEFTPADDING", (0, 0), (-1, -1), 14), ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+        ("TOPPADDING", (0, 0), (-1, -1), 9), ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
     ]))
     out = []
     if cap:
         out.append(Paragraph(cap, S["codecap"]))
     out.append(inner)
-    out.append(Spacer(1, 8))
+    out.append(Spacer(1, 10))
     return out
 
 
 def _cover(S):
     cov = T.COVER
     fl = [Spacer(1, 0.7 * cm)]
-    for line in [cov["academie"], cov["direction"], cov["centre"], cov["lycee"]]:
-        fl.append(Paragraph(line, S["cv_small"]))
-    fl.append(Spacer(1, 0.2 * cm))
-    fl.append(Paragraph(cov["filiere"], ParagraphStyle("f", parent=S["cv_small"], fontName="TNR-I")))
+    fl.append(Paragraph("Royaume du Maroc", S["cv_small"]))
+    fl.append(Spacer(1, 0.15 * cm))
+    fl.append(Paragraph(cov["ministere"], ParagraphStyle("f", parent=S["cv_small"], fontName="TNR-I", fontSize=10)))
+    fl.append(Spacer(1, 0.4 * cm))
+    # Institution box
+    box_data = [[Paragraph(f"{cov['academie']}<br/>{cov['direction']}<br/>{cov['centre']}",
+                           ParagraphStyle("bx", fontName="TNR", fontSize=12, leading=18, alignment=TA_CENTER))]]
+    box = Table(box_data, colWidths=[CONTENT_W * 0.85])
+    box.setStyle(TableStyle([
+        ("BOX", (0, 0), (-1, -1), 1.5, HexColor(T.TITLE_BLUE)),
+        ("TOPPADDING", (0, 0), (-1, -1), 10), ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        ("LEFTPADDING", (0, 0), (-1, -1), 12), ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+    ]))
+    fl.append(box)
     fl.append(Spacer(1, 1.7 * cm))
     fl.append(Paragraph(cov["report_kind"], S["cv_kind"]))
-    fl.append(Spacer(1, 0.7 * cm))
-    fl.append(Paragraph(cov["project_title"], S["cv_title"]))
-    fl.append(Spacer(1, 0.3 * cm))
-    fl.append(Paragraph(cov["project_sub"], S["cv_sub"]))
+    fl.append(Spacer(1, 0.5 * cm))
+    title_text = cov["project_title"].replace("\n", "<br/>")
+    fl.append(Paragraph(f'<b>{title_text}</b>',
+                        ParagraphStyle("ptitle", fontName="TNR-B", fontSize=17, leading=24, alignment=TA_CENTER)))
     fl.append(Spacer(1, 2.2 * cm))
     # students / encadrant table
     studs = "<br/>".join(cov["students"])
-    left = Paragraph(f'<font name="CAL-B" color="{T.HEADING_BLUE}">Réalisé par :</font><br/>{studs}',
+    left = Paragraph(f'<font name="TNR-B" color="{T.HEADING_BLUE}">Réalisé par :</font><br/>{studs}',
                      ParagraphStyle("l", fontName="TNR", fontSize=13, leading=20, alignment=TA_CENTER))
-    right = Paragraph(f'<font name="CAL-B" color="{T.HEADING_BLUE}">Encadré par :</font><br/>{cov["encadrant"]}',
+    right = Paragraph(f'<font name="TNR-B" color="{T.HEADING_BLUE}">Encadré par :</font><br/>{cov["encadrant"]}',
                       ParagraphStyle("r", fontName="TNR", fontSize=13, leading=20, alignment=TA_CENTER))
     tb = Table([[left, right]], colWidths=[CONTENT_W / 2, CONTENT_W / 2])
     tb.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP")]))
     fl.append(tb)
-    fl.append(Spacer(1, 2.6 * cm))
-    fl.append(Paragraph(f'<font name="CAL-B" size=14 color="{T.HEADING_BLUE}">Année universitaire {cov["year"]}</font>',
-                        ParagraphStyle("y", alignment=TA_CENTER, fontName="TNR-B", fontSize=14)))
+    fl.append(Spacer(1, 1.8 * cm))
+    fl.append(Paragraph(f'<b>Centre de formation :</b><br/>{cov["lycee"]}',
+                        ParagraphStyle("cf", fontName="TNR", fontSize=12, leading=18, alignment=TA_CENTER)))
+    fl.append(Spacer(1, 1.8 * cm))
+    fl.append(Paragraph(cov["year"],
+                        ParagraphStyle("y", fontName="TNR-B", fontSize=13, leading=18, alignment=TA_CENTER,
+                                       textColor=HexColor(T.HEADING_BLUE))))
     fl.append(NextPageTemplate("normal"))
     fl.append(PageBreak())
     return fl
