@@ -20,6 +20,8 @@ class AuthController extends Controller
 
     public function register(Request $request): JsonResponse
     {
+        $request->merge(['email' => strtolower(trim($request->email ?? ''))]);
+
         $validator = Validator::make($request->all(), [
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users',
@@ -43,7 +45,7 @@ class AuthController extends Controller
         $user = (new User)->forceFill([
             'name'              => $request->name,
             'username'          => $this->generateUsername($request->name),
-            'email'             => $request->email,
+            'email'             => strtolower($request->email),
             'password'          => Hash::make($request->password),
             'role'              => $request->role,
             'country'           => $request->country,
@@ -185,6 +187,37 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Profile updated',
             'user'    => $this->formatUser($user->fresh(['freelancerProfile', 'clientProfile'])),
+        ]);
+    }
+
+    // ─── Update avatar ───────────────────────────────────────────────────────
+
+    public function updateAvatar(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'avatar' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = $request->user();
+        $path = $this->saveBase64Avatar($request->avatar);
+
+        if (!$path) {
+            return response()->json(['message' => 'Invalid image. Use JPG, PNG or WebP under 5 MB.'], 422);
+        }
+
+        if ($user->avatar && !str_starts_with($user->avatar, 'http')) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->update(['avatar' => $path]);
+
+        return response()->json([
+            'message'    => 'Avatar updated',
+            'avatar_url' => $user->fresh()->avatar_url,
         ]);
     }
 

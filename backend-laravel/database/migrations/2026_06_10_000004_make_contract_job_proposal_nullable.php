@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Schema;
  * so contracts.job_id and contracts.proposal_id must be nullable. The
  * original migration set them NOT NULL.
  *
- * Laravel 11+ supports ->change() natively for SQLite, MySQL, and PostgreSQL
+ * Laravel 11+ supports ->change() natively for MySQL, MySQL, and PostgreSQL
  * without requiring doctrine/dbal — the framework rebuilds the table
- * internally on SQLite, preserving all other column attributes.
+ * internally on MySQL, preserving all other column attributes.
  */
 return new class extends Migration
 {

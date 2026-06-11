@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin, Star, DollarSign, MessageSquare,
   UserPlus, Edit3, X, Briefcase, ExternalLink, Trash2,
-  BadgeCheck, Send, AlertCircle,
+  BadgeCheck, Send, AlertCircle, Camera, Loader2,
 } from 'lucide-react';
 import { api } from '../../api';
 import useAuthStore from '../../store/authStore';
 import UserAvatar from '../../components/ui/UserAvatar';
 import toast from 'react-hot-toast';
+import { compressImage } from '../../utils/imageCompressor';
 
 const AVAIL_CONFIG = {
   available:     { label: 'Available',     cls: 'text-green-400',  dot: 'bg-green-400' },
@@ -216,6 +217,8 @@ export default function FreelancerProfile() {
   const [activeTab, setActiveTab] = useState('overview');
   const [skillInput, setSkillInput] = useState('');
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef(null);
 
   const [form, setForm] = useState({
     title: '', bio: '', hourly_rate: '', country: '', phone: '',
@@ -279,6 +282,27 @@ export default function FreelancerProfile() {
       await api.freelancers.deletePortfolio(id);
       setProfile((p) => ({ ...p, portfolios: p.portfolios?.filter((x) => x.id !== id) }));
     } catch { toast.error('Failed to remove portfolio'); }
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Please choose an image file'); return; }
+
+    setUploadingAvatar(true);
+    try {
+      const compressed = await compressImage(file);
+      const { data } = await api.auth.updateAvatar({ avatar: compressed });
+      setProfile((p) => ({ ...p, avatar_url: data.avatar_url }));
+      updateUser({ avatar_url: data.avatar_url });
+      toast.success('Photo updated!');
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Failed to update photo';
+      toast.error(msg);
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = '';
+    }
   };
 
   const handleReviewSuccess = (newReview) => {
@@ -360,10 +384,30 @@ export default function FreelancerProfile() {
       {/* Hero card */}
       <motion.div {...fadeUp(0)} className="card p-6">
         <div className="flex items-start gap-5 flex-wrap">
-          <div className="relative shrink-0">
+          <div className="relative shrink-0 group">
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
             <UserAvatar user={profile} size={80} className="!rounded-2xl ring-2 ring-dark-700" />
-            {profile.is_online && (
+            {profile.is_online && !isOwnProfile && (
               <span className="absolute bottom-1 right-1 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-dark-950" />
+            )}
+            {isOwnProfile && (
+              <button
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                className="absolute inset-0 rounded-2xl flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity disabled:cursor-wait"
+                title="Change photo"
+              >
+                {uploadingAvatar
+                  ? <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  : <Camera className="w-6 h-6 text-white" />
+                }
+              </button>
             )}
           </div>
 

@@ -5,7 +5,7 @@ export default function AuthLayout() {
   return (
     <div
       className="min-h-screen theme-bg flex flex-col"
-      style={{ paddingTop: '64px' }}
+      style={{ paddingTop: '60px' }}
     >
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <motion.div

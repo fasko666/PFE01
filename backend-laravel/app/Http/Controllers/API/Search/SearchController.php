@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Global multi-entity search. Uses MySQL FULLTEXT when available, falls back
- * to LIKE %q% for SQLite (tests) and as a safety net.
+ * to LIKE %q% for MySQL (tests) and as a safety net.
  *
  * Endpoints:
  *   GET /api/search?q=react&type=all|jobs|freelancers|contracts|messages

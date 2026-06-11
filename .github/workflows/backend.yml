@@ -26,7 +26,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, bcmath, intl, pdo_sqlite, redis, gd
+          extensions: mbstring, bcmath, intl, redis, gd
           coverage: pcov
           tools: composer:v2
 
@@ -48,7 +48,6 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate --force
-          touch database/database.sqlite
 
       - name: Run Pint (lint)
         run: vendor/bin/pint --test

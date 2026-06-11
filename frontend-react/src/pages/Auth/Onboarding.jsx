@@ -9,6 +9,7 @@ import { api } from '../../api';
 import toast from 'react-hot-toast';
 import PandaLogo from '../../components/ui/PandaLogo';
 import UserAvatar from '../../components/ui/UserAvatar';
+import { compressImage } from '../../utils/imageCompressor';
 
 const TOTAL = 9;
 
@@ -145,6 +146,9 @@ export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(initialState);
   const [submitting, setSubmitting] = useState(false);
+  // photoDisplay: what to show in the UI (existing avatar URL or new base64 pick)
+  // form.photoUrl: only set when the user actually picks a NEW file (base64), sent to backend
+  const [photoDisplay, setPhotoDisplay] = useState(user?.avatar_url || '');
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   const next = () => setStep((s) => Math.min(TOTAL + 1, s + 1));
@@ -221,14 +225,17 @@ export default function Onboarding() {
   /* ─── Photo file picker ──────────────────────────────── */
   const photoInputRef = useRef(null);
   const openPhotoPicker = () => photoInputRef.current?.click();
-  const onPhotoSelected = (e) => {
+  const onPhotoSelected = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error('Photo must be under 5MB'); return; }
     if (!file.type.startsWith('image/')) { toast.error('Please choose an image file'); return; }
-    const reader = new FileReader();
-    reader.onload = (ev) => set({ photoUrl: ev.target.result });
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImage(file);
+      set({ photoUrl: compressed }); // base64 → sent to backend
+      setPhotoDisplay(compressed);   // shown in UI
+    } catch {
+      toast.error('Could not read image. Try another file.');
+    }
   };
 
   const activeCat = CATEGORIES.find((c) => c.name === form.category);
@@ -564,7 +571,10 @@ export default function Onboarding() {
             {/* Live preview card */}
             <div className="rounded-2xl bg-dark-900 border border-dark-800 p-5 h-fit">
               <div className="relative w-24 h-24 mx-auto mb-3">
-                <UserAvatar user={user} size={96} className="ring-1 ring-dark-700" />
+                {photoDisplay
+                  ? <img src={photoDisplay} className="w-24 h-24 rounded-full object-cover ring-1 ring-dark-700" alt="" />
+                  : <UserAvatar user={user} size={96} className="ring-1 ring-dark-700" />
+                }
                 <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-green-400 ring-2 ring-dark-900" />
               </div>
               <div className="text-center text-lg font-bold text-dark-100 mb-1">{user?.name || 'Your Name'}</div>
@@ -676,8 +686,8 @@ export default function Onboarding() {
                   onChange={onPhotoSelected}
                 />
                 <div className="relative w-32 h-32 mx-auto md:mx-0 rounded-full bg-gradient-to-br from-amber-700/40 to-purple-600/30 flex items-center justify-center overflow-hidden border border-dark-700">
-                  {form.photoUrl ? (
-                    <img src={form.photoUrl} className="w-full h-full object-cover" alt="Your profile" />
+                  {photoDisplay ? (
+                    <img src={photoDisplay} className="w-full h-full object-cover" alt="Your profile" />
                   ) : (
                     <Camera className="w-8 h-8 text-dark-400" />
                   )}
@@ -695,12 +705,15 @@ export default function Onboarding() {
                   className="mt-4 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-primary-500/40 text-primary-300 text-xs font-semibold hover:bg-primary-500/10 transition-all"
                 >
                   <Pencil className="w-3 h-3" />
-                  {form.photoUrl ? 'Edit photo' : 'Upload photo'}
+                  {photoDisplay ? 'Change photo' : 'Upload photo'}
                 </button>
                 {form.photoUrl && (
                   <button
                     type="button"
-                    onClick={() => set({ photoUrl: '' })}
+                    onClick={() => {
+                      set({ photoUrl: '' });
+                      setPhotoDisplay(user?.avatar_url || '');
+                    }}
                     className="mt-2 block text-xs text-dark-500 hover:text-red-400 mx-auto md:mx-0"
                   >
                     Remove photo
@@ -787,7 +800,7 @@ export default function Onboarding() {
 
       /* ─── Step 11: Profile review ─── */
       case 10:
-        return <ProfileReview form={form} user={user} onSubmit={handleSubmit} submitting={submitting} onEdit={(s) => setStep(s)} />;
+        return <ProfileReview form={form} user={user} photoDisplay={photoDisplay} onSubmit={handleSubmit} submitting={submitting} onEdit={(s) => setStep(s)} />;
 
       /* ─── Step 12: Connects ─── */
       case 11:
@@ -875,14 +888,14 @@ export default function Onboarding() {
 }
 
 /* ─── Profile review (step 11) ──────────────────────────── */
-function ProfileReview({ form, user, onSubmit, submitting, onEdit }) {
+function ProfileReview({ form, user, photoDisplay, onSubmit, submitting, onEdit }) {
   return (
     <div className="grid md:grid-cols-[1fr_320px] gap-8">
       <div className="space-y-4">
         <div className="rounded-2xl border border-dark-800 bg-dark-900 p-5">
           <div className="flex items-start gap-4">
             <div className="relative w-20 h-20 rounded-full overflow-hidden bg-dark-800 shrink-0">
-              {form.photoUrl ? <img src={form.photoUrl} alt="" className="w-full h-full object-cover" /> : <UserAvatar user={user} size={80} />}
+              {photoDisplay ? <img src={photoDisplay} alt="" className="w-full h-full object-cover" /> : <UserAvatar user={user} size={80} />}
               <button onClick={() => onEdit(10)} className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center ring-2 ring-dark-900">
                 <Pencil className="w-3 h-3 text-white" />
               </button>

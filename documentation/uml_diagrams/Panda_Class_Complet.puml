@@ -1,0 +1,617 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam classBackgroundColor #EBF5FB
+skinparam classBorderColor #003466
+skinparam classFontColor #003466
+skinparam classFontSize 11
+skinparam classAttributeFontSize 10
+skinparam arrowColor #005A9C
+skinparam arrowThickness 1.5
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #F9A825
+skinparam defaultFontSize 10
+skinparam linetype ortho
+
+title Panda -- Diagramme de Classes Complet (Tous les Modeles)
+
+' ────────── UTILISATEURS ──────────────────────────────────────────────────
+package "Utilisateurs & Securite" #E8F4FD {
+
+  class User {
+    +id : bigint <<PK>>
+    +name : string
+    +username : string <<unique>>
+    +email : string <<unique>>
+    +password : string <<bcrypt>>
+    +role : enum[freelancer|client|admin]
+    +avatar : string
+    +country : string
+    +timezone : string
+    +phone : string
+    +phone_verified : boolean
+    +is_active : boolean
+    +is_verified : boolean
+    +is_online : boolean
+    +is_platform : boolean
+    +connects_balance : decimal
+    +google_id : string
+    +github_id : string
+    +two_factor_secret : text <<AES-256>>
+    +two_factor_recovery_codes : text <<AES-256>>
+    +two_factor_confirmed_at : datetime
+    +last_seen_at : datetime
+    +deleted_at : datetime <<softDelete>>
+    --
+    +hasEnabledTwoFactorAuthentication() : bool
+    +subscribed(slug) : bool
+    +isFreelancer() : bool
+    +isClient() : bool
+    +isAdmin() : bool
+    +getAvatarUrlAttribute() : string
+  }
+
+  class FreelancerProfile {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +bio : text
+    +title : string
+    +hourly_rate : decimal
+    +experience_level : enum[entry|mid|senior|expert]
+    +availability : enum[full_time|part_time|not_available]
+    +avg_rating : decimal(3,2)
+    +total_reviews : int
+    +total_earned : decimal
+    +total_jobs : int
+    +payment_verified : boolean
+    +languages : json
+    +education : json
+    +certifications : json
+    +is_featured : boolean
+  }
+
+  class ClientProfile {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +company_name : string
+    +company_size : string
+    +industry : string
+    +website : string
+    +description : text
+    +total_spent : decimal
+    +total_jobs_posted : int
+    +hire_rate : decimal
+    +avg_rating : decimal
+  }
+
+  class Wallet {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +balance : decimal(12,2)
+    +pending_balance : decimal(12,2)
+    +escrow_balance : decimal(12,2)
+  }
+
+  class IdentityVerification {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +document_type : enum[passport|id_card|driving_license]
+    +document_front_path : string
+    +document_back_path : string
+    +selfie_path : string
+    +status : enum[pending|approved|rejected]
+    +admin_notes : text
+    +reviewed_by : bigint <<FK>>
+    +reviewed_at : datetime
+  }
+
+  class AuditLog {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +action : string
+    +metadata : json
+    +ip_address : string
+    +user_agent : string
+  }
+
+  class Portfolio {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +title : string
+    +description : text
+    +project_url : string
+    +images : json
+    +is_featured : boolean
+  }
+
+  class PushSubscription {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +endpoint : text
+    +public_key : string
+    +auth_token : string
+  }
+}
+
+' ────────── MARKETPLACE ───────────────────────────────────────────────────
+package "Marketplace" #E8F8F5 {
+
+  class JobPosting {
+    +id : bigint <<PK>>
+    +client_id : bigint <<FK>>
+    +category_id : bigint <<FK>>
+    +title : string <<FULLTEXT>>
+    +description : text <<FULLTEXT>>
+    +type : enum[hourly|fixed]
+    +budget_min : decimal
+    +budget_max : decimal
+    +status : enum[draft|open|in_progress|completed|cancelled]
+    +required_skills : json
+    +duration : string
+    +experience_level : enum
+    +proposals_count : int
+    +views_count : int
+  }
+
+  class Proposal {
+    +id : bigint <<PK>>
+    +job_id : bigint <<FK>>
+    +freelancer_id : bigint <<FK>>
+    +cover_letter : text
+    +bid_amount : decimal
+    +milestones : json
+    +estimated_duration : int
+    +status : enum[pending|accepted|rejected|withdrawn]
+    +is_ai_generated : boolean
+    +connects_used : int
+    +submitted_at : datetime
+  }
+
+  class Category {
+    +id : bigint <<PK>>
+    +name : string
+    +slug : string
+    +parent_id : bigint <<FK>>
+    +icon : string
+    +description : text
+  }
+
+  class Skill {
+    +id : bigint <<PK>>
+    +name : string
+    +category_id : bigint <<FK>>
+    +slug : string
+  }
+
+  class FreelancerSkill {
+    +user_id : bigint <<FK>>
+    +skill_id : bigint <<FK>>
+    +level : enum[beginner|intermediate|expert]
+  }
+
+  class SavedJob {
+    +user_id : bigint <<FK>>
+    +job_id : bigint <<FK>>
+    +created_at : datetime
+  }
+
+  class Review {
+    +id : bigint <<PK>>
+    +contract_id : bigint <<FK>>
+    +reviewer_id : bigint <<FK>>
+    +reviewee_id : bigint <<FK>>
+    +rating : decimal(3,2)
+    +comment : text
+    +breakdown : json
+    +is_public : boolean
+  }
+}
+
+' ────────── CONTRATS ──────────────────────────────────────────────────────
+package "Contrats & Jalons" #FEF9E7 {
+
+  class Contract {
+    +id : bigint <<PK>>
+    +client_id : bigint <<FK>>
+    +freelancer_id : bigint <<FK>>
+    +job_id : bigint <<FK>>
+    +proposal_id : bigint <<FK>>
+    +title : string
+    +type : enum[fixed|hourly]
+    +status : enum[pending|active|paused|completed|cancelled|disputed]
+    +fixed_price : decimal
+    +hourly_rate : decimal
+    +weekly_limit : int
+    +escrow_amount : decimal
+    +starts_at : datetime
+    +deadline : date
+    +completed_at : datetime
+    +dispute_opened_by : bigint <<FK>>
+    +dispute_reason : text
+    +resolved_by : bigint <<FK>>
+    +archived_at : datetime
+    +deleted_at : datetime <<softDelete>>
+    --
+    {static} ALLOWED_TRANSITIONS : array
+    {static} TERMINAL_STATUSES : array
+    +canTransitionTo(status) : bool
+    +isTerminal() : bool
+    +hasParticipant(user) : bool
+  }
+
+  class Milestone {
+    +id : bigint <<PK>>
+    +contract_id : bigint <<FK>>
+    +created_by : bigint <<FK>>
+    +title : string
+    +description : text
+    +amount : decimal
+    +status : enum[pending|funded|submitted|approved|rejected|disputed]
+    +due_at : datetime
+    +submitted_at : datetime
+    +approved_at : datetime
+    +submission_notes : text
+    +submitted_by : bigint <<FK>>
+    +rejection_reason : text
+    +attachments : json
+    +sort_order : int
+  }
+
+  class ContractFile {
+    +id : bigint <<PK>>
+    +contract_id : bigint <<FK>>
+    +uploader_id : bigint <<FK>>
+    +original_name : string
+    +stored_path : string
+    +mime_type : string
+    +size_bytes : bigint
+    +version : int
+    +parent_id : bigint <<FK,self>>
+    +description : text
+    +deleted_at : datetime <<softDelete>>
+  }
+
+  class ContractActivity {
+    +id : bigint <<PK>>
+    +contract_id : bigint <<FK>>
+    +actor_id : bigint <<FK>>
+    +type : string
+    +data : json
+    +created_at : datetime
+    ' append-only - no UPDATE/DELETE
+  }
+
+  class TimeLog {
+    +id : bigint <<PK>>
+    +contract_id : bigint <<FK>>
+    +freelancer_id : bigint <<FK>>
+    +started_at : datetime
+    +ended_at : datetime
+    +duration_seconds : int
+    +memo : string
+    +screenshot_url : string
+  }
+
+  class ContractExtension {
+    +id : bigint <<PK>>
+    +contract_id : bigint <<FK>>
+    +requested_by : bigint <<FK>>
+    +old_deadline : date
+    +new_deadline : date
+    +reason : text
+    +status : enum[pending|accepted|rejected]
+    +responded_at : datetime
+  }
+}
+
+' ────────── FINANCE ───────────────────────────────────────────────────────
+package "Finance & Paiements" #FDF2F8 {
+
+  class Transaction {
+    +id : bigint <<PK>>
+    +wallet_id : bigint <<FK>>
+    +user_id : bigint <<FK>>
+    +type : enum[credit|debit|escrow|commission|withdrawal|refund]
+    +direction : enum[in|out]
+    +amount : decimal(12,2)
+    +fee : decimal(12,2)
+    +balance_after : decimal(12,2)
+    +reference_type : string
+    +reference_id : bigint
+    +idempotency_key : string <<unique>>
+    +description : text
+    +counterparty_user_id : bigint <<FK>>
+    +metadata : json
+  }
+
+  class Withdrawal {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +amount : decimal
+    +fee : decimal
+    +net : decimal
+    +method : enum[stripe|bank|paypal|wise|crypto]
+    +status : enum[pending|approved|rejected]
+    +stripe_transfer_id : string
+    +rejection_reason : text
+    +processed_at : datetime
+  }
+
+  class Subscription {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +type : string
+    +stripe_id : string
+    +stripe_status : string
+    +stripe_price : string
+    +plan_slug : string
+    +quantity : int
+    +trial_ends_at : datetime
+    +ends_at : datetime
+    --
+    +active() : bool
+  }
+
+  class WeeklyInvoice {
+    +id : bigint <<PK>>
+    +contract_id : bigint <<FK>>
+    +freelancer_id : bigint <<FK>>
+    +client_id : bigint <<FK>>
+    +week_start : date
+    +week_end : date
+    +hours : decimal(8,2)
+    +rate : decimal
+    +total : decimal
+    +status : enum[pending|paid|cancelled]
+    +paid_at : datetime
+  }
+
+  class StripeWebhookEvent {
+    +id : bigint <<PK>>
+    +stripe_event_id : string <<unique>>
+    +event_type : string
+    +payload : json
+    +processed_at : datetime
+    ' Idempotence : ignore si deja traite
+  }
+
+  class PlatformSetting {
+    +id : bigint <<PK>>
+    +key : string <<unique>>
+    +value : string
+    +description : text
+    ' fee.freelancer_pct = 0.10
+    ' fee.client_pct    = 0.05
+    ' fee.withdrawal_flat = 2.00
+    ' fee.deposit_pct   = 0.029
+    ' fee.deposit_flat  = 0.30
+    ' withdrawal.min    = 20.00
+  }
+}
+
+' ────────── COMMUNICATION ─────────────────────────────────────────────────
+package "Communication & Notifications" #F4ECF7 {
+
+  class Conversation {
+    +id : bigint <<PK>>
+    +title : string
+    +contract_id : bigint <<FK>>
+    +last_message_at : datetime
+    +last_message_preview : string
+  }
+
+  class ConversationParticipant {
+    +conversation_id : bigint <<FK>>
+    +user_id : bigint <<FK>>
+    +last_read_at : datetime
+    +is_muted : boolean
+  }
+
+  class Message {
+    +id : bigint <<PK>>
+    +conversation_id : bigint <<FK>>
+    +sender_id : bigint <<FK>>
+    +body : text
+    +type : enum[text|file|image|system|audio]
+    +attachment_path : string
+    +attachment_name : string
+    +reply_to_id : bigint <<FK,self>>
+    +is_edited : boolean
+    +edited_at : datetime
+    +deleted_at : datetime <<softDelete>>
+  }
+
+  class MessageReaction {
+    +id : bigint <<PK>>
+    +message_id : bigint <<FK>>
+    +user_id : bigint <<FK>>
+    +emoji : string
+  }
+
+  class Notification {
+    +id : string <<UUID,PK>>
+    +notifiable_id : bigint
+    +notifiable_type : string
+    +type : string
+    +data : json
+    +read_at : datetime
+  }
+}
+
+' ────────── CATALOGUE & AGENCES ───────────────────────────────────────────
+package "Catalogue, Agences & Talents" #EAFAF1 {
+
+  class CatalogProject {
+    +id : bigint <<PK>>
+    +freelancer_id : bigint <<FK>>
+    +category_id : bigint <<FK>>
+    +title : string
+    +slug : string <<unique>>
+    +description : text
+    +tiers : json
+    +status : enum[pending|approved|rejected]
+    +avg_rating : decimal
+    +total_orders : int
+    +is_featured : boolean
+  }
+
+  class CatalogOrder {
+    +id : bigint <<PK>>
+    +catalog_project_id : bigint <<FK>>
+    +client_id : bigint <<FK>>
+    +freelancer_id : bigint <<FK>>
+    +tier : enum[basic|standard|premium]
+    +price : decimal
+    +status : enum[pending|in_progress|delivered|completed|revision|cancelled]
+    +requirements : text
+    +delivery_date : datetime
+    +revision_count : int
+    +completed_at : datetime
+  }
+
+  class CatalogReview {
+    +id : bigint <<PK>>
+    +catalog_order_id : bigint <<FK>>
+    +catalog_project_id : bigint <<FK>>
+    +client_id : bigint <<FK>>
+    +rating : decimal(3,2)
+    +comment : text
+  }
+
+  class Agency {
+    +id : bigint <<PK>>
+    +owner_id : bigint <<FK>>
+    +name : string
+    +slug : string <<unique>>
+    +description : text
+    +logo : string
+    +website : string
+    +is_verified : boolean
+    +member_count : int
+  }
+
+  class AgencyMember {
+    +agency_id : bigint <<FK>>
+    +user_id : bigint <<FK>>
+    +role : enum[owner|admin|member]
+    +joined_at : datetime
+  }
+
+  class AgencyInvitation {
+    +id : bigint <<PK>>
+    +agency_id : bigint <<FK>>
+    +email : string
+    +token : string <<unique>>
+    +expires_at : datetime
+    +invited_by : bigint <<FK>>
+  }
+
+  class TalentList {
+    +id : bigint <<PK>>
+    +client_id : bigint <<FK>>
+    +name : string
+    +description : text
+    +is_private : boolean
+  }
+
+  class SavedFreelancer {
+    +client_id : bigint <<FK>>
+    +freelancer_id : bigint <<FK>>
+    +list_id : bigint <<FK>>
+    +notes : text
+  }
+
+  class TaxDocument {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +type : enum[W9|W8BEN|VAT]
+    +data : json
+    +pdf_path : string
+    +status : enum[pending|approved|rejected]
+    +reviewed_by : bigint <<FK>>
+    +reviewed_at : datetime
+  }
+
+  class AiHistory {
+    +id : bigint <<PK>>
+    +user_id : bigint <<FK>>
+    +type : enum[proposal|chat|analyze|match|smart_search]
+    +input : json
+    +output : json
+    +model : string
+    +tokens_used : int
+    +fallback_used : boolean
+  }
+}
+
+' ─────────────── Relations ────────────────────────────────────────────────
+User "1" --o "0..1" FreelancerProfile
+User "1" --o "0..1" ClientProfile
+User "1" --o "1"    Wallet
+User "1" --o "*"    Portfolio
+User "1" --o "*"    AuditLog
+User "1" --o "0..1" IdentityVerification
+User "1" --o "*"    PushSubscription
+User "1" --o "*"    Subscription
+User "1" --o "*"    AiHistory
+User "1" --o "*"    JobPosting : posts (client)
+User "1" --o "*"    Proposal   : submits (freelancer)
+User "*" --o "*"    Skill      : via FreelancerSkill
+
+JobPosting "1" --o "*"    Proposal
+JobPosting "1" --o "0..1" Contract
+Proposal   "1" --o "0..1" Contract
+
+Contract "1" --o "*"    Milestone
+Contract "1" --o "*"    ContractFile
+Contract "1" --o "*"    ContractActivity
+Contract "1" --o "*"    TimeLog
+Contract "1" --o "*"    ContractExtension
+Contract "1" --o "0..1" Review
+Contract "1" --o "0..1" Conversation
+Contract "1" --o "*"    WeeklyInvoice
+ContractFile "0..1" --o "*" ContractFile : versions(parent_id)
+
+Wallet "1" --o "*" Transaction
+Wallet "1" --o "*" Withdrawal
+
+Conversation "1" --o "*" ConversationParticipant
+Conversation "1" --o "*" Message
+Message "1"      --o "*" MessageReaction
+Message "0..1"   --o "*" Message : reply_to
+
+Agency  "1" --o "*" AgencyMember
+Agency  "1" --o "*" AgencyInvitation
+TalentList "1" --o "*" SavedFreelancer
+CatalogProject "1" --o "*" CatalogOrder
+CatalogOrder   "1" --o "0..1" CatalogReview
+
+note top of Contract
+  Machine d'etat:
+  pending  -> [active, cancelled]
+  active   -> [paused, completed, cancelled, disputed]
+  paused   -> [active, cancelled, disputed]
+  disputed -> [active, completed, cancelled]
+  completed, cancelled : TERMINAL
+end note
+
+note bottom of Transaction
+  LedgerService 6 Garanties:
+  1. DB::transaction() atomique
+  2. SELECT FOR UPDATE no race
+  3. Double-entree comptable
+  4. balance_after immutable
+  5. idempotency_key UNIQUE
+  6. Invariant SUM verifie
+end note
+
+note right of PlatformSetting
+  Commissions configurables admin :
+  freelancer_pct  = 10%
+  client_pct      = 5%
+  withdrawal_flat = $2.00
+  deposit_pct     = 2.9%
+  withdrawal_min  = $20.00
+end note
+
+@enduml

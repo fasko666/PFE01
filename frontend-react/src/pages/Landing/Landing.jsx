@@ -120,7 +120,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="bg-dark-950 text-dark-100 overflow-x-hidden relative" style={{ paddingTop: 64 }}>
+    <div className="bg-dark-950 text-dark-100 overflow-x-hidden relative" style={{ paddingTop: 60 }}>
 
       {/* ── Decorative top glows ── */}
       <div aria-hidden className="absolute top-16 left-0 w-[600px] h-[600px] bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />

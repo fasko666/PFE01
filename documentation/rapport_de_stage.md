@@ -13,7 +13,7 @@
 
 ## TITRE DU PROJET
 
-> # FreeNest — Conception et Développement d'une Marketplace Freelance Full-Stack avec Intelligence Artificielle
+> # Panda — Conception et Développement d'une Marketplace Freelance Full-Stack avec Intelligence Artificielle
 
 ---
 
@@ -38,7 +38,7 @@ Enfin, un grand merci à ma famille et à mes amis pour leur soutien constant et
 
 ## RÉSUMÉ
 
-FreeNest est une marketplace freelance full-stack développée dans le cadre d'un projet de fin d'études. La plateforme permet aux clients de publier des offres d'emploi freelance et aux freelancers de proposer leurs services via un système de propositions, de contrats et de paiements sécurisés par escrow.
+Panda est une marketplace freelance full-stack développée dans le cadre d'un projet de fin d'études. La plateforme permet aux clients de publier des offres d'emploi freelance et aux freelancers de proposer leurs services via un système de propositions, de contrats et de paiements sécurisés par escrow.
 
 Le projet intègre des technologies modernes : **Laravel 12** pour le backend API REST, **React 19** pour l'interface utilisateur, et **Ollama (modèle Mistral)** pour les fonctionnalités d'intelligence artificielle. Il inclut également une messagerie en temps réel via Socket.IO, une authentification OAuth Google, un système de portefeuille numérique et un tableau de bord d'administration complet.
 
@@ -48,7 +48,7 @@ Le projet intègre des technologies modernes : **Laravel 12** pour le backend AP
 
 ## ABSTRACT
 
-FreeNest is a full-stack freelance marketplace built as a final year project. The platform enables clients to post job listings and freelancers to submit proposals, manage contracts, and receive secure escrow-based payments. Built with Laravel 12 (backend), React 19 (frontend), and Ollama/Mistral AI integration, the system also features real-time messaging, Google OAuth, and a comprehensive admin dashboard.
+Panda is a full-stack freelance marketplace built as a final year project. The platform enables clients to post job listings and freelancers to submit proposals, manage contracts, and receive secure escrow-based payments. Built with Laravel 12 (backend), React 19 (frontend), and Ollama/Mistral AI integration, the system also features real-time messaging, Google OAuth, and a comprehensive admin dashboard.
 
 ---
 
@@ -56,7 +56,7 @@ FreeNest is a full-stack freelance marketplace built as a final year project. Th
 
 1. Introduction
 2. Contexte et Problématique
-3. Présentation du Projet FreeNest
+3. Présentation du Projet Panda
 4. Analyse des Besoins
    - 4.1 Besoins fonctionnels
    - 4.2 Besoins non fonctionnels
@@ -96,7 +96,7 @@ FreeNest is a full-stack freelance marketplace built as a final year project. Th
 
 Le marché du travail connaît une transformation profonde avec l'essor du travail indépendant (freelance). Selon les études récentes, plus d'un tiers de la population active mondiale exercera une activité freelance d'ici 2030. Des plateformes comme Upwork, Fiverr ou Malt ont démontré la viabilité et la demande croissante pour des marketplaces mettant en relation clients et prestataires indépendants.
 
-C'est dans ce contexte que s'inscrit **FreeNest**, une marketplace freelance complète que j'ai conçue et développée de A à Z dans le cadre de mon projet de fin d'études. FreeNest se distingue par l'intégration native de l'intelligence artificielle pour assister les freelancers dans la rédaction de propositions et les clients dans la recherche de talents, ainsi que par un système de paiement sécurisé par escrow garantissant la confiance entre les deux parties.
+C'est dans ce contexte que s'inscrit **Panda**, une marketplace freelance complète que j'ai conçue et développée de A à Z dans le cadre de mon projet de fin d'études. Panda se distingue par l'intégration native de l'intelligence artificielle pour assister les freelancers dans la rédaction de propositions et les clients dans la recherche de talents, ainsi que par un système de paiement sécurisé par escrow garantissant la confiance entre les deux parties.
 
 Ce rapport présente l'ensemble du travail réalisé : de l'analyse des besoins à la conception architecturale, du développement des fonctionnalités à l'intégration de l'IA, en passant par la sécurisation des paiements et la mise en place d'une messagerie en temps réel.
 
@@ -117,9 +117,9 @@ Le travail freelance représente aujourd'hui un secteur économique majeur. Les 
 
 **Comment concevoir et développer une marketplace freelance moderne, sécurisée et enrichie par l'intelligence artificielle, capable de mettre en relation efficacement clients et freelancers tout en garantissant la sécurité des paiements et la qualité des échanges ?**
 
-### 2.3 Solution proposée : FreeNest
+### 2.3 Solution proposée : Panda
 
-FreeNest répond à cette problématique en proposant :
+Panda répond à cette problématique en proposant :
 - Une interface moderne et intuitive (3D, animations)
 - Un système d'IA intégré et accessible à tous (Ollama/Mistral)
 - Un escrow transparent avec commission fixe de 10%
@@ -128,13 +128,13 @@ FreeNest répond à cette problématique en proposant :
 
 ---
 
-## 3. PRÉSENTATION DU PROJET FREENEST
+## 3. PRÉSENTATION DU PROJET PANDA
 
 ### 3.1 Vue d'ensemble
 
 | Élément | Détail |
 |---------|--------|
-| **Nom** | FreeNest (aussi appelé "Panda") |
+| **Nom** | Panda (aussi appelé "Panda") |
 | **Type** | Marketplace B2B/B2C Freelance |
 | **Backend** | Laravel 12 (PHP 8.2+) |
 | **Frontend** | React 19 + Vite |
@@ -295,7 +295,7 @@ Pour le CLIENT :
 
 ### 5.1 Architecture Générale
 
-FreeNest suit une architecture **Full-Stack Headless** (frontend découplé du backend) :
+Panda suit une architecture **Full-Stack Headless** (frontend découplé du backend) :
 
 ```
 ┌─────────────────────────────────────────┐
@@ -762,7 +762,7 @@ Lors de l'acceptation d'une proposition, une conversation est automatiquement cr
 
 ### 7.6 Module Intelligence Artificielle
 
-#### Les 5 fonctionnalités IA de FreeNest
+#### Les 5 fonctionnalités IA de Panda
 
 **1. Génération de proposition**
 ```
@@ -1200,7 +1200,7 @@ GET    /api/categories               Toutes les catégories
 
 ```env
 # Application
-APP_NAME=FreeNest
+APP_NAME=Panda
 APP_URL=http://localhost:8000
 APP_ENV=local
 
@@ -1208,7 +1208,7 @@ APP_ENV=local
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=freenest_db
+DB_DATABASE=panda_db
 DB_USERNAME=root
 DB_PASSWORD=
 
@@ -1247,4 +1247,4 @@ STRIPE_SECRET=sk_test_...
 
 ---
 
-*Rapport rédigé par Ayoub Elmernissi — Projet FreeNest — Année 2025/2026*
+*Rapport rédigé par Ayoub Elmernissi — Projet Panda — Année 2025/2026*

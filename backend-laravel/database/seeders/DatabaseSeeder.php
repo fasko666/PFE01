@@ -52,8 +52,8 @@ class DatabaseSeeder extends Seeder
 
         // ── Admin ─────────────────────────────────────────────────────────────
         $admin = User::create([
-            'name' => 'Admin FreeNest', 'username' => 'admin',
-            'email' => 'admin@freenest.io', 'password' => Hash::make('password'),
+            'name' => 'Admin Panda', 'username' => 'admin',
+            'email' => 'admin@panda.io', 'password' => Hash::make('password'),
             'role' => 'admin', 'is_verified' => true, 'is_active' => true,
             'avatar' => 'https://randomuser.me/api/portraits/men/0.jpg',
         ]);
@@ -64,7 +64,7 @@ class DatabaseSeeder extends Seeder
         $freelancers = [
             [
                 'name' => 'Alex Johnson',       'username' => 'alex_johnson',
-                'email' => 'alex@freenest.io',  'country' => 'US',
+                'email' => 'alex@panda.io',  'country' => 'US',
                 'avatar' => 'https://randomuser.me/api/portraits/men/11.jpg',
                 'title' => 'Senior Full-Stack Developer (Laravel & React)',
                 'bio'   => 'Senior full-stack developer with 7+ years building scalable SaaS platforms. Specialist in Laravel APIs and React frontends. Delivered 50+ projects across fintech and e-commerce.',
@@ -73,7 +73,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Sofia Martinez',     'username' => 'sofia_design',
-                'email' => 'sofia@freenest.io', 'country' => 'ES',
+                'email' => 'sofia@panda.io', 'country' => 'ES',
                 'avatar' => 'https://randomuser.me/api/portraits/women/21.jpg',
                 'title' => 'UI/UX Designer & Brand Identity Specialist',
                 'bio'   => 'Award-winning designer crafting user-centric digital experiences. I turn complex problems into elegant interfaces. Worked with startups and Fortune 500 companies.',
@@ -82,7 +82,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Karim Tahiri',       'username' => 'karim_ai',
-                'email' => 'karim@freenest.io', 'country' => 'MA',
+                'email' => 'karim@panda.io', 'country' => 'MA',
                 'avatar' => 'https://randomuser.me/api/portraits/men/32.jpg',
                 'title' => 'AI/ML Engineer & Data Scientist',
                 'bio'   => 'Machine learning engineer specializing in NLP, computer vision, and production AI deployments. 5+ years of research and industry experience.',
@@ -91,7 +91,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Lena Fischer',        'username' => 'lena_dev',
-                'email' => 'lena@freenest.io',  'country' => 'DE',
+                'email' => 'lena@panda.io',  'country' => 'DE',
                 'avatar' => 'https://randomuser.me/api/portraits/women/44.jpg',
                 'title' => 'Backend & Cloud Infrastructure Engineer',
                 'bio'   => 'DevOps engineer and backend specialist. Expert in Kubernetes, AWS, CI/CD pipelines, and microservices architecture. Passionate about performance and reliability.',
@@ -100,7 +100,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'James Okafor',        'username' => 'james_mobile',
-                'email' => 'james@freenest.io', 'country' => 'NG',
+                'email' => 'james@panda.io', 'country' => 'NG',
                 'avatar' => 'https://randomuser.me/api/portraits/men/55.jpg',
                 'title' => 'React Native & Flutter Mobile Developer',
                 'bio'   => 'Mobile developer with 4+ years shipping cross-platform apps. Built apps with 500k+ downloads. Strong focus on smooth animations and native-like performance.',
@@ -109,7 +109,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Amira Hassan',        'username' => 'amira_write',
-                'email' => 'amira@freenest.io', 'country' => 'EG',
+                'email' => 'amira@panda.io', 'country' => 'EG',
                 'avatar' => 'https://randomuser.me/api/portraits/women/62.jpg',
                 'title' => 'Technical Writer & Content Strategist',
                 'bio'   => 'Technical writer and content strategist with deep experience in SaaS documentation, blog content, and developer guides. Fluent in English, Arabic, and French.',
@@ -118,7 +118,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Lucas Dupont',        'username' => 'lucas_vue',
-                'email' => 'lucas@freenest.io', 'country' => 'FR',
+                'email' => 'lucas@panda.io', 'country' => 'FR',
                 'avatar' => 'https://randomuser.me/api/portraits/men/73.jpg',
                 'title' => 'Vue.js & Nuxt.js Frontend Engineer',
                 'bio'   => 'Frontend engineer passionate about building fast, accessible web apps with Vue 3 and Nuxt. 5+ years experience with component libraries and SSR.',
@@ -127,7 +127,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Priya Sharma',        'username' => 'priya_ds',
-                'email' => 'priya@freenest.io', 'country' => 'IN',
+                'email' => 'priya@panda.io', 'country' => 'IN',
                 'avatar' => 'https://randomuser.me/api/portraits/women/83.jpg',
                 'title' => 'Data Scientist & Python Automation Expert',
                 'bio'   => 'Data scientist with strong background in predictive modeling, data pipelines, and business intelligence. Experience at top tech companies in Bangalore and London.',
@@ -136,7 +136,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Omar Benali',         'username' => 'omar_go',
-                'email' => 'omar@freenest.io',  'country' => 'DZ',
+                'email' => 'omar@panda.io',  'country' => 'DZ',
                 'avatar' => 'https://randomuser.me/api/portraits/men/87.jpg',
                 'title' => 'Go & Rust Systems Engineer',
                 'bio'   => 'Systems engineer building high-performance backends with Go and Rust. Specialized in real-time APIs, WebSockets, and distributed systems.',
@@ -145,7 +145,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Emma Wilson',         'username' => 'emma_marketing',
-                'email' => 'emma@freenest.io',  'country' => 'GB',
+                'email' => 'emma@panda.io',  'country' => 'GB',
                 'avatar' => 'https://randomuser.me/api/portraits/women/90.jpg',
                 'title' => 'Digital Marketing & SEO Strategist',
                 'bio'   => 'Performance marketer helping SaaS and e-commerce brands grow through data-driven SEO, paid ads, and conversion optimization. 300%+ average ROI across clients.',
@@ -181,42 +181,42 @@ class DatabaseSeeder extends Seeder
         $clients = [
             [
                 'name' => 'Nathan Rivera',       'username' => 'nathan_tech',
-                'email' => 'client1@freenest.io','country' => 'US',
+                'email' => 'client1@panda.io','country' => 'US',
                 'avatar' => 'https://randomuser.me/api/portraits/men/15.jpg',
                 'company' => 'NovaTech Solutions', 'industry' => 'Technology',
                 'balance' => 12000, 'jobs_posted' => 14, 'total_spent' => 45000,
             ],
             [
                 'name' => 'Claire Dubois',       'username' => 'claire_startup',
-                'email' => 'client2@freenest.io','country' => 'FR',
+                'email' => 'client2@panda.io','country' => 'FR',
                 'avatar' => 'https://randomuser.me/api/portraits/women/28.jpg',
                 'company' => 'Bloom Digital Agency', 'industry' => 'Marketing',
                 'balance' => 7500, 'jobs_posted' => 9, 'total_spent' => 28000,
             ],
             [
                 'name' => 'Mohammed Al-Rashid',  'username' => 'mohammed_biz',
-                'email' => 'client3@freenest.io','country' => 'AE',
+                'email' => 'client3@panda.io','country' => 'AE',
                 'avatar' => 'https://randomuser.me/api/portraits/men/38.jpg',
                 'company' => 'Gulf Ventures Group', 'industry' => 'Finance',
                 'balance' => 25000, 'jobs_posted' => 21, 'total_spent' => 92000,
             ],
             [
                 'name' => 'Yuki Tanaka',         'username' => 'yuki_games',
-                'email' => 'client4@freenest.io','country' => 'JP',
+                'email' => 'client4@panda.io','country' => 'JP',
                 'avatar' => 'https://randomuser.me/api/portraits/women/47.jpg',
                 'company' => 'Pixel Dreams Studio', 'industry' => 'Gaming',
                 'balance' => 15000, 'jobs_posted' => 11, 'total_spent' => 38000,
             ],
             [
                 'name' => 'David Osei',          'username' => 'david_health',
-                'email' => 'client5@freenest.io','country' => 'GH',
+                'email' => 'client5@panda.io','country' => 'GH',
                 'avatar' => 'https://randomuser.me/api/portraits/men/58.jpg',
                 'company' => 'HealthBridge Africa', 'industry' => 'Healthcare',
                 'balance' => 5000, 'jobs_posted' => 6, 'total_spent' => 18000,
             ],
             [
                 'name' => 'Isabella Conti',      'username' => 'isabella_ecom',
-                'email' => 'client6@freenest.io','country' => 'IT',
+                'email' => 'client6@panda.io','country' => 'IT',
                 'avatar' => 'https://randomuser.me/api/portraits/women/67.jpg',
                 'company' => 'Luxe Commerce SRL', 'industry' => 'E-Commerce',
                 'balance' => 9000, 'jobs_posted' => 8, 'total_spent' => 31000,
@@ -380,11 +380,11 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->info('');
-        $this->command->info('✅ FreeNest seeded successfully! (password: password)');
+        $this->command->info('✅ Panda seeded successfully! (password: password)');
         $this->command->info('');
-        $this->command->info('  Admin     → admin@freenest.io');
-        $this->command->info('  Clients   → client1@freenest.io … client6@freenest.io');
-        $this->command->info('  Freelancers → alex / sofia / karim / lena / james / amira / lucas / priya / omar / emma @freenest.io');
+        $this->command->info('  Admin     → admin@panda.io');
+        $this->command->info('  Clients   → client1@panda.io … client6@panda.io');
+        $this->command->info('  Freelancers → alex / sofia / karim / lena / james / amira / lucas / priya / omar / emma @panda.io');
         $this->command->info('');
     }
 }

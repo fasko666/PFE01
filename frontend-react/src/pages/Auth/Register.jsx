@@ -9,6 +9,7 @@ import useAuthStore from '../../store/authStore';
 import CountrySelect from '../../components/ui/CountrySelect';
 import { api } from '../../api';
 import toast from 'react-hot-toast';
+import { compressImage } from '../../utils/imageCompressor';
 
 const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api').replace('/api', '');
 
@@ -125,17 +126,19 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      // scroll to first field error
+      setTimeout(() => {
+        const el = document.querySelector('[data-error="true"]');
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+      return;
+    }
     setLoading(true);
     try {
       let payload = { ...form };
       if (avatarFile) {
-        const base64 = await new Promise((res) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => res(ev.target.result);
-          reader.readAsDataURL(avatarFile);
-        });
-        payload.avatar = base64;
+        payload.avatar = await compressImage(avatarFile);
       }
       await register(payload);
       setRegisteredEmail(form.email);
@@ -143,13 +146,19 @@ export default function Register() {
     } catch (err) {
       const serverErrors = err.errors || err.response?.data?.errors || {};
       if (Object.keys(serverErrors).length) {
-        setErrors(
-          Object.fromEntries(
-            Object.entries(serverErrors).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])
-          )
+        const mapped = Object.fromEntries(
+          Object.entries(serverErrors).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])
         );
+        setErrors(mapped);
+        // show all server errors in a toast too so nothing is missed
+        const firstMsg = Object.values(mapped)[0];
+        toast.error(firstMsg || 'Please fix the errors below');
+        setTimeout(() => {
+          document.querySelector('[data-error="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
       } else {
-        toast.error(err.message || err.response?.data?.message || 'Registration failed');
+        const msg = err.message || err.response?.data?.message || 'Registration failed. Please try again.';
+        toast.error(msg);
       }
     } finally {
       setLoading(false);
@@ -257,6 +266,18 @@ export default function Register() {
 
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
 
+              {/* Server-side error banner */}
+              {errors.role && (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-xs">
+                  <span className="font-semibold">⚠ {errors.role}</span>
+                </div>
+              )}
+              {errors.general && (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-xs">
+                  <span className="font-semibold">⚠ {errors.general}</span>
+                </div>
+              )}
+
               {/* Avatar */}
               <div className="flex flex-col items-center py-1">
                 <div
@@ -282,7 +303,7 @@ export default function Register() {
               </div>
 
               {/* Name */}
-              <div>
+              <div data-error={!!errors.name}>
                 <label className="block text-sm font-semibold text-dark-300 mb-1.5">Full name</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400 pointer-events-none" strokeWidth={1.75} />
@@ -300,7 +321,7 @@ export default function Register() {
               </div>
 
               {/* Email with live validation */}
-              <div>
+              <div data-error={!!errors.email}>
                 <label className="block text-sm font-semibold text-dark-300 mb-1.5">Email address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400 pointer-events-none" strokeWidth={1.75} />

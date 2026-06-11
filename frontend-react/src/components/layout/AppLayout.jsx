@@ -15,10 +15,7 @@ export default function AppLayout() {
 
   return (
     <div className="theme-bg" style={{ minHeight: 'calc(100vh - 60px)', marginTop: 60 }}>
-      <main
-        className="overflow-y-auto scrollbar-none"
-        style={{ minHeight: 'calc(100vh - 60px)' }}
-      >
+      <main style={{ minHeight: 'calc(100vh - 60px)' }}>
         <div className="p-6 max-w-7xl mx-auto">
           {showBack && (
             <button

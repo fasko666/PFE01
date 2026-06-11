@@ -30,18 +30,16 @@ class PasswordResetController extends Controller
 
     public function forgot(ForgotPasswordRequest $request): JsonResponse
     {
+        // Set custom SPA reset URL before the broker sends the notification
+        \Illuminate\Auth\Notifications\ResetPassword::createUrlUsing(
+            fn (User $user, string $token) =>
+                rtrim((string) env('FRONTEND_URL', 'http://localhost:5173'), '/')
+                . '/reset-password?token=' . urlencode($token)
+                . '&email=' . urlencode($user->email)
+        );
+
         $status = Password::sendResetLink(
-            $request->only('email'),
-            function (User $user, string $token) {
-                $url = rtrim((string) env('FRONTEND_URL', 'http://localhost:5173'), '/')
-                    . '/reset-password?token=' . urlencode($token)
-                    . '&email=' . urlencode($user->email);
-                // Use Laravel's built-in mail (channels list-only via notification = simpler here):
-                $user->sendPasswordResetNotification($token);
-                // Replace the default mail with our custom URL by attaching it transiently:
-                // (Laravel's ResetPassword::$createUrlCallback is the SPA-friendly hook.)
-                \Illuminate\Auth\Notifications\ResetPassword::createUrlUsing(fn () => $url);
-            }
+            $request->only('email')
         );
 
         // Always 200 to avoid email enumeration. Status is logged.

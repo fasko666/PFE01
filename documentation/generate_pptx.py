@@ -1,5 +1,5 @@
 """
-Genere la presentation PowerPoint FreeNest — version maj. juin 2026
+Genere la presentation PowerPoint Panda — version maj. juin 2026
 """
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
@@ -109,7 +109,7 @@ def two_col(slide, left_items, right_items, y_start=Inches(2.0), size=13):
 s = prs.slides.add_slide(BLANK)
 add_rect(s, 0, 0, W, H, fill=BLUE_DARK)
 add_rect(s, 0, Inches(2.8), W, Inches(2.2), fill=BLUE_MAIN)
-add_text(s, "FreeNest", 0, Inches(0.6), W, Inches(1.2),
+add_text(s, "Panda", 0, Inches(0.6), W, Inches(1.2),
          size=64, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
 add_text(s, "Marketplace Freelance Full-Stack avec IA", 0, Inches(1.7), W, Inches(0.8),
          size=20, color=RGBColor(160,200,255), align=PP_ALIGN.CENTER)
@@ -129,7 +129,7 @@ slide_bg(s)
 slide_header(s, "Plan de la Presentation")
 plans = [
     ("01", "Contexte et Problematique"),
-    ("02", "Presentation de FreeNest"),
+    ("02", "Presentation de Panda"),
     ("03", "Stack Technologique"),
     ("04", "Architecture et CI/CD"),
     ("05", "Authentification, 2FA et KYC"),
@@ -181,13 +181,13 @@ bullet_list(s, [
 ], Inches(0.5), Inches(3.9), Inches(12), Inches(2.5), size=13, color=BLUE_DARK)
 
 # ════════════════════════════════════════════════════════════════
-#  SLIDE 4 — PRESENTATION FREENEST
+#  SLIDE 4 — PRESENTATION PANDA
 # ════════════════════════════════════════════════════════════════
 s = prs.slides.add_slide(BLANK)
 slide_bg(s)
-slide_header(s, "Presentation de FreeNest", "Marketplace freelance full-stack de niveau production")
+slide_header(s, "Presentation de Panda", "Marketplace freelance full-stack de niveau production")
 
-add_text(s, "FreeNest — Alternative moderne et complete aux grandes plateformes",
+add_text(s, "Panda — Alternative moderne et complete aux grandes plateformes",
          Inches(0.5), Inches(1.3), Inches(12), Inches(0.5), size=14, color=GREY_TEXT)
 
 features = [
@@ -748,7 +748,7 @@ add_rect(s, 0, 0, W, H, fill=BLUE_DARK)
 add_rect(s, 0, Inches(2.5), W, Inches(2.8), fill=BLUE_MAIN)
 add_text(s, "Merci pour votre attention", 0, Inches(0.8), W, Inches(1.2),
          size=38, bold=True, color=WHITE, align=PP_ALIGN.CENTER)
-add_text(s, "FreeNest — Marketplace Freelance Full-Stack de Niveau Production",
+add_text(s, "Panda — Marketplace Freelance Full-Stack de Niveau Production",
          0, Inches(2.6), W, Inches(0.7), size=18, color=WHITE, align=PP_ALIGN.CENTER)
 add_text(s, "Laravel 12  |  React 19  |  Stripe  |  Docker  |  Ollama  |  CI/CD GitHub Actions",
          0, Inches(3.3), W, Inches(0.6), size=14, color=RGBColor(160,200,255), align=PP_ALIGN.CENTER)
@@ -759,7 +759,7 @@ add_text(s, "Questions ?", 0, Inches(5.2), W, Inches(1.2),
          size=42, bold=True, color=ORANGE, align=PP_ALIGN.CENTER)
 
 # Sauvegarde
-out = r"C:\Users\Pro\Desktop\PFE O1\documentation\FreeNest_Presentation.pptx"
+out = r"C:\Users\Pro\Desktop\PFE O1\documentation\Panda_Presentation.pptx"
 prs.save(out)
 print("OK - Presentation PowerPoint creee : " + out)
 print("Slides : " + str(len(prs.slides)))

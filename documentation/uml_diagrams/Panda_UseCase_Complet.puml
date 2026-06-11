@@ -1,0 +1,263 @@
+@startuml
+!theme plain
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam usecaseBackgroundColor #DDEEFF
+skinparam usecaseBorderColor #003466
+skinparam usecaseFontSize 10
+skinparam usecaseFontColor #003466
+skinparam actorBackgroundColor #003466
+skinparam actorFontColor #003466
+skinparam actorBorderColor #001a33
+skinparam actorFontSize 12
+skinparam packageBackgroundColor #F4F8FB
+skinparam packageBorderColor #0078D4
+skinparam packageBorderThickness 2
+skinparam packageFontColor #003466
+skinparam packageFontSize 12
+skinparam arrowColor #005A9C
+skinparam arrowThickness 1.5
+skinparam noteFontSize 9
+skinparam defaultFontSize 10
+
+title Panda -- Diagramme de Cas d'Utilisation Complet
+
+' ── Acteurs humains (gauche) ──────────────────────────────────────────────
+actor "Freelancer" as FL
+actor "Client" as CL
+actor "Admin" as AD
+
+' ── Systemes externes (droite) ────────────────────────────────────────────
+actor "Google OAuth" as GO
+actor "Stripe API" as ST
+actor "Ollama Mistral" as AI
+actor "Laravel Reverb" as RV
+
+rectangle "Panda Platform" {
+
+  package "01. Authentification" #E3F2FD {
+    (Inscription email) as A1
+    (Connexion email / mdp) as A2
+    (OAuth2 Google) as A3
+    (Reinitialiser mot de passe) as A4
+    (Activer 2FA TOTP) as A5
+    (Codes de secours 2FA) as A6
+    (Onboarding 5 etapes) as A7
+    (Verification KYC) as A8
+    (Profil public) as A9
+  }
+
+  package "02. Marketplace" #E8F5E9 {
+    (Publier une offre) as B1
+    (Recherche FULLTEXT) as B2
+    (Filtrer offres) as B3
+    (Recherche globale) as B4
+    (Sauvegarder offre) as B5
+    (Parcourir freelancers) as B6
+    (Voir profil freelancer) as B7
+    (Gerer mes offres) as B8
+  }
+
+  package "03. Propositions et IA" #FFF8E1 {
+    (Soumettre proposition) as C1
+    (Generer proposition IA) as C2
+    (Analyser profil IA) as C3
+    (Matcher freelancers IA) as C4
+    (Recherche intelligente IA) as C5
+    (Chat assistant IA) as C6
+    (Accepter proposition) as C7
+  }
+
+  package "04. Contrats et Jalons" #FFF3E0 {
+    (Gerer contrats actifs) as D1
+    (Creer jalons) as D2
+    (Financer jalon escrow) as D3
+    (Soumettre travail jalon) as D4
+    (Approuver jalon) as D5
+    (Rejeter / Revision) as D6
+    (Ouvrir litige) as D7
+    (Upload fichiers version) as D8
+    (Timer start / stop) as D9
+    (Analytics contrat) as D10
+    (Extension deadline) as D11
+    (Export PDF contrat) as D12
+    (Laisser un avis) as D13
+  }
+
+  package "05. Paiements et Finance" #FCE4EC {
+    (Deposer fonds Stripe) as E1
+    (Wallet 3 balances) as E2
+    (Liberer jalon) as E3
+    (Retrait gains) as E4
+    (Stripe Connect) as E5
+    (Plan premium) as E6
+    (Portail abonnement) as E7
+    (Factures hebdo) as E8
+  }
+
+  package "06. Messagerie RT" #EDE7F6 {
+    (Envoyer message RT) as F1
+    (Reactions emoji) as F2
+    (Accuses lu / livraison) as F3
+    (Indicateur de frappe) as F4
+    (Notifications Push Web) as F5
+    (Notifications in-app) as F6
+  }
+
+  package "07. Catalogue Services" #E8EAF6 {
+    (Creer service 3 tiers) as G1
+    (Commander service) as G2
+    (Livrer service) as G3
+    (Valider livraison) as G4
+    (Evaluer service) as G5
+  }
+
+  package "08. Agences et Talents" #F1F8E9 {
+    (Creer agence) as H1
+    (Inviter membres token) as H2
+    (Rejoindre agence) as H3
+    (Listes de talents) as H4
+    (Sauvegarder freelancers) as H5
+    (Documents fiscaux W9/VAT) as H6
+  }
+
+  package "09. Administration" #FFEBEE {
+    (Dashboard statistiques) as I1
+    (Gerer utilisateurs) as I2
+    (Valider KYC) as I3
+    (Approuver retraits) as I4
+    (Configurer commissions) as I5
+    (Moderer catalogue) as I6
+    (Audit logs) as I7
+    (Resoudre litiges) as I8
+    (Valider docs fiscaux) as I9
+  }
+}
+
+' ── Freelancer ─────────────────────────────────────────────────────────────
+FL --> A1
+FL --> A2
+FL --> A3
+FL --> A5
+FL --> A6
+FL --> A7
+FL --> A8
+FL --> A9
+FL --> B2
+FL --> B3
+FL --> B4
+FL --> B7
+FL --> C1
+FL --> C2
+FL --> C3
+FL --> C6
+FL --> D1
+FL --> D2
+FL --> D4
+FL --> D8
+FL --> D9
+FL --> D10
+FL --> D11
+FL --> D12
+FL --> D13
+FL --> E2
+FL --> E4
+FL --> E5
+FL --> E6
+FL --> E8
+FL --> F1
+FL --> F2
+FL --> F3
+FL --> F4
+FL --> F5
+FL --> F6
+FL --> G1
+FL --> G3
+FL --> H1
+FL --> H2
+FL --> H3
+FL --> H6
+
+' ── Client ─────────────────────────────────────────────────────────────────
+CL --> A1
+CL --> A2
+CL --> A3
+CL --> A5
+CL --> A8
+CL --> A9
+CL --> B1
+CL --> B2
+CL --> B3
+CL --> B4
+CL --> B5
+CL --> B6
+CL --> B7
+CL --> B8
+CL --> C4
+CL --> C5
+CL --> C6
+CL --> C7
+CL --> D1
+CL --> D3
+CL --> D5
+CL --> D6
+CL --> D7
+CL --> D11
+CL --> D12
+CL --> D13
+CL --> E1
+CL --> E2
+CL --> E3
+CL --> E6
+CL --> E7
+CL --> F1
+CL --> F2
+CL --> F3
+CL --> F4
+CL --> F5
+CL --> F6
+CL --> G2
+CL --> G4
+CL --> G5
+CL --> H1
+CL --> H2
+CL --> H4
+CL --> H5
+CL --> H6
+
+' ── Admin ──────────────────────────────────────────────────────────────────
+AD --> I1
+AD --> I2
+AD --> I3
+AD --> I4
+AD --> I5
+AD --> I6
+AD --> I7
+AD --> I8
+AD --> I9
+
+' ── Systemes externes ──────────────────────────────────────────────────────
+GO --> A3 : OAuth2 token
+ST --> E1 : checkout webhook
+ST --> E3 : Stripe Transfer
+ST --> E5 : Connect Express
+ST --> E6 : subscription events
+AI --> C2 : Mistral 7B
+AI --> C3
+AI --> C4
+AI --> C5
+AI --> C6
+RV --> F1 : message.sent
+RV --> F2 : reaction.toggled
+RV --> F3 : message.read
+RV --> F4 : user.typing
+RV --> F5 : push event
+RV --> F6 : notification.created
+
+' ── Relations structurelles ────────────────────────────────────────────────
+C2 ..> C1 : <<include>>
+E3 ..> D3 : <<include>>
+I3 ..> A8 : <<include>>
+C7 ..> D1 : <<include>>
+
+@enduml

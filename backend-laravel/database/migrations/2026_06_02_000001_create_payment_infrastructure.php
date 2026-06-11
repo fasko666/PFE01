@@ -109,7 +109,7 @@ return new class extends Migration
             $table->index(['contract_id', 'milestone_id']);
         });
 
-        // Add 'commission' and richer type vocabulary (SQLite-safe: drop & recreate enum
+        // Add 'commission' and richer type vocabulary (MySQL-safe: drop & recreate enum
         // is non-trivial in MySQL too, so we leave the enum and use 'fee' for commissions
         // alongside the existing types. The existing `type` enum already supports:
         // ['credit', 'debit', 'escrow', 'release', 'refund', 'withdrawal', 'fee']

@@ -23,6 +23,7 @@ const BuildWebsite    = lazy(() => import('./pages/GetOutcomes/BuildWebsite'));
 const ScalePaidAds    = lazy(() => import('./pages/GetOutcomes/ScalePaidAds'));
 const HandleSupport   = lazy(() => import('./pages/GetOutcomes/HandleSupport'));
 const Agencies        = lazy(() => import('./pages/Agencies/Agencies'));
+const Enterprise      = lazy(() => import('./pages/Enterprise/Enterprise'));
 const Search          = lazy(() => import('./pages/Search/Search'));
 const FindTalent      = lazy(() => import('./pages/FindTalent/FindTalent'));
 const Login           = lazy(() => import('./pages/Auth/Login'));
@@ -125,6 +126,7 @@ function AppRoot() {
           <Route path="/get-outcomes/scale-paid-ads"   element={<ScalePaidAds />} />
           <Route path="/get-outcomes/handle-support"   element={<HandleSupport />} />
           <Route path="/agencies"                      element={<Agencies />} />
+          <Route path="/enterprise"                    element={<Enterprise />} />
           <Route path="/search"                        element={<Search />} />
           <Route path="/find-talent"                   element={<FindTalent />} />
           <Route path="/find-talent/:skill"            element={<FindTalent />} />

@@ -1,5 +1,5 @@
 # PRÉSENTATION — SOUTENANCE PFE
-## FreeNest — Marketplace Freelance Full-Stack avec IA
+## Panda — Marketplace Freelance Full-Stack avec IA
 ### Ayoub Elmernissi — 2025/2026
 
 > **Format :** 20 diapositives — Durée : 20–25 minutes
@@ -27,12 +27,12 @@
 ║  Établissement: [Nom de l'établissement]             ║
 ║  Année        : 2025–2026                            ║
 ║                                                      ║
-║  [Capture d'écran de la landing page 3D FreeNest]    ║
+║  [Capture d'écran de la landing page 3D Panda]    ║
 ╚══════════════════════════════════════════════════════╝
 ```
 
 **Notes :** Commencer par une phrase d'accroche :
-> *"Imaginez une plateforme où un client publie une offre, l'IA propose les meilleurs freelancers, et le paiement est garanti par un système d'escrow sécurisé. C'est FreeNest."*
+> *"Imaginez une plateforme où un client publie une offre, l'IA propose les meilleurs freelancers, et le paiement est garanti par un système d'escrow sécurisé. C'est Panda."*
 
 ---
 
@@ -45,7 +45,7 @@
 ║  PLAN                                                ║
 ║                                                      ║
 ║  1.  Contexte et Problématique          2 min        ║
-║  2.  Présentation de FreeNest           2 min        ║
+║  2.  Présentation de Panda           2 min        ║
 ║  3.  Technologies utilisées             2 min        ║
 ║  4.  Architecture du système            2 min        ║
 ║  5.  Modules développés                 5 min        ║
@@ -87,7 +87,7 @@
 ║  │             │ les nouveaux utilisateurs         │  ║
 ║  └─────────────┴──────────────────────────────────┘  ║
 ║                                                      ║
-║  ✅  SOLUTION → FreeNest                             ║
+║  ✅  SOLUTION → Panda                             ║
 ╚══════════════════════════════════════════════════════╝
 ```
 
@@ -96,12 +96,12 @@
 ---
 
 ## ══════════════════════════════════════
-## SLIDE 4 — PRÉSENTATION DE FREENEST
+## SLIDE 4 — PRÉSENTATION DE PANDA
 ## ══════════════════════════════════════
 
 ```
 ╔══════════════════════════════════════════════════════╗
-║  QU'EST-CE QUE FREENEST ?                           ║
+║  QU'EST-CE QUE PANDA ?                           ║
 ║                                                      ║
 ║  Une marketplace freelance complète                  ║
 ║  ┌────────────────────────────────────────────────┐  ║
@@ -109,7 +109,7 @@
 ║  │  Publie des              Propose ses           │  ║
 ║  │  offres                  services              │  ║
 ║  │     │                        │                 │  ║
-║  │     └───────── FREENEST ─────┘                 │  ║
+║  │     └───────── PANDA ─────┘                 │  ║
 ║  │              (Intermédiaire de                 │  ║
 ║  │               confiance + IA)                  │  ║
 ║  └────────────────────────────────────────────────┘  ║
@@ -310,7 +310,7 @@
 ║                                                      ║
 ║  CYCLE DE VIE D'UNE MISSION :                        ║
 ║                                                      ║
-║  CLIENT              FREENEST          FREELANCER    ║
+║  CLIENT              PANDA          FREELANCER    ║
 ║    │                    │                  │         ║
 ║    │  Publie une offre  │                  │         ║
 ║    │──────────────────▶│                  │         ║
@@ -650,7 +650,7 @@
 ╔══════════════════════════════════════════════════════╗
 ║  CONCLUSION ET PERSPECTIVES                          ║
 ║                                                      ║
-║  FreeNest est une plateforme complète et             ║
+║  Panda est une plateforme complète et             ║
 ║  opérationnelle, couvrant l'ensemble du              ║
 ║  cycle de vie d'une mission freelance.               ║
 ║                                                      ║
@@ -730,4 +730,4 @@
 
 ---
 
-*Présentation préparée par Ayoub Elmernissi — FreeNest PFE 2025/2026*
+*Présentation préparée par Ayoub Elmernissi — Panda PFE 2025/2026*

@@ -4,12 +4,14 @@
 # WhatsApp images and other media
 *.jpeg
 *.jpg
-*.png
 *.gif
 *.mp4
 
+*.png
+!documentation/uml_images/*.png
+
 # Demo files
-freenest-demo.html
+panda-demo.html
 
 # Sensitive / local files
 .env

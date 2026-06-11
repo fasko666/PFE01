@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * MySQL FULLTEXT indexes for global search (Feature 2). Skipped on non-MySQL
- * drivers (SQLite tests fall back to LIKE %x% which the controller handles).
+ * drivers (MySQL tests fall back to LIKE %x% which the controller handles).
  */
 return new class extends Migration
 {

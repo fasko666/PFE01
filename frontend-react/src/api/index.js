@@ -7,6 +7,7 @@ export const auth = {
   logout:         ()     => http.post('/auth/logout'),
   me:             ()     => http.get('/auth/me'),
   updateProfile:  (data) => http.put('/auth/profile', data),
+  updateAvatar:   (data) => http.post('/auth/avatar', data),
   changePassword:       (data) => http.put('/auth/change-password', data),
   resendVerification:   ()     => http.post('/auth/resend-verification'),
   verifyPhone:          ()     => http.post('/auth/verify-phone'),

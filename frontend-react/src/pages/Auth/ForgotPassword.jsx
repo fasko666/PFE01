@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Mail, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import http from '../../api/axios';
 import toast from 'react-hot-toast';
@@ -25,23 +24,25 @@ export default function ForgotPassword() {
 
   if (sent) {
     return (
-      <Wrapper>
-        <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-4" />
-        <h1 className="text-xl font-bold font-display text-dark-50 mb-2">Check your inbox</h1>
-        <p className="text-sm text-dark-400 mb-6">
+      <div className="space-y-4 text-center">
+        <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto" />
+        <h1 className="text-xl font-bold font-display text-dark-100">Check your inbox</h1>
+        <p className="text-sm text-dark-400">
           If an account exists for <span className="text-dark-200 font-medium">{email}</span>, we've sent a password reset link. Click it within 60 minutes.
         </p>
-        <Link to="/login" className="inline-flex items-center gap-1.5 text-xs text-primary-400 hover:underline">
+        <Link to="/login" className="inline-flex items-center justify-center gap-1.5 text-xs text-primary-400 hover:text-primary-300 hover:underline transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
         </Link>
-      </Wrapper>
+      </div>
     );
   }
 
   return (
-    <Wrapper>
-      <h1 className="text-xl font-bold font-display text-dark-50 mb-1">Forgot password?</h1>
-      <p className="text-sm text-dark-400 mb-6">Enter your email and we'll send you a reset link.</p>
+    <div className="space-y-6">
+      <div className="text-center space-y-1.5">
+        <h1 className="text-2xl font-bold font-display text-dark-100 tracking-tight">Forgot password?</h1>
+        <p className="text-sm text-dark-500">Enter your email and we'll send you a reset link.</p>
+      </div>
 
       <form onSubmit={submit} className="space-y-4">
         <div className="relative">
@@ -49,29 +50,20 @@ export default function ForgotPassword() {
           <input
             type="email" required autoFocus value={email} onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-dark-700 bg-dark-900 text-sm text-dark-100 placeholder:text-dark-600 outline-none focus:border-primary-500/50"
+            className="input pl-10"
           />
         </div>
         <button type="submit" disabled={busy || !email}
-          className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary-500 hover:bg-primary-600 text-white text-sm font-bold disabled:opacity-40 transition-colors">
+          className="w-full btn btn-primary py-3 rounded-xl text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2">
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send reset link'}
         </button>
       </form>
 
-      <div className="mt-6 text-center">
-        <Link to="/login" className="inline-flex items-center gap-1.5 text-xs text-dark-500 hover:text-dark-200">
+      <div className="text-center">
+        <Link to="/login" className="inline-flex items-center gap-1.5 text-xs text-dark-500 hover:text-dark-200 transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
         </Link>
       </div>
-    </Wrapper>
-  );
-}
-
-function Wrapper({ children }) {
-  return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-sm mx-auto rounded-2xl border border-dark-800 bg-dark-900 p-6 text-center">
-      {children}
-    </motion.div>
+    </div>
   );
 }

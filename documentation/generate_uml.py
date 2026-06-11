@@ -1,5 +1,5 @@
 """
-Genere les diagrammes UML FreeNest en images PNG via PlantUML — version maj. juin 2026
+Genere les diagrammes UML Panda en images PNG via PlantUML — version maj. juin 2026
 """
 import os, subprocess
 
@@ -20,7 +20,7 @@ skinparam usecase {
 }
 skinparam packageStyle rectangle
 left to right direction
-title Use Case Global -- FreeNest (Vue Complete)
+title Use Case Global -- Panda (Vue Complete)
 
 actor "Freelancer" as FL #LightGreen
 actor "Client"     as CL #LightBlue
@@ -29,7 +29,7 @@ actor "Google OAuth" as G <<external>>
 actor "Ollama IA"    as AI <<external>>
 actor "Stripe"       as ST <<external>>
 
-rectangle "FreeNest" {
+rectangle "Panda" {
   package "Authentification & Securite" {
     (S'inscrire) as REG
     (Se connecter) as LOGIN
@@ -460,7 +460,7 @@ skinparam class {
   HeaderBackgroundColor #2196F3
   HeaderFontColor white
 }
-title Diagramme de Classes -- FreeNest (Majeur juin 2026)
+title Diagramme de Classes -- Panda (Majeur juin 2026)
 
 class User {
   +id: int
@@ -698,7 +698,7 @@ skinparam class {
   HeaderFontColor white
 }
 skinparam linetype ortho
-title ERD -- FreeNest (35+ tables, juin 2026)
+title ERD -- Panda (35+ tables, juin 2026)
 
 entity "users" as U {
   * id: INT <<PK>>
@@ -1249,7 +1249,7 @@ skinparam activity {
   BorderColor #2196F3
   ArrowColor #1565C0
 }
-title Activite -- Cycle de Vie Complet d'une Mission FreeNest
+title Activite -- Cycle de Vie Complet d'une Mission Panda
 
 |#AED6F1|Client|
 |#A9DFBF|Freelancer|
@@ -1410,7 +1410,7 @@ skinparam state {
   BorderColor #E67E22
   ArrowColor #D35400
 }
-title Etats d'un Contrat -- FreeNest
+title Etats d'un Contrat -- Panda
 
 [*] --> active : Proposition acceptee
 
@@ -1447,7 +1447,7 @@ skinparam state {
   BorderColor #8E44AD
   ArrowColor #7D3C98
 }
-title Etats d'un Jalon (Milestone) -- FreeNest
+title Etats d'un Jalon (Milestone) -- Panda
 
 [*] --> pending : Contrat cree
 
@@ -1546,7 +1546,7 @@ skinparam database {
   BackgroundColor #FFF9E6
   BorderColor #E67E22
 }
-title Diagramme de Deploiement -- FreeNest (Docker, juin 2026)
+title Diagramme de Deploiement -- Panda (Docker, juin 2026)
 
 node "GitHub Actions CI/CD" {
   component "backend.yml\n(PHP lint, tests, build)" as CI_B
@@ -1567,7 +1567,7 @@ node "Docker Host (Production)" {
     component "WebSocket Server\n(Pusher-compatible)" as SOKETI
   }
   node "Container: MySQL 8.0" {
-    database "freenest_db\n(35+ tables)" as DB
+    database "panda_db\n(35+ tables)" as DB
   }
   node "Container: Redis" {
     database "Cache + Sessions\n+ Queues" as REDIS

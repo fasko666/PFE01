@@ -69,7 +69,7 @@ class WeeklyInvoiceController extends Controller
     }
 
     /**
-     * Portable 'YYYY-MM' extraction. SQLite/PostgreSQL/MySQL all expose a
+     * Portable 'YYYY-MM' extraction. MySQL/PostgreSQL/MySQL all expose a
      * substring-style call; we lean on substr(week_end, 1, 7) because every
      * supported driver renders a DATE column as 'YYYY-MM-DD' in text contexts.
      */

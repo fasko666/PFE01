@@ -1,5 +1,6 @@
 """
-Genere le rapport de stage FreeNest au format Word (.docx) — version maj. juin 2026
+Rapport de PFE Panda — Version COMPLETE et PROFESSIONNELLE — Juin 2026
+Auteur : Ayoub Elmernissi
 """
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor, Inches
@@ -10,22 +11,25 @@ import os
 
 doc = Document()
 
+# ── Mise en page A4 ─────────────────────────────────────────────────────────
 section = doc.sections[0]
-section.page_width  = Cm(21)
-section.page_height = Cm(29.7)
+section.page_width    = Cm(21)
+section.page_height   = Cm(29.7)
 section.left_margin   = Cm(2.5)
 section.right_margin  = Cm(2.5)
 section.top_margin    = Cm(2.5)
 section.bottom_margin = Cm(2.5)
 
-def set_font(run, name="Calibri", size=11, bold=False, color=None):
+# ── Utilitaires ─────────────────────────────────────────────────────────────
+def sf(run, name="Calibri", size=11, bold=False, italic=False, color=None):
     run.font.name = name
     run.font.size = Pt(size)
     run.font.bold = bold
+    run.font.italic = italic
     if color:
         run.font.color.rgb = RGBColor(*color)
 
-def heading(doc, text, level=1, color=(0,70,127)):
+def H(text, level=1, color=(0,52,102)):
     p = doc.add_heading(text, level=level)
     p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     for run in p.runs:
@@ -33,23 +37,31 @@ def heading(doc, text, level=1, color=(0,70,127)):
         run.font.name = "Calibri"
     return p
 
-def para(doc, text, size=11, bold=False, color=None, align=WD_ALIGN_PARAGRAPH.JUSTIFY):
+def P(text, size=11, bold=False, italic=False, color=None, align=WD_ALIGN_PARAGRAPH.JUSTIFY):
     p = doc.add_paragraph()
     p.alignment = align
     run = p.add_run(text)
-    set_font(run, size=size, bold=bold, color=color)
-    p.paragraph_format.space_after = Pt(4)
+    sf(run, size=size, bold=bold, italic=italic, color=color)
+    p.paragraph_format.space_after = Pt(5)
     return p
 
-def bullet(doc, text, level=0):
+def B(text, level=0):
     p = doc.add_paragraph(style="List Bullet")
     run = p.add_run(text)
-    set_font(run, size=11)
+    sf(run, size=11)
     p.paragraph_format.left_indent = Cm(1 + level * 0.5)
     p.paragraph_format.space_after = Pt(2)
     return p
 
-def add_table(doc, headers, rows, col_widths=None):
+def NB(text, level=0):
+    p = doc.add_paragraph(style="List Number")
+    run = p.add_run(text)
+    sf(run, size=11)
+    p.paragraph_format.left_indent = Cm(1 + level * 0.5)
+    p.paragraph_format.space_after = Pt(2)
+    return p
+
+def T(headers, rows, col_widths=None):
     t = doc.add_table(rows=1+len(rows), cols=len(headers))
     t.style = "Table Grid"
     hdr = t.rows[0].cells
@@ -63,7 +75,7 @@ def add_table(doc, headers, rows, col_widths=None):
         shd = OxmlElement('w:shd')
         shd.set(qn('w:val'), 'clear')
         shd.set(qn('w:color'), 'auto')
-        shd.set(qn('w:fill'), '005288')
+        shd.set(qn('w:fill'), '003466')
         tcPr.append(shd)
         hdr[i].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
     for r_idx, row in enumerate(rows):
@@ -89,27 +101,25 @@ def add_table(doc, headers, rows, col_widths=None):
     doc.add_paragraph()
     return t
 
-def code_block(doc, text):
+def CODE(text):
     p = doc.add_paragraph()
-    p.paragraph_format.left_indent  = Cm(1)
+    p.paragraph_format.left_indent  = Cm(0.8)
+    p.paragraph_format.right_indent = Cm(0.8)
     p.paragraph_format.space_before = Pt(4)
     p.paragraph_format.space_after  = Pt(4)
     run = p.add_run(text)
     run.font.name = "Courier New"
     run.font.size = Pt(9)
-    run.font.color.rgb = RGBColor(0,60,0)
+    run.font.color.rgb = RGBColor(0, 70, 0)
     pPr = p._p.get_or_add_pPr()
     shd = OxmlElement('w:shd')
     shd.set(qn('w:val'), 'clear')
     shd.set(qn('w:color'), 'auto')
-    shd.set(qn('w:fill'), 'F4F4F4')
+    shd.set(qn('w:fill'), 'F0F4F8')
     pPr.append(shd)
     return p
 
-def page_break(doc):
-    doc.add_page_break()
-
-def hr(doc):
+def HR():
     p = doc.add_paragraph()
     pPr = p._p.get_or_add_pPr()
     pBdr = OxmlElement('w:pBdr')
@@ -117,782 +127,1353 @@ def hr(doc):
     bottom.set(qn('w:val'), 'single')
     bottom.set(qn('w:sz'), '6')
     bottom.set(qn('w:space'), '1')
-    bottom.set(qn('w:color'), '005288')
+    bottom.set(qn('w:color'), '003466')
     pBdr.append(bottom)
     pPr.append(pBdr)
-    p.paragraph_format.space_after = Pt(6)
+    p.paragraph_format.space_after = Pt(8)
 
-# ═══════════════════════════════════════════════════════════════
+def PB():
+    doc.add_page_break()
+
+def NOTE(text):
+    p = doc.add_paragraph()
+    p.paragraph_format.left_indent = Cm(1)
+    run = p.add_run("Note : " + text)
+    sf(run, size=10, italic=True, color=(80,80,80))
+    p.paragraph_format.space_after = Pt(4)
+
+# ════════════════════════════════════════════════════════════════════════════
 #  PAGE DE GARDE
-# ═══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
 p = doc.add_paragraph()
 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p.paragraph_format.space_before = Pt(60)
-run = p.add_run("RAPPORT DE STAGE / PROJET DE FIN D'ETUDES")
-set_font(run, size=18, bold=True, color=(0, 82, 136))
+p.paragraph_format.space_before = Pt(20)
+run = p.add_run("UNIVERSITE — FACULTE DES SCIENCES ET TECHNIQUES")
+sf(run, size=13, bold=True, color=(60,60,60))
 
 p2 = doc.add_paragraph()
 p2.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p2.paragraph_format.space_before = Pt(20)
-run2 = p2.add_run("FreeNest")
-set_font(run2, size=36, bold=True, color=(0, 120, 215))
+run2 = p2.add_run("Licence Professionnelle Informatique")
+sf(run2, size=12, color=(80,80,80))
+
+HR()
+doc.add_paragraph()
 
 p3 = doc.add_paragraph()
 p3.alignment = WD_ALIGN_PARAGRAPH.CENTER
-run3 = p3.add_run("Conception et Developpement d'une Marketplace Freelance\nFull-Stack avec Intelligence Artificielle")
-set_font(run3, size=14, color=(60,60,60))
+p3.paragraph_format.space_before = Pt(30)
+run3 = p3.add_run("RAPPORT DE PROJET DE FIN D'ETUDES")
+sf(run3, size=20, bold=True, color=(0,52,102))
 
-hr(doc)
+doc.add_paragraph()
 
-info = [
-    ("Etudiant",     "Ayoub Elmernissi"),
-    ("Email",        "ayoubelmerniss55@gmail.com"),
-    ("Formation",    "Licence Professionnelle Informatique"),
-    ("Annee",        "2025 - 2026"),
-    ("Projet",       "FreeNest — Plateforme Freelance (PFE)"),
-    ("Technologies", "Laravel 12  |  React 19  |  MySQL  |  Docker  |  Stripe"),
-    ("Date",         "Juin 2026"),
+p4 = doc.add_paragraph()
+p4.alignment = WD_ALIGN_PARAGRAPH.CENTER
+run4 = p4.add_run("Panda")
+sf(run4, size=42, bold=True, color=(0,120,215))
+
+p5 = doc.add_paragraph()
+p5.alignment = WD_ALIGN_PARAGRAPH.CENTER
+run5 = p5.add_run("Conception et Developpement d'une Marketplace Freelance\nFull-Stack avec Intelligence Artificielle Locale")
+sf(run5, size=15, color=(50,50,50))
+
+doc.add_paragraph()
+HR()
+doc.add_paragraph()
+
+info_data = [
+    ("Realise par",    "Ayoub Elmernissi"),
+    ("Email",          "ayoubelmerniss55@gmail.com"),
+    ("Formation",      "Licence Professionnelle Informatique"),
+    ("Annee",          "2025 - 2026"),
+    ("Intitule",       "Panda — Marketplace Freelance Full-Stack (PFE)"),
+    ("Stack",          "Laravel 12 | React 19 | MySQL 8 | Stripe | Docker | Ollama"),
+    ("Date de depot",  "Juin 2026"),
 ]
-for label, val in info:
+for label, val in info_data:
     p = doc.add_paragraph()
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r1 = p.add_run(label + " : ")
-    set_font(r1, bold=True, color=(0,82,136))
+    sf(r1, bold=True, color=(0,52,102))
     r2 = p.add_run(val)
-    set_font(r2, color=(30,30,30))
+    sf(r2, color=(30,30,30))
 
-page_break(doc)
+PB()
 
-# ═══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
 #  REMERCIEMENTS
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Remerciements", 1)
-para(doc, "Je tiens a exprimer ma profonde gratitude envers toutes les personnes qui ont contribue a la realisation de ce projet de fin d'etudes.")
-para(doc, "Je remercie particulierement mon encadrant pedagogique pour ses conseils avisees, sa disponibilite et ses orientations tout au long de ce travail.")
-para(doc, "Mes remerciements vont egalement a ma famille et mes amis pour leur soutien moral et leur encouragement constant durant cette periode de travail intense.")
-para(doc, "Enfin, je remercie la communaute open-source dont les outils (Laravel, React, Stripe, Docker, PlantUML) ont rendu ce projet possible.")
-page_break(doc)
+# ════════════════════════════════════════════════════════════════════════════
+H("Remerciements", 1)
+P("Je tiens a exprimer ma profonde gratitude envers toutes les personnes qui ont contribue, de pres ou de loin, a la realisation de ce projet de fin d'etudes.")
+P("Mes remerciements vont en premier lieu a mon encadrant pedagogique pour ses conseils eclaires, sa disponibilite constante et sa rigueur tout au long de l'avancement du projet. Ses orientations m'ont permis de maintenir un cap technique et methodologique solide dans les moments de doute.")
+P("Je remercie egalement l'ensemble du corps enseignant de ma formation pour la qualite des enseignements dispenses, qui ont constitue le socle de competences mobilise dans ce travail.")
+P("Un grand merci a ma famille pour son soutien moral, sa patience et ses encouragements constants durant cette periode de travail intensif.")
+P("Enfin, je tiens a remercier la communaute open-source internationale dont les travaux — Laravel, React, Stripe, Docker, Ollama, PlantUML — ont rendu ce projet possible et m'ont permis de travailler avec les outils de l'industrie 2026.")
+PB()
 
-# ═══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
 #  RESUME
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Resume", 1)
-para(doc, "FreeNest est une marketplace freelance full-stack de niveau production, developpee dans le cadre d'un Projet de Fin d'Etudes. La plateforme met en relation des freelancers et des clients au travers d'un ecosysteme complet comprenant : gestion de contrats et jalons, paiements en escrow via Stripe, messagerie temps reel avec Laravel Echo/WebSockets, catalogue de services (style Fiverr), gestion d'agences, intelligence artificielle locale (Ollama/Mistral 7B), verification d'identite (KYC), authentification a deux facteurs (2FA), notifications push Web, facturation par abonnement, centre fiscal, et deploiement Docker avec pipelines CI/CD GitHub Actions.")
-para(doc, "Cote backend, le projet repose sur Laravel 12 avec Sanctum (tokens Bearer), Socialite (OAuth Google), Spatie Permissions et Stripe (paiements + Connect). Cote frontend, React 19 + Vite avec TailwindCSS 3.4, Zustand 5.0, Framer Motion 12, Three.js et Socket.IO 4.8 offrent une experience utilisateur premium.")
-para(doc, "La base de donnees MySQL compte 35+ tables relationnelles. L'API REST expose 100+ endpoints. Le frontend contient 80+ composants React repartis sur 50+ pages. L'application est containerisee avec Docker et deployee via GitHub Actions (CI/CD).")
-hr(doc)
-para(doc, "Mots-cles : Laravel 12, React 19, Stripe, Escrow, WebSockets, IA, Docker, GitHub Actions, KYC, 2FA, Marketplace Freelance, Agences, Catalogue, PFE", size=10, color=(80,80,80))
-page_break(doc)
+# ════════════════════════════════════════════════════════════════════════════
+H("Resume", 1)
+P("Panda est une marketplace freelance full-stack de niveau production, developpee dans le cadre d'un Projet de Fin d'Etudes. La plateforme met en relation des freelancers independants et des clients entreprises au travers d'un ecosysteme technologique complet et moderne.")
+P("Sur le plan fonctionnel, Panda couvre l'integralite du cycle de vie d'une mission freelance : inscription avec onboarding guide, authentification multi-facteurs (2FA TOTP), verification d'identite KYC, publication et recherche d'offres, systeme de propositions avec generation par IA locale, gestion complete de contrats (jalons, fichiers, suivi du temps, extensions, PDF), paiements securises en escrow via Stripe avec double systeme de commission, messagerie temps reel multi-fonctions, catalogue de services productises, gestion d'agences, notifications Push Web, facturation par abonnement, centre fiscal international, et deploiement containerise avec CI/CD automatise.")
+P("Cote technique, le backend repose sur Laravel 12 (PHP 8.2) avec Sanctum 4.3 pour l'authentification par Bearer tokens, Socialite 5.27 pour OAuth2 Google, Spatie Permissions 6.25 pour la gestion des roles, Stripe PHP SDK 20.2 pour les paiements, et Laravel Reverb pour le broadcast WebSocket. Le frontend utilise React 19 avec Vite 8, TailwindCSS 3.4, Zustand 5, Framer Motion 12, Socket.IO 4.8 et Three.js. L'intelligence artificielle est fournie localement par Ollama avec le modele Mistral 7B.")
+P("La base de donnees MySQL 8 compte 35+ tables relationnelles. L'API REST expose 100+ endpoints. Le frontend contient 80+ composants React sur 50+ pages. L'application est containerisee avec Docker (6+ services) et deployee via GitHub Actions CI/CD.")
+HR()
+P("Mots-cles : Laravel 12, React 19, Stripe, Escrow, Double-entree comptable, LedgerService, WebSockets, Reverb, IA Locale, Ollama, Mistral 7B, Docker, GitHub Actions, KYC, 2FA TOTP, Marketplace Freelance, Agences, Catalogue, PFE", size=10, italic=True, color=(70,70,70))
+PB()
 
-# ═══════════════════════════════════════════════════════════════
-#  SOMMAIRE
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Table des Matieres", 1)
-chapters = [
-    ("1",  "Introduction et Contexte du Projet"),
-    ("2",  "Analyse des Besoins et Specifications"),
-    ("3",  "Architecture Technique"),
-    ("4",  "Base de Donnees (35+ Tables)"),
-    ("5",  "Authentification, Securite et 2FA"),
-    ("6",  "Marketplace : Offres, Propositions, Catalogue"),
-    ("7",  "Contrats, Jalons et Suivi du Temps"),
-    ("8",  "Systeme de Paiement Escrow et Stripe"),
-    ("9",  "Messagerie Temps Reel et Notifications Push"),
-    ("10", "Intelligence Artificielle (Ollama / Mistral 7B)"),
-    ("11", "Agences et Gestion des Talents"),
-    ("12", "Administration, KYC et Finance"),
-    ("13", "Deploiement Docker et CI/CD"),
-    ("14", "Tests et Qualite"),
-    ("15", "Bilan et Perspectives"),
+# ════════════════════════════════════════════════════════════════════════════
+#  TABLE DES MATIERES
+# ════════════════════════════════════════════════════════════════════════════
+H("Table des Matieres", 1)
+toc = [
+    ("Remerciements", ""),
+    ("Resume", ""),
+    ("Chapitre 1", "Introduction et Contexte du Projet"),
+    ("Chapitre 2", "Analyse des Besoins et Specifications Fonctionnelles"),
+    ("Chapitre 3", "Architecture Technique Generale"),
+    ("Chapitre 4", "Base de Donnees — Schema Complet (35+ Tables)"),
+    ("Chapitre 5", "Backend Laravel 12 — Structure et Services"),
+    ("Chapitre 6", "Authentification, Securite, 2FA et KYC"),
+    ("Chapitre 7", "Marketplace : Offres, Propositions et Catalogue"),
+    ("Chapitre 8", "Gestion des Contrats, Jalons et Suivi du Temps"),
+    ("Chapitre 9", "Systeme de Paiement Escrow (LedgerService + Stripe)"),
+    ("Chapitre 10", "Messagerie Temps Reel (Laravel Reverb + Socket.IO)"),
+    ("Chapitre 11", "Intelligence Artificielle Locale (Ollama / Mistral 7B)"),
+    ("Chapitre 12", "Agences, Gestion des Talents et Centre Fiscal"),
+    ("Chapitre 13", "Administration, Finance Admin et Audit"),
+    ("Chapitre 14", "Frontend React 19 — Architecture et Composants"),
+    ("Chapitre 15", "Deploiement Docker et Pipelines CI/CD"),
+    ("Chapitre 16", "Tests, Qualite et Securite"),
+    ("Chapitre 17", "Bilan, Difficultes et Perspectives"),
+    ("Annexes", "Endpoints API, Schema BDD, Structure Dossiers"),
 ]
-for num, title in chapters:
+for ref, title in toc:
     p = doc.add_paragraph()
-    r1 = p.add_run(f"Chapitre {num} — ")
-    set_font(r1, bold=True, color=(0,82,136))
-    r2 = p.add_run(title)
-    set_font(r2)
-doc.add_paragraph()
-page_break(doc)
+    r1 = p.add_run(ref)
+    sf(r1, bold=True, color=(0,52,102))
+    if title:
+        r2 = p.add_run(" — " + title)
+        sf(r2, color=(30,30,30))
+    p.paragraph_format.space_after = Pt(3)
+PB()
 
-# ═══════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════
 #  CHAPITRE 1 — INTRODUCTION
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 1 — Introduction et Contexte du Projet", 1)
-heading(doc, "1.1 Contexte General", 2)
-para(doc, "Le marche mondial du travail freelance connaît une croissance exponentielle. Des plateformes comme Upwork, Fiverr et Malt ont democratise l'acces aux talents independants. Cependant, ces plateformes souffrent de frais eleves (20%+), d'interfaces vieillissantes et d'une dependance aux intermediaires opaques.")
-para(doc, "FreeNest (nom de code : Panda) est une reponse academique et technique a cette problematique : une marketplace freelance complete, moderne et production-ready, concue dans le cadre d'un Projet de Fin d'Etudes (PFE).")
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 1 — Introduction et Contexte du Projet", 1)
 
-heading(doc, "1.2 Objectifs du Projet", 2)
-para(doc, "L'objectif principal est de concevoir et developper une plateforme freelance full-stack de niveau professionnel, integrant :")
-bullet(doc, "Un systeme de gestion de contrats et jalons complet")
-bullet(doc, "Des paiements securises en escrow via Stripe (10% de commission plateforme)")
-bullet(doc, "Une messagerie temps reel avec Laravel Echo et WebSockets")
-bullet(doc, "Un catalogue de services productises (style Fiverr)")
-bullet(doc, "La gestion d'agences avec invitation de membres")
-bullet(doc, "Une IA locale (Ollama/Mistral 7B) pour 5 fonctionnalites intelligentes")
-bullet(doc, "La verification d'identite KYC et l'authentification 2FA")
-bullet(doc, "Un deploiement Docker avec CI/CD GitHub Actions")
+H("1.1 Contexte General et Motivation", 2)
+P("Le marche mondial du travail independant (freelance) connait une croissance exponentielle. En 2025, on denombre plus de 1,57 milliard de travailleurs independants dans le monde, representant un marche global de 455 milliards de dollars, avec une croissance annuelle de 15%. Des plateformes pionnières telles qu'Upwork, Fiverr et Malt ont democratise l'acces aux talents independants. Cependant, ces plateformes presentent des limitations structurelles significatives : des commissions elevees (jusqu'a 20% chez Upwork), des interfaces vieillissantes inadaptees aux standards UX modernes, une opacite dans la gestion des paiements et une absence totale d'intelligence artificielle pour assister les utilisateurs.")
+P("C'est dans ce contexte que s'inscrit Panda (nom de code : Panda), un projet de fin d'etudes visant a concevoir et developper une marketplace freelance full-stack de niveau production, integrant les meilleures pratiques de l'industrie logicielle 2026.")
 
-heading(doc, "1.3 Perimetre Fonctionnel", 2)
-para(doc, "FreeNest couvre l'ensemble du cycle de vie d'une mission freelance : de l'inscription jusqu'a la cloture du contrat et le retrait des gains. La plateforme s'adresse a trois types d'utilisateurs : Freelancers, Clients, et Administrateurs. Elle inclut egalement un systeme d'Agences permettant a des groupes de freelancers de collaborer sous une marque commune.")
-page_break(doc)
+H("1.2 Presentation du Projet Panda", 2)
+P("Panda est une plateforme web SaaS (Software as a Service) concue comme une alternative moderne et complete aux plateformes etablies. Elle se distingue par :")
+B("Une architecture technique moderne : separation stricte frontend/backend, API REST, WebSockets temps reel.")
+B("Un systeme de paiement securise : escrow double-entree comptable, integration Stripe complete (Checkout, Connect, Webhooks).")
+B("L'intelligence artificielle locale : integration d'Ollama/Mistral 7B sans envoi de donnees vers des services externes.")
+B("La securite enterprise : 2FA TOTP, KYC, audit logs, rate limiting, tokens chiffres au repos.")
+B("Le deploiement professionnel : containerisation Docker complete, pipelines CI/CD GitHub Actions.")
+B("Un modele de commission transparent : 10% prelevee sur le freelancer, 5% sur le client, frais de retrait fixes ($2).")
 
-# ═══════════════════════════════════════════════════════════════
+H("1.3 Objectifs Academiques et Techniques", 2)
+P("Ce projet vise a demontrer la maitrise des competences suivantes :")
+B("Conception et implementation d'une API REST complete avec Laravel 12 (100+ endpoints, 21 modules).")
+B("Developpement d'une Single Page Application (SPA) avancee avec React 19 (50+ pages, 80+ composants).")
+B("Integration d'un systeme de paiement en escrow avec comptabilite double-entree et garanties ACID.")
+B("Mise en place d'une infrastructure temps reel avec Laravel Reverb et Socket.IO 4.8 (11 evenements).")
+B("Deploiement complet avec Docker, Nginx et GitHub Actions CI/CD.")
+B("Integration d'une IA locale avec Ollama/Mistral 7B pour 5 fonctionnalites intelligentes.")
+
+H("1.4 Perimetre Fonctionnel", 2)
+P("Panda couvre l'integralite du cycle de vie d'une mission freelance, de l'inscription jusqu'au retrait des gains, en passant par la publication d'offres, les propositions generees par IA, la gestion de contrats avec jalons, les paiements escrow via Stripe, la messagerie temps reel et l'administration complete de la plateforme.")
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
 #  CHAPITRE 2 — ANALYSE DES BESOINS
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 2 — Analyse des Besoins et Specifications", 1)
-heading(doc, "2.1 Acteurs du Systeme", 2)
-add_table(doc,
-    ["Acteur", "Role", "Acces Principal"],
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 2 — Analyse des Besoins et Specifications Fonctionnelles", 1)
+
+H("2.1 Identification des Acteurs", 2)
+T(
+    ["Acteur", "Nature", "Description", "Acces Principal"],
     [
-        ["Freelancer",    "Prestataire de services",  "Profil, Propositions, Contrats, Portefeuille, Catalogue"],
-        ["Client",        "Donneur d'ordres",          "Offres, Recrutement, Escrow, Contrats, Talent Lists"],
-        ["Admin",         "Gestionnaire plateforme",   "Dashboard, KYC, Finance, Moderation Catalogue"],
-        ["Google OAuth",  "Fournisseur d'identite",    "Connexion sociale (Socialite)"],
-        ["Stripe",        "Passerelle de paiement",    "Depot, Escrow, Connect, Webhooks"],
-        ["Ollama/Mistral","Moteur IA local",            "Generation, Matching, Chat, Analyse, Recherche"],
+        ["Freelancer",   "Utilisateur humain",  "Prestataire de services independant",      "Profil, Propositions, Contrats, Wallet, Catalogue, Agence"],
+        ["Client",       "Utilisateur humain",  "Entreprise ou particulier donneur d'ordre", "Offres, Recrutement, Escrow, Contrats, Talent Lists"],
+        ["Admin",        "Utilisateur humain",  "Gestionnaire de la plateforme",             "Dashboard, KYC, Finance, Moderation, Parametres"],
+        ["Google OAuth", "Service externe",     "Fournisseur d'identite sociale",            "Connexion via compte Google (Socialite)"],
+        ["Stripe",       "Service externe",     "Passerelle de paiement internationale",     "Checkout, Connect Express, Webhooks, Subscriptions"],
+        ["Ollama AI",    "Service local",        "Moteur LLM local (Mistral 7B)",              "Generation propositions, Matching, Chat, Analyse"],
+        ["Laravel Reverb","Service local",       "Serveur WebSocket officiel Laravel",        "Broadcast events, canaux prives, notifications RT"],
     ],
-    [5, 5, 7]
+    [2.5, 3, 4.5, 7]
 )
 
-heading(doc, "2.2 Cas d'Utilisation Principaux", 2)
-para(doc, "Les cas d'utilisation couvrent l'ensemble du parcours utilisateur :")
-bullet(doc, "Authentification : inscription email, connexion Google OAuth 2.0, reset mot de passe, 2FA TOTP")
-bullet(doc, "Onboarding : processus guidee en 5 etapes pour les freelancers")
-bullet(doc, "Marketplace : publication, recherche full-text, filtres avances, sauvegarde d'offres")
-bullet(doc, "Catalogue : services productises avec tiers, commandes, livraisons et avis")
-bullet(doc, "Propositions : soumission manuelle ou generee par IA, jalons integres")
-bullet(doc, "Contrats : cycle de vie complet, fichiers, suivi du temps, extensions, PDF")
-bullet(doc, "Paiements : depot Stripe, escrow, liberation par jalon, retrait via Stripe Connect")
-bullet(doc, "Messagerie : conversations temps reel, reactions, accusees de lecture, fichiers")
-bullet(doc, "Agences : creation, invitation de membres, transfert de propriete")
-bullet(doc, "KYC : upload documents, file admin, approbation/rejet")
-bullet(doc, "Facturation : abonnements Stripe (plans), factures hebdomadaires horaires")
-bullet(doc, "Administration : tableau de bord, gestion utilisateurs, finance, moderation")
+H("2.2 Catalogue des Besoins Fonctionnels par Module", 2)
 
-heading(doc, "2.3 Exigences Non Fonctionnelles", 2)
-add_table(doc,
-    ["Categorie", "Exigence"],
+H("Module Authentification et Securite", 3)
+B("BF-01 : Inscription par email avec validation stricte (email unique, mot de passe bcrypt)")
+B("BF-02 : Connexion par email/mot de passe avec generation de token Sanctum")
+B("BF-03 : Connexion sociale Google OAuth 2.0 (liaison ou creation de compte automatique)")
+B("BF-04 : Reinitialisation du mot de passe par email (token signe, TTL 60 minutes)")
+B("BF-05 : Activation de l'authentification a deux facteurs TOTP (Google Authenticator)")
+B("BF-06 : Gestion des codes de secours 2FA (generation, affichage, regeneration)")
+B("BF-07 : Onboarding guide en 5 etapes pour les nouveaux freelancers")
+B("BF-08 : Verification d'identite KYC (upload documents, selfie, approbation admin)")
+
+H("Module Marketplace", 3)
+B("BF-09 : Publication d'offres d'emploi avec budget, type (horaire/fixe), competences")
+B("BF-10 : Recherche full-text sur les offres (index FULLTEXT MySQL)")
+B("BF-11 : Soumission de propositions avec jalons integres et generation par IA")
+B("BF-12 : Catalogue de services productises (3 tiers : Basic/Standard/Premium)")
+B("BF-13 : Commandes de services : checkout, livraison, validation, avis")
+B("BF-14 : Recherche globale unifiee (offres + freelancers + services + agences)")
+B("BF-15 : Autocomplete temps reel via GET /api/search/suggest")
+
+H("Module Contrats et Paiements", 3)
+B("BF-16 : Creation automatique de contrat lors de l'acceptation d'une proposition")
+B("BF-17 : Gestion complete des jalons (funded, submitted, approved, rejected, disputed)")
+B("BF-18 : Upload de fichiers livres avec versioning (parent_id chain)")
+B("BF-19 : Suivi du temps horaire (start/stop timer, duration_seconds)")
+B("BF-20 : Extensions de deadline (demande + approbation)")
+B("BF-21 : Export PDF du contrat et du dossier de litige")
+B("BF-22 : Depot de fonds via Stripe Checkout Session (3D Secure)")
+B("BF-23 : Systeme escrow : fund -> release avec double-entree comptable atomique")
+B("BF-24 : Retrait des gains via Stripe Connect Express")
+B("BF-25 : Abonnements (plans) Stripe avec portail de facturation")
+B("BF-26 : Factures hebdomadaires automatiques pour contrats horaires")
+
+H("Module Communication et IA", 3)
+B("BF-27 : Messagerie temps reel avec 11 evenements WebSocket (Reverb)")
+B("BF-28 : Reactions emoji sur les messages (toggle)")
+B("BF-29 : Accusees de lecture et de livraison en temps reel")
+B("BF-30 : Indicateur de frappe 'UserTyping' en temps reel")
+B("BF-31 : Notifications Push Web (VAPID + Service Worker)")
+B("BF-32 : Generation de propositions par IA (Ollama/Mistral 7B)")
+B("BF-33 : Matching intelligent de freelancers pour une offre")
+B("BF-34 : Analyse et scoring du profil freelancer")
+B("BF-35 : Chat assistant IA contextuel")
+B("BF-36 : Recherche semantique intelligente")
+
+H("Module Agences, Talents et Administration", 3)
+B("BF-37 : Creation et gestion d'agences (invitation par token, roles owner/admin/member)")
+B("BF-38 : Listes de talents et signets de freelancers (clients)")
+B("BF-39 : Centre fiscal : W-9, W-8BEN, VAT — soumission et export PDF")
+B("BF-40 : Dashboard admin : stats, gestion utilisateurs, KYC, finance, moderation")
+
+H("2.3 Exigences Non Fonctionnelles", 2)
+T(
+    ["Categorie", "Exigence", "Mesure / Critere"],
     [
-        ["Performance",   "Reponse API < 200ms (hors IA). Lazy loading React, code splitting Vite."],
-        ["Securite",      "Bearer tokens Sanctum, 2FA TOTP, HTTPS, rate limiting, validation stricte, KYC."],
-        ["Scalabilite",   "Architecture Docker, queues Laravel, indexes full-text MySQL."],
-        ["Disponibilite", "CI/CD GitHub Actions, pipelines de test automatises."],
-        ["UX",            "Design premium, animations Framer Motion, mode sombre/clair, responsive."],
-        ["Conformite",    "Tax Center (W-9/W-8BEN/VAT), audit logs, RGPD-ready."],
-    ],
-    [4, 13]
-)
-page_break(doc)
-
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 3 — ARCHITECTURE
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 3 — Architecture Technique", 1)
-heading(doc, "3.1 Vue d'Ensemble", 2)
-para(doc, "FreeNest adopte une architecture microservices-ready basee sur la separation stricte frontend/backend, communicant via une API REST documentee et un canal WebSocket temps reel.")
-add_table(doc,
-    ["Couche", "Technologie", "Version", "Role"],
-    [
-        ["Backend",       "Laravel",          "12.x",    "API REST, Auth, Business Logic, Events"],
-        ["Frontend",      "React + Vite",     "19 / 6.x","SPA, routing, state, animations 3D"],
-        ["Base de donnees","MySQL",            "8.0",     "35+ tables relationnelles, full-text"],
-        ["Temps reel",    "Socket.IO / Echo", "4.8 / 2.x","WebSockets, chat, notifications"],
-        ["IA",            "Ollama / Mistral", "0.3 / 7B","Generation, matching, analyse"],
-        ["Paiements",     "Stripe",           "2024",    "Cards, Connect, Webhooks, Invoices"],
-        ["Conteneurisation","Docker + Compose","26.x",   "Dev et prod containerises"],
-        ["CI/CD",         "GitHub Actions",   "-",       "Tests, lint, build, deploy auto"],
-    ],
-    [3.5, 4, 2, 7]
-)
-
-heading(doc, "3.2 Stack Backend (Laravel 12)", 2)
-para(doc, "Le backend Laravel 12 expose une API REST versionnee sous /api/. Il utilise :")
-bullet(doc, "Laravel Sanctum : authentification par tokens Bearer stateless")
-bullet(doc, "Laravel Socialite : OAuth 2.0 avec Google")
-bullet(doc, "Spatie Laravel Permission : gestion des roles (freelancer / client / admin)")
-bullet(doc, "Laravel Echo Server : broadcast d'evenements WebSocket")
-bullet(doc, "Stripe PHP SDK : paiements, Connect, Webhooks")
-bullet(doc, "Intervention/Image : traitement et redimensionnement des images")
-bullet(doc, "Laravel Queues : taches asynchrones (emails, IA, webhooks)")
-bullet(doc, "Rate Limiting : protection des endpoints sensibles (auth: 10/min, IA: 20/min)")
-
-heading(doc, "3.3 Stack Frontend (React 19)", 2)
-add_table(doc,
-    ["Bibliotheque", "Version", "Usage"],
-    [
-        ["React",             "19.x",  "UI declarative, Concurrent Mode, Suspense"],
-        ["Vite",              "6.x",   "Build ultra-rapide, HMR, code splitting"],
-        ["TailwindCSS",       "3.4",   "Design system, dark/light mode, CSS variables"],
-        ["Zustand",           "5.0",   "State management global (auth, chat, theme)"],
-        ["Framer Motion",     "12.x",  "Animations fluides, page transitions"],
-        ["Three.js + R3F",    "0.170+","Globe 3D interactif (landing page)"],
-        ["Socket.IO Client",  "4.8",   "WebSocket temps reel (chat, notifications)"],
-        ["Recharts",          "3.8",   "Graphiques dashboard (revenus, activite)"],
-        ["Axios",             "1.16",  "Client HTTP, interceptors token + refresh"],
-        ["React Hot Toast",   "2.x",   "Notifications toast premium"],
-        ["React Router DOM",  "7.x",   "SPA routing, protected routes, lazy loading"],
-    ],
-    [4, 2, 11]
-)
-
-heading(doc, "3.4 Architecture des Evenements Temps Reel", 2)
-para(doc, "Le systeme de messagerie temps reel repose sur Laravel Broadcasting avec les evenements suivants :")
-add_table(doc,
-    ["Evenement", "Declencheur", "Abonnes"],
-    [
-        ["MessageSent",            "Envoi d'un message",              "Participants de la conversation"],
-        ["MessageEdited",          "Edition d'un message",            "Participants de la conversation"],
-        ["MessageDeleted",         "Suppression d'un message",        "Participants de la conversation"],
-        ["MessageRead",            "Lecture d'un message",            "Emetteur du message"],
-        ["MessageDelivered",       "Livraison d'un message",          "Emetteur du message"],
-        ["MessageReactionToggled", "Reaction emoji sur message",      "Participants de la conversation"],
-        ["UserTyping",             "Indicateur de frappe",            "Participants de la conversation"],
-        ["ConversationUpdated",    "Mise a jour meta-conversation",   "Participants de la conversation"],
-        ["NotificationCreated",    "Creation d'une notification",     "Utilisateur destinataire"],
-        ["WeeklyInvoiceGenerated", "Facture hebdomadaire emise",       "Freelancer concerne"],
-        ["WeeklyInvoicePaid",      "Facture hebdomadaire payee",       "Client concerne"],
-    ],
-    [5, 5, 7]
-)
-
-heading(doc, "3.5 CI/CD et Deploiement", 2)
-para(doc, "Deux pipelines GitHub Actions automatisent le cycle de livraison :")
-bullet(doc, "backend.yml : PHP lint, tests PHPUnit, analyse statique, build Docker image")
-bullet(doc, "frontend.yml : npm install, ESLint, Vite build, tests Vitest")
-para(doc, "La containerisation Docker utilise un Dockerfile multi-stage pour le backend (PHP-FPM + Nginx) et un Dockerfile Nginx pour le frontend. Un docker-compose.yml orchestre l'ensemble des services en local et en production.")
-page_break(doc)
-
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 4 — BASE DE DONNEES
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 4 — Base de Donnees (35+ Tables)", 1)
-heading(doc, "4.1 Schema General", 2)
-para(doc, "La base de donnees MySQL 8.0 est organisee en domaines fonctionnels. Des index FULLTEXT sont ajoutes sur les champs de recherche (titre, description, bio, competences) pour les requetes de recherche globale.")
-
-heading(doc, "4.2 Tables par Domaine", 2)
-add_table(doc,
-    ["Domaine", "Tables", "Description"],
-    [
-        ["Utilisateurs",    "users, personal_access_tokens",                                          "Comptes, roles, 2FA, phone, tokens Sanctum"],
-        ["Profils",         "freelancer_profiles, client_profiles",                                   "Profils etendus par role, onboarding, stats"],
-        ["Competences",     "categories, skills, freelancer_skills",                                  "Taxonomie hierarchique, niveaux"],
-        ["Portfolio",       "portfolios",                                                             "Projets portfolio avec images JSON"],
-        ["Offres",          "job_postings, saved_jobs",                                               "Offres clients, statuts, sauvegarde"],
-        ["Propositions",    "proposals",                                                              "Propositions freelancers, jalons JSON"],
-        ["Contrats",        "contracts, contract_activities, contract_extensions, contract_files",    "Cycle de vie complet, fichiers, historique"],
-        ["Jalons",          "milestones",                                                             "Decoupe du travail, statuts, escrow"],
-        ["Temps",           "time_logs",                                                              "Suivi temps horaire par contrat"],
-        ["Paiements",       "wallets, transactions, withdrawals, stripe_webhook_events",              "Escrow 3 balances, historique, retraits"],
-        ["Facturation",     "subscriptions, subscription_items, weekly_invoices",                    "Plans Stripe, factures hebdo horaires"],
-        ["Catalogue",       "catalog_projects, catalog_project_images, catalog_orders, catalog_reviews, saved_catalog_projects", "Services productises (Fiverr-like)"],
-        ["Agences",         "agencies, agency_members, agency_invitations",                          "Groupes freelancers, invitations token"],
-        ["Messagerie",      "conversations, messages, message_reactions",                             "Chat temps reel, reactions emoji"],
-        ["Avis",            "reviews",                                                               "Notations post-contrat"],
-        ["IA",              "ai_histories",                                                           "Logs des appels Ollama, tokens"],
-        ["Talents",         "talent_lists, saved_freelancers",                                       "Listes curees, signets freelancers"],
-        ["KYC / Compliance","identity_verifications, tax_documents, audit_logs",                     "Verif. identite, fisc., piste audit"],
-        ["Notifications",   "notifications, push_subscriptions",                                     "Notif. in-app + Web Push"],
-        ["Platform",        "platform_settings",                                                     "Parametres plateforme (commission, etc.)"],
-    ],
-    [3, 6, 7.5]
-)
-
-heading(doc, "4.3 Wallet a 3 Balances", 2)
-para(doc, "Chaque utilisateur dispose d'un portefeuille (table wallets) avec trois balances distinctes :")
-add_table(doc,
-    ["Balance", "Role", "Mouvement"],
-    [
-        ["balance",         "Fonds disponibles et retirables",   "Incremente lors de liberation de paiement (90%)"],
-        ["pending_balance", "Fonds en attente de validation",    "Utilisee pour les transferts en cours"],
-        ["escrow_balance",  "Fonds bloques en garantie",         "Debite du client, libere au freelancer via jalon"],
-    ],
-    [4, 6, 7]
-)
-page_break(doc)
-
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 5 — AUTHENTIFICATION ET SECURITE
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 5 — Authentification, Securite et 2FA", 1)
-heading(doc, "5.1 Inscription et Connexion", 2)
-para(doc, "FreeNest propose deux methodes d'authentification :")
-bullet(doc, "Email / Mot de passe : validation stricte (unique, bcrypt), token Sanctum retourne")
-bullet(doc, "Google OAuth 2.0 : via Laravel Socialite, creation ou liaison de compte automatique")
-para(doc, "Le flux d'onboarding en 5 etapes guide les nouveaux freelancers (categorie, niveau, formation, tarif, photo/langues) avant d'acceder au tableau de bord.")
-
-heading(doc, "5.2 Reinitialisation du Mot de Passe", 2)
-para(doc, "Un systeme de reset par email en deux etapes est implemente :")
-bullet(doc, "POST /api/auth/forgot-password : envoie un email avec lien signe (throttle: 5/min)")
-bullet(doc, "POST /api/auth/reset-password : valide le token, met a jour le mot de passe")
-
-heading(doc, "5.3 Authentification a Deux Facteurs (2FA TOTP)", 2)
-para(doc, "Le module 2FA TOTP (Time-based One-Time Password) est integre directement :")
-add_table(doc,
-    ["Endpoint", "Action"],
-    [
-        ["GET  /api/two-factor/status",             "Statut d'activation du 2FA"],
-        ["POST /api/two-factor/enable",             "Genere secret + QR Code (Google Authenticator)"],
-        ["POST /api/two-factor/confirm",            "Confirme le code TOTP pour activer"],
-        ["POST /api/two-factor/disable",            "Desactive le 2FA"],
-        ["GET  /api/two-factor/recovery-codes",     "Codes de secours (8 codes jetables)"],
-        ["POST /api/two-factor/recovery-codes/regenerate", "Regenere les codes de secours"],
-    ],
-    [8, 9]
-)
-
-heading(doc, "5.4 Verification d'Identite KYC", 2)
-para(doc, "Le processus KYC (Know Your Customer) permet a la plateforme de verifier l'identite des utilisateurs avant de les autoriser a retirer des fonds :")
-bullet(doc, "L'utilisateur soumet ses documents (passeport, CNI, justificatif de domicile) via upload")
-bullet(doc, "Les documents sont stockes en local (Storage::disk('local')) et jamais exposes publiquement")
-bullet(doc, "L'admin examine la file KYC via /api/admin/kyc et approuve ou rejette")
-bullet(doc, "Le statut est expose via GET /api/verify-identity/status")
-
-heading(doc, "5.5 Rate Limiting et Securite Generale", 2)
-bullet(doc, "Auth endpoints : throttle 10 req/min (brute-force protection)")
-bullet(doc, "Password reset : throttle 5 req/min (anti-spam)")
-bullet(doc, "IA endpoints : throttle 20 req/min (protection des couts)")
-bullet(doc, "Search public : throttle 60/120 req/min (autocomplete)")
-bullet(doc, "Validation Laravel stricte sur toutes les entrees (Form Requests)")
-bullet(doc, "Audit logs : toute action sensible est tracee dans la table audit_logs")
-page_break(doc)
-
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 6 — MARKETPLACE
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 6 — Marketplace : Offres, Propositions, Catalogue", 1)
-heading(doc, "6.1 Gestion des Offres d'Emploi", 2)
-para(doc, "Les clients publient des offres d'emploi avec titre, description, budget (min/max), type (horaire/fixe), competences requises et categorie. Chaque offre passe par un cycle de statuts : draft -> open -> in_progress -> completed / cancelled.")
-para(doc, "La recherche utilise des index FULLTEXT MySQL pour des recherches ultra-rapides sur titre, description et competences. Des filtres permettent le tri par categorie, budget, type et date.")
-
-heading(doc, "6.2 Systeme de Propositions", 2)
-para(doc, "Les freelancers soumettent des propositions avec :")
-bullet(doc, "Lettre de motivation (manuelle ou generee par IA Ollama)")
-bullet(doc, "Montant propose (bid_amount)")
-bullet(doc, "Decoupe en jalons (milestones JSON)")
-bullet(doc, "Flag is_ai_generated pour la transparence")
-para(doc, "Le client peut accepter (ce qui cree automatiquement un contrat) ou rejeter. L'acceptation rejette automatiquement toutes les autres propositions pour cette offre.")
-
-heading(doc, "6.3 Catalogue de Services (Style Fiverr)", 2)
-para(doc, "En plus des offres, FreeNest propose un Catalogue de services productises ou les freelancers vendent des prestations standardisees :")
-add_table(doc,
-    ["Fonctionnalite", "Description"],
-    [
-        ["CatalogProject", "Service avec titre, description, tiers tarifaires (Basic/Standard/Premium), images"],
-        ["CatalogOrder",   "Commande d'un tier, livraison de fichiers, validation client"],
-        ["CatalogReview",  "Note et avis post-commande (1-5 etoiles)"],
-        ["Saved Catalog",  "Sauvegarde de services favoris"],
-        ["Moderation Admin","L'admin approuve ou rejette les services avant publication"],
-    ],
-    [5, 12]
-)
-
-heading(doc, "6.4 Recherche Globale", 2)
-para(doc, "Le SearchController fournit deux endpoints :")
-bullet(doc, "GET /api/search : recherche unifiee sur offres, freelancers, services, agences")
-bullet(doc, "GET /api/search/suggest : autocomplete temps reel (throttle 120/min)")
-para(doc, "Les index FULLTEXT MySQL sur les champs cles garantissent des resultats pertinents en moins de 50ms.")
-page_break(doc)
-
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 7 — CONTRATS, JALONS, TEMPS
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 7 — Contrats, Jalons et Suivi du Temps", 1)
-heading(doc, "7.1 Cycle de Vie d'un Contrat", 2)
-para(doc, "Un contrat est cree automatiquement lors de l'acceptation d'une proposition. Il suit un cycle de vie strict :")
-add_table(doc,
-    ["Statut", "Description", "Transition"],
-    [
-        ["active",    "Contrat en cours",             "Depuis creation (proposition acceptee)"],
-        ["paused",    "Travail suspendu",              "Depuis active, retour possible"],
-        ["completed", "Tous jalons approuves",         "Fin normale du contrat"],
-        ["disputed",  "Litige ouvert",                 "Resolu par admin (freelancer gagne ou remboursement)"],
-        ["cancelled", "Annulation mutuelle",           "Accord des deux parties ou admin"],
-    ],
-    [3, 6, 8]
-)
-
-heading(doc, "7.2 Fonctionnalites Avancees des Contrats", 2)
-add_table(doc,
-    ["Fonctionnalite", "Endpoint", "Description"],
-    [
-        ["Fichiers",       "POST /contracts/{id}/files",       "Upload de fichiers livres avec versioning"],
-        ["Suivi du temps", "POST /contracts/{id}/time/start",  "Timer horaire start/stop, log en base"],
-        ["Extensions",     "POST /contracts/{id}/extensions",  "Demande d'extension de deadline, approbation"],
-        ["Analytics",      "GET /contracts/{id}/analytics",    "Stats: temps passe, jalons, budget reste"],
-        ["Activite",       "GET /contracts/{id}/activity",     "Journal d'activite chronologique"],
-        ["PDF",            "GET /contracts/{id}/pdf",          "Export PDF du contrat signe"],
-        ["PDF Litige",     "GET /contracts/{id}/dispute-pdf",  "PDF du dossier de litige pour arbitrage"],
-        ["Archive",        "POST /contracts/{id}/archive",     "Archivage des contrats termines"],
+        ["Performance",   "Reponse API < 200ms (hors IA)",             "Indexes DB, lazy loading, code splitting Vite"],
+        ["Securite",      "Protection multi-couches",                   "Bearer token, 2FA, HTTPS, HMAC Webhooks, CSP"],
+        ["Fiabilite",     "Transactions ACID sur les paiements",        "DB::transaction(), SELECT FOR UPDATE, idempotency keys"],
+        ["Scalabilite",   "Architecture modulaire et containerisee",    "Docker, Redis queues, services independants"],
+        ["Maintenabilite","Code organise par domaine",                  "PSR-12, 21 modules controllers, services dedie"],
+        ["Conformite",    "Traçabilite des actions sensibles",          "AuditLogService sur toutes les actions critiques"],
+        ["UX / Accessibilite","Design premium responsive",              "TailwindCSS, Framer Motion, dark/light mode, ARIA"],
     ],
     [3.5, 5.5, 8]
 )
+PB()
 
-heading(doc, "7.3 Workflow des Jalons", 2)
-para(doc, "Chaque contrat est decoupee en jalons (milestones). Chaque jalon suit son propre cycle de vie :")
-add_table(doc,
-    ["Statut Jalon", "Acteur", "Action"],
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 3 — ARCHITECTURE TECHNIQUE
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 3 — Architecture Technique Generale", 1)
+
+H("3.1 Vue d'Ensemble de l'Architecture", 2)
+P("Panda adopte une architecture trois-tiers strictement separee : le frontend React 19 (couche presentation), le backend Laravel 12 (couche metier et API), et la base de donnees MySQL 8 (couche donnees). Les couches communiquent exclusivement via des interfaces bien definies : REST/JSON pour les echanges synchrones, WebSocket (Laravel Reverb) pour les evenements temps reel.")
+
+H("3.2 Stack Technique Complet", 2)
+T(
+    ["Couche", "Technologie", "Version Exacte", "Role dans Panda"],
     [
-        ["pending",   "Systeme",    "Cree lors de la creation du contrat"],
-        ["funded",    "Client",     "Client finance l'escrow (POST /payments/contracts/{id}/fund-escrow)"],
-        ["submitted", "Freelancer", "Freelancer soumet son travail avec fichiers et notes"],
-        ["approved",  "Client",     "Client approuve -> paiement libere automatiquement (90%)"],
-        ["rejected",  "Client",     "Client demande des corrections -> retour a 'funded'"],
-        ["disputed",  "Admin",      "Admin arbitre -> 'approved' ou 'pending' (remboursement)"],
+        ["API Backend",   "Laravel / PHP",           "12.x / 8.2",    "API REST, Business Logic, State Machines, Events"],
+        ["Auth Backend",  "Laravel Sanctum",         "4.3",           "Tokens Bearer stateless, canaux WebSocket prives"],
+        ["OAuth",         "Laravel Socialite",       "5.27",          "Connexion Google OAuth2, liaison de compte"],
+        ["Permissions",   "Spatie Permissions",      "6.25",          "Roles (freelancer/client/admin), gates Laravel"],
+        ["Paiements",     "Stripe PHP SDK",          "20.2",          "Checkout, Connect, Webhooks, Subscriptions"],
+        ["WebSocket",     "Laravel Reverb",          "1.10",          "Serveur broadcast WebSocket officiel Laravel"],
+        ["Images",        "Intervention/Image",      "3.11",          "Upload, redimensionnement, avatars"],
+        ["JWT",           "Tymon JWT-Auth",          "2.3",           "Alternative token pour certains flux"],
+        ["Cache/Queue",   "Predis / Redis",          "3.4",           "Cache sessions, queues jobs, rate limiting"],
+        ["UI Frontend",   "React / React-DOM",       "19.2.6",        "SPA, Concurrent Mode, Suspense, lazy loading"],
+        ["Build Tool",    "Vite",                    "8.0.12",        "HMR, code splitting, treeshaking, assets"],
+        ["CSS Framework", "TailwindCSS",             "3.4.19",        "Design system, dark/light mode, CSS variables"],
+        ["State Mgmt",    "Zustand",                 "5.0.13",        "Stores auth, chat, theme — zero boilerplate"],
+        ["Animations",    "Framer Motion",           "12.39.0",       "Page transitions, animations fluides"],
+        ["Routing",       "React Router DOM",        "7.15.1",        "SPA routing, protected routes, lazy pages"],
+        ["HTTP Client",   "Axios",                   "1.16.1",        "Interceptors Bearer token + refresh automatique"],
+        ["WebSocket CLI", "Socket.IO Client",        "4.8.3",         "Connexion Reverb, souscription canaux prives"],
+        ["Echo Client",   "Laravel Echo",            "2.3.4",         "Abstraction Echo sur Socket.IO, auth canaux"],
+        ["Pusher Compat", "Pusher-JS",               "8.5.0",         "Compatibilite Pusher protocol (Reverb)"],
+        ["Graphiques",    "Recharts",                "3.8.1",         "Dashboards (revenus, activite, jalons)"],
+        ["UI Icons",      "Lucide React",            "1.16.0",        "Icones coherentes, tree-shakable"],
+        ["UI Components", "Headless UI",             "2.2.10",        "Modals, dropdowns, accessibles (ARIA)"],
+        ["Dates",         "date-fns",                "4.2.1",         "Formatage dates, calculs durees"],
+        ["Toasts",        "React Hot Toast",         "2.6.0",         "Notifications toast premium"],
+        ["3D",            "Three.js + R3F",          "0.170+",        "Globe 3D interactif landing page"],
+        ["Base de donnees","MySQL",                  "8.0",           "35+ tables, index FULLTEXT, FK, transactions"],
+        ["Conteneurisation","Docker + Compose",      "26.x",          "Dev et prod containerises, 6+ services"],
+        ["CI/CD",         "GitHub Actions",          "latest",        "Tests automatises, build, deploy sur merge"],
+        ["IA Moteur",     "Ollama",                  "0.3+",          "LLM server local, API compatible OpenAI"],
+        ["IA Modele",     "Mistral 7B",              "7B",            "Modele LLM local, 7 milliards parametres"],
+        ["Proxy",         "Nginx",                   "1.25",          "Reverse proxy, Gzip, Cache-Control, SPA"],
     ],
-    [3.5, 3, 11]
+    [3, 4, 2, 8.5]
 )
 
-heading(doc, "7.4 Suivi du Temps (Time Tracking)", 2)
-para(doc, "Pour les contrats horaires, un systeme de suivi du temps est integre :")
-bullet(doc, "POST /contracts/{id}/time/start : demarre un timer (cree un TimeLog ouvert)")
-bullet(doc, "POST /contracts/{id}/time/stop : arrete le timer (calcule la duree en minutes)")
-bullet(doc, "GET /contracts/{id}/time/weekly : resume hebdomadaire avec calcul de facturation")
-para(doc, "Les WeeklyInvoices sont generees automatiquement via une commande Laravel schedulee (HourlyGenerateInvoicesCommand), avec evenements WeeklyInvoiceGenerated et WeeklyInvoicePaid.")
-page_break(doc)
+H("3.3 Architecture de Communication", 2)
+P("Trois canaux de communication coexistent dans Panda :")
+NB("REST/JSON synchrone : 100+ endpoints HTTP sous /api/ — chaque requete inclut un Bearer token Sanctum dans le header Authorization.")
+NB("WebSocket asynchrone : Laravel Reverb diffu les evenements sur des canaux prives (conversation.{id}, user.{id}) — l'autorisation est verifiee via le middleware Sanctum avant toute souscription.")
+NB("Web Push : le Service Worker (sw.js) recoit les notifications push VAPID hors session navigateur.")
 
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 8 — PAIEMENTS ESCROW ET STRIPE
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 8 — Systeme de Paiement Escrow et Stripe", 1)
-heading(doc, "8.1 Architecture du Systeme de Paiement", 2)
-para(doc, "FreeNest integre Stripe comme passerelle de paiement principale. Le systeme supporte deux modes de depot :")
-bullet(doc, "Stripe Checkout Session : paiement par carte bancaire securise (3D Secure)")
-bullet(doc, "Stripe Connect : les freelancers connectent leur compte bancaire pour recevoir des virements")
-
-heading(doc, "8.2 Flux de Paiement Escrow", 2)
-para(doc, "Le flux en 4 phases garantit la securite des deux parties :")
-add_table(doc,
-    ["Phase", "Action", "Effet en Base de Donnees"],
+H("3.4 Organisation du Backend en Modules", 2)
+P("Le backend est organise en 21 modules metier, chacun dans son propre sous-dossier de Controllers/API/ :")
+T(
+    ["Module", "Controller(s)", "Responsabilite"],
     [
-        ["1. Depot",     "Client recharge son solde via Stripe Checkout", "wallet.balance += montant - fees"],
-        ["2. Escrow",    "Client bloque des fonds pour un jalon",          "balance -= X, escrow_balance += X, milestone='funded'"],
-        ["3. Livraison", "Freelancer soumet son travail",                  "milestone.status = 'submitted'"],
-        ["4. Liberation","Client approuve le travail",                     "escrow -= X, freelancer.balance += 90%, 2 transactions INSERT, COMMIT atomique"],
+        ["Auth",      "AuthController, PasswordResetController, TwoFactorController", "Inscription, connexion, logout, 2FA, reset"],
+        ["AI",        "AIController",                                                  "5 endpoints Ollama/Mistral, logs, fallback"],
+        ["Admin",     "AdminController, AdminFinanceController",                       "Dashboard, users, KYC queue, finance, retraits"],
+        ["Agency",    "AgencyController",                                              "CRUD agences, membres, invitations token"],
+        ["Auth",      "AuthController",                                                "Inscription, connexion, OAuth, profil"],
+        ["Billing",   "SubscriptionController, WeeklyInvoiceController",              "Plans Stripe, abonnements, factures hebdo"],
+        ["Catalog",   "CatalogProjectController, CatalogOrderController",             "Services productises, commandes, livraisons"],
+        ["Chat",      "ChatController",                                                "Messages, reactions, read receipts, typing"],
+        ["Contracts", "ContractController, MilestoneController, ContractFileController, TimeTrackingController, ContractExtensionController, ContractAnalyticsController, ContractPdfController", "Cycle de vie complet des contrats"],
+        ["Freelancer","FreelancerController",                                          "Profil, onboarding, skills, portfolio, dashboard"],
+        ["Jobs",      "JobController, ProposalController",                             "Offres emploi, propositions, statuts"],
+        ["KYC",       "IdentityVerificationController",                               "Upload documents, file admin, approve/reject"],
+        ["Notifications","NotificationController",                                    "Notifications in-app, markRead, markAllRead"],
+        ["Payments",  "PaymentController, StripeController, StripeWebhookController", "Wallet, escrow, retraits, sessions Stripe"],
+        ["Push",      "PushSubscriptionController",                                   "VAPID, subscribe/unsubscribe endpoints"],
+        ["Reviews",   "ReviewController",                                              "Avis post-contrat, note freelancer"],
+        ["Search",    "SearchController",                                              "Recherche globale FULLTEXT, autocomplete"],
+        ["Talent",    "SavedFreelancerController, TalentListController",              "Signets freelancers, listes curees"],
+        ["Tax",       "TaxDocumentController",                                         "W-9, W-8BEN, VAT, PDF, validation admin"],
     ],
-    [3, 5, 9]
+    [3, 7, 7.5]
+)
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 4 — BASE DE DONNEES
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 4 — Base de Donnees — Schema Complet (35+ Tables)", 1)
+
+H("4.1 Principes de Conception", 2)
+P("Le schema de la base de donnees MySQL 8 a ete concu selon les principes suivants :")
+B("Normalisation 3NF : elimination des redondances, cles etrangeres avec ON DELETE CASCADE.")
+B("Index FULLTEXT : ajoutes sur les champs titre, description, bio, competences pour la recherche rapide.")
+B("Soft Deletes : utilises sur les entites sensibles (users, contracts, messages) via deleted_at.")
+B("Precision decimale : tous les montants monetaires en DECIMAL(12,2) — jamais en FLOAT.")
+B("Timestamps universels : created_at / updated_at sur toutes les tables, plus des timestamps metier specifiques.")
+B("Idempotency keys : colonne idempotency_key UNIQUE sur transactions pour eviter les doubles credits.")
+
+H("4.2 Schema Complet par Domaine", 2)
+T(
+    ["Domaine", "Tables", "Champs Cles Notables"],
+    [
+        ["Utilisateurs",    "users",                         "role, two_factor_secret (chiffre), two_factor_confirmed_at, is_platform, connects_balance, is_active, is_verified, soft_delete"],
+        ["Tokens",          "personal_access_tokens",        "tokenable_id, tokenable_type, abilities, last_used_at"],
+        ["Profils",         "freelancer_profiles, client_profiles", "hourly_rate, experience_level, avg_rating, total_earned, payment_verified"],
+        ["Competences",     "categories, skills, freelancer_skills", "parent_id (hierarchie), level (debutant/intermediaire/expert)"],
+        ["Portfolio",       "portfolios",                    "images JSON, project_url, is_featured"],
+        ["Offres",          "job_postings, saved_jobs",       "type ENUM(hourly/fixed), budget_min/max, status ENUM, FULLTEXT index"],
+        ["Propositions",    "proposals",                     "is_ai_generated, connects_used, milestones JSON, bid_amount"],
+        ["Contrats",        "contracts",                     "type ENUM, escrow_amount DECIMAL, hourly_rate, weekly_limit, archived_at, dispute_opened_by, resolved_by, ALLOWED_TRANSITIONS machine d'etat"],
+        ["Activite Contrat","contract_activities",           "type VARCHAR(64), data JSON, actor_id (append-only, no update/delete)"],
+        ["Fichiers Contrat","contract_files",                "parent_id (versioning chain), version INT, stored_path, mime_type, size_bytes, soft_delete"],
+        ["Extensions",      "contract_extensions",           "old_deadline, new_deadline, reason, status ENUM(pending/accepted/rejected)"],
+        ["Jalons",          "milestones",                    "status ENUM, submission_notes, attachments JSON, sort_order, rejection_reason"],
+        ["Temps",           "time_logs",                     "started_at, ended_at (null=running), duration_seconds, screenshot_url"],
+        ["Finance",         "wallets",                       "balance DECIMAL, pending_balance, escrow_balance — 3 balances distinctes"],
+        ["Transactions",    "transactions",                  "type ENUM(credit/debit/escrow/commission/withdrawal), direction ENUM(in/out), balance_after DECIMAL, idempotency_key UNIQUE, counterparty_user_id"],
+        ["Retraits",        "withdrawals",                   "method ENUM(bank/paypal/wise/stripe/crypto), net DECIMAL, stripe_transfer_id"],
+        ["Stripe Events",   "stripe_webhook_events",         "stripe_event_id UNIQUE (idempotence webhooks), payload JSON, processed_at"],
+        ["Abonnements",     "subscriptions, subscription_items", "stripe_id, stripe_status, plan_slug, ends_at, trial_ends_at"],
+        ["Factures Hebdo",  "weekly_invoices",               "week_start/end, hours DECIMAL, rate DECIMAL, total, status ENUM"],
+        ["Catalogue",       "catalog_projects, catalog_project_images, catalog_orders, catalog_reviews, saved_catalog_projects", "tiers JSON (3 niveaux), status ENUM(pending/approved/rejected)"],
+        ["Agences",         "agencies, agency_members, agency_invitations", "owner_id, role ENUM(owner/admin/member), token VARCHAR UNIQUE, expires_at"],
+        ["Messagerie",      "conversations, messages, message_reactions", "last_message_at, body TEXT, deleted_at (soft), reply_to_id, emoji VARCHAR"],
+        ["Participants",    "conversation_participants",     "last_read_at, is_muted"],
+        ["Avis",            "reviews",                       "rating DECIMAL, breakdown JSON, contract_id"],
+        ["IA",              "ai_histories",                  "type ENUM, input JSON, output JSON, model VARCHAR, tokens_used INT"],
+        ["Talents",         "talent_lists, saved_freelancers", "is_private, notes TEXT sur les membres"],
+        ["KYC",             "identity_verifications",        "document_type ENUM, stored paths locaux, admin_notes, reviewed_at"],
+        ["Fiscal",          "tax_documents",                 "type ENUM(W9/W8BEN/VAT), data JSON, pdf_path, status"],
+        ["Audit",           "audit_logs",                    "action VARCHAR, metadata JSON, ip_address, user_agent"],
+        ["Push",            "push_subscriptions",            "endpoint, public_key, auth_token — VAPID"],
+        ["Platform",        "platform_settings",             "cles de configuration : fee.freelancer_pct=0.10, fee.client_pct=0.05, withdrawal.min=20"],
+        ["Notifications",   "notifications",                 "type, notifiable_id/type (polymorphe), data JSON, read_at"],
+    ],
+    [3.5, 5.5, 8.5]
 )
 
-heading(doc, "8.3 Stripe Connect et Retraits", 2)
-para(doc, "Les freelancers peuvent retirer leurs gains via Stripe Connect Express :")
-bullet(doc, "POST /payments/stripe/connect/onboard : cree une session d'onboarding Stripe Connect")
-bullet(doc, "GET /payments/stripe/connect/status : verifie si le compte est pleinement configure")
-bullet(doc, "POST /payments/withdrawals : demande un retrait (soumis a approbation admin si non-KYC)")
-bullet(doc, "L'admin valide ou rejette les retraits via /api/admin/finance/withdrawals/{id}/approve")
-
-heading(doc, "8.4 Stripe Webhooks", 2)
-para(doc, "Le StripeWebhookController gere les evenements Stripe entrants :")
-bullet(doc, "checkout.session.completed : confirme un depot Stripe, credite le portefeuille")
-bullet(doc, "account.updated : met a jour le statut Stripe Connect du freelancer")
-bullet(doc, "invoice.paid : confirme le paiement d'un abonnement")
-bullet(doc, "Signature HMAC verifiee (Stripe::constructEvent) — aucune auth Sanctum sur ce endpoint")
-
-heading(doc, "8.5 Abonnements (Plans)", 2)
-para(doc, "FreeNest propose un systeme d'abonnement Stripe pour des plans premium (acces a des fonctionnalites avancees, plus de 'connects', mise en avant) :")
-bullet(doc, "GET /api/plans : catalogue public des plans (prix, features)")
-bullet(doc, "POST /api/billing/checkout : cree une session Stripe Checkout pour souscription")
-bullet(doc, "POST /api/billing/swap : change de plan (upgrade/downgrade)")
-bullet(doc, "GET /api/billing/portal : acces au portail de facturation Stripe")
-page_break(doc)
-
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 9 — MESSAGERIE ET NOTIFICATIONS
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 9 — Messagerie Temps Reel et Notifications Push", 1)
-heading(doc, "9.1 Architecture de la Messagerie", 2)
-para(doc, "La messagerie repose sur Laravel Echo Server pour le broadcast et Socket.IO 4.8 cote client. Les conversations sont liees a des contrats ou sont des discussions directes entre utilisateurs.")
-
-heading(doc, "9.2 Fonctionnalites de Chat", 2)
-add_table(doc,
-    ["Fonctionnalite", "Endpoint / Evenement", "Description"],
+H("4.3 Structure du Wallet a 3 Balances", 2)
+P("Le systeme de portefeuille constitue le coeur financier de Panda. Chaque utilisateur dispose d'un wallet avec trois soldes distincts, garantissant la tracabilite et l'integrite financiere :")
+T(
+    ["Balance", "Description", "Mouvements Typiques"],
     [
-        ["Envoyer message",      "POST /chat/conversations/{id}/send",    "Texte, fichiers, images"],
-        ["Editer message",       "PUT /chat/messages/{id}",               "Modification avec historique"],
-        ["Supprimer message",    "DELETE /chat/messages/{id}",            "Suppression douce"],
-        ["Reactions emoji",      "POST /chat/messages/{id}/reactions",    "Toggle emoji (like, love, etc.)"],
-        ["Accusee de lecture",   "POST /chat/conversations/{id}/read",    "Marquer tous les messages comme lus"],
-        ["Indicateur frappe",    "POST /chat/conversations/{id}/typing",  "Broadcast 'X est en train d'ecrire...'"],
-        ["Livraison",            "POST /chat/messages/{id}/delivered",    "Confirmation reception"],
-        ["Piece jointe",         "POST /chat/.../attachment",             "Upload et envoi de fichiers"],
-        ["Recherche conversation","GET /chat/conversations/search",       "Recherche par nom ou message"],
+        ["balance",          "Fonds disponibles — retirables immediatement",  "CREDIT lors d'un depot Stripe ou liberation de jalon (-10% commission). DEBIT lors d'un escrow funding ou retrait."],
+        ["pending_balance",  "Fonds en attente de validation",                "Utilise transitoirement lors de certains transferts inter-services."],
+        ["escrow_balance",   "Fonds bloques en garantie de mission",          "CREDIT lors du fund-escrow client. DEBIT lors de la liberation (vers freelancer) ou remboursement (litige client gagne)."],
     ],
-    [4, 6, 7]
+    [3.5, 5, 9]
+)
+P("Le LedgerService garantit que la somme (SUM(transactions.amount * direction)) pour un wallet est toujours egale a wallet.balance — invariant verifie a la fin de chaque operation.")
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 5 — BACKEND LARAVEL
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 5 — Backend Laravel 12 — Structure et Services", 1)
+
+H("5.1 Architecture du Backend", 2)
+P("Le backend Laravel 12 respecte l'architecture MVC enrichie d'une couche Services qui isole la logique metier complexe des controllers. Les controllers sont reduits a leur responsabilite essentielle : valider l'entree, deleguer au service, retourner la reponse.")
+
+CODE("""// Structure d'un controller production (ContractController)
+class ContractController extends Controller
+{
+    public function __construct(
+        private LedgerService       $ledger,       // money movements
+        private NotificationService $notifications // push + in-app
+    ) {}
+
+    public function show(Request $request, Contract $contract): JsonResponse
+    {
+        $this->authorizeOrFail($request, 'view', $contract); // ContractPolicy
+        $contract->load(['client', 'freelancer', 'milestones', 'reviews', 'conversation']);
+        // ...
+    }
+}""")
+
+H("5.2 Services Metier Dedies", 2)
+T(
+    ["Service", "Responsabilites", "Garanties / Particularites"],
+    [
+        ["LedgerService",          "TOUTES les operations monetaires (deposit, fundEscrow, releaseMilestone, withdrawal)", "DB::transaction() sur chaque op, SELECT FOR UPDATE, double-entree, idempotency keys, balance invariant"],
+        ["TotpService",            "Generation secrets TOTP, verification codes, URI otpauth://",                         "Secrets chiffres au repos via Crypt::encryptString (cle AES Laravel)"],
+        ["AuditLogService",        "Log de toutes les actions sensibles",                                                  "user_id, action, metadata JSON, ip_address, user_agent — append-only"],
+        ["ContractActivityService","Journal d'activite des contrats (append-only)",                                        "Type-safe events : milestone.created, file.uploaded, status.changed"],
+        ["HourlyBillingService",   "Calcul et generation des factures hebdomadaires",                                     "Commande schedulee HourlyGenerateInvoicesCommand, evenements WeeklyInvoice*"],
+        ["StripeService",          "Sessions Checkout, Connect onboarding, lien portail",                                 "Idempotency key Stripe sur chaque appel API"],
+        ["SubscriptionService",    "Gestion lifecycle abonnements (create, swap, cancel, resume)",                        "Compatibilite Laravel Cashier-like sans package tiers"],
+        ["CatalogCheckoutService", "Paiement d'une commande catalogue",                                                   "Verifie stock tier, cree CatalogOrder, charge via LedgerService"],
+        ["NotificationService",    "Notifications in-app + broadcast + web push",                                         "Tache asynchrone via queue, ne bloque pas la requete principale"],
+    ],
+    [4, 6.5, 7]
 )
 
-heading(doc, "9.3 Notifications Push Web", 2)
-para(doc, "FreeNest implemente la Web Push API (VAPID) pour les notifications navigateur :")
-bullet(doc, "Service Worker (sw.js) enregistre cote client pour recevoir les push")
-bullet(doc, "POST /api/push/subscribe : enregistre l'endpoint push du navigateur")
-bullet(doc, "DELETE /api/push/subscribe : desabonnement")
-bullet(doc, "Les notifications sont envoyees via webpush() pour les evenements cles (message recu, contrat mis a jour, jalon approuve)")
-bullet(doc, "browserNotify.js : API Notification navigateur avec icone et son (sound.js)")
-page_break(doc)
+H("5.3 Modele Contract et Machine d'Etat", 2)
+P("Le modele Contract implemente une machine d'etat formelle via la constante ALLOWED_TRANSITIONS et la methode canTransitionTo(). Cela garantit que les transitions de statut sont validables avant execution et que les controllers ne peuvent jamais mettre un contrat dans un etat invalide.")
+CODE("""// app/Models/Contract.php — Machine d'etat
+public const ALLOWED_TRANSITIONS = [
+    'pending'   => ['active', 'cancelled'],
+    'active'    => ['paused', 'completed', 'cancelled', 'disputed'],
+    'paused'    => ['active', 'cancelled', 'disputed'],
+    'disputed'  => ['active', 'completed', 'cancelled'], // admin only
+    'completed' => [],  // terminal
+    'cancelled' => [],  // terminal
+];
 
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 10 — INTELLIGENCE ARTIFICIELLE
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 10 — Intelligence Artificielle (Ollama / Mistral 7B)", 1)
-heading(doc, "10.1 Architecture IA", 2)
-para(doc, "FreeNest integre un moteur d'IA local via Ollama avec le modele Mistral 7B. Cette approche garantit la confidentialite des donnees (pas d'envoi vers des APIs externes) et elimine les couts variables d'API comme OpenAI.")
-add_table(doc,
-    ["Fonctionnalite IA", "Endpoint", "Description"],
+public function canTransitionTo(string $status): bool
+{
+    return in_array($status, self::ALLOWED_TRANSITIONS[$this->status] ?? [], true);
+}""")
+
+H("5.4 Securite du Modele User", 2)
+P("Le modele User est concu pour prevenir les vulnerabilites d'affectation de masse. Les champs sensibles sont volontairement exclus de fillable :")
+CODE("""// app/Models/User.php — SECURITE : champs critiques hors fillable
+protected $fillable = [
+    'name', 'username', 'email', 'password',
+    'avatar', 'country', 'timezone', 'phone', 'phone_verified',
+    'is_online', 'last_seen_at', 'google_id', 'github_id', 'connects_balance',
+    // NOTE : 'role', 'is_active', 'is_verified', 'email_verified_at'
+    // sont EXCLUS intentionnellement pour prevenir l'escalade de privileges.
+    // Ils ne peuvent etre modifies que via des chemins codes explicitement audites.
+];
+protected $hidden = ['password', 'remember_token',
+    'two_factor_secret',            // chiffre AES au repos
+    'two_factor_recovery_codes',    // chiffres AES au repos
+];""")
+
+H("5.5 Rate Limiting par Endpoint", 2)
+T(
+    ["Groupe d'endpoints", "Throttle", "Justification"],
     [
-        ["Generation de proposition","POST /api/ai/generate-proposal", "Redige une proposition personnalisee a partir du profil freelancer + details offre"],
-        ["Matching freelancers",     "POST /api/ai/match-freelancers",  "Recommande les meilleurs freelancers pour une offre client"],
-        ["Analyse de profil",        "POST /api/ai/analyze-profile",    "Donne des conseils pour optimiser le profil freelancer"],
-        ["Chat assistant",           "POST /api/ai/chat",               "Assistant IA conversationnel (questions/reponses contextuelles)"],
-        ["Recherche intelligente",   "POST /api/ai/smart-search",       "Recherche semantique au-dela des mots-cles"],
+        ["POST /auth/register, /auth/login",       "10 req/min/IP", "Protection brute-force sur les credentials"],
+        ["POST /auth/forgot-password, /reset",     "5 req/min/IP",  "Anti-spam des emails de reinitialisation"],
+        ["POST /ai/*",                             "20 req/min/user","Protection des couts LLM (Ollama calls)"],
+        ["GET /search, /search/suggest",           "60/120 req/min","Autocomplete public, couts serveur"],
+        ["Tous autres endpoints authentifies",     "Aucun (Sanctum)","Utilisateurs identifies, monitoring suffisant"],
+        ["POST /payments/stripe/webhook",          "Aucun + HMAC",   "Stripe verifie sa propre signature, pas de throttle"],
     ],
-    [5, 5, 7.5]
+    [6, 3.5, 8]
+)
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 6 — AUTHENTIFICATION, SECURITE, 2FA, KYC
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 6 — Authentification, Securite, 2FA et KYC", 1)
+
+H("6.1 Flux d'Inscription et de Connexion", 2)
+P("Panda propose deux methodes d'authentification complementaires :")
+B("Email / Mot de passe : le mot de passe est hache avec bcrypt (cost factor 12 par defaut). Apres validation, un token Sanctum est genere et retourne au client. Le token est stocke en localStorage cote frontend.")
+B("Google OAuth 2.0 : via Laravel Socialite 5.27. Le controller recupere le profil Google (id, name, email, picture), cherche un utilisateur avec google_id=X ou email=Y en base, cree un nouveau compte si absent, puis genere un token Sanctum.")
+
+H("6.2 Processus d'Onboarding Freelancer", 2)
+P("Apres inscription, un freelancer est redirige vers un onboarding guide en 5 etapes (page /onboarding) :")
+T(
+    ["Etape", "Contenu", "Champs Mis a Jour"],
+    [
+        ["1", "Categorie principale et specialites",     "freelancer_profiles.category, specializations"],
+        ["2", "Niveau d'experience (entry/mid/senior)", "freelancer_profiles.experience_level"],
+        ["3", "Formation et certifications",            "freelancer_profiles.education, certifications JSON"],
+        ["4", "Disponibilite et tarif horaire",         "freelancer_profiles.availability, hourly_rate"],
+        ["5", "Photo de profil et langues parles",      "users.avatar, freelancer_profiles.languages JSON"],
+    ],
+    [1.5, 5, 11]
 )
 
-heading(doc, "10.2 Fallback en Cas d'Indisponibilite", 2)
-para(doc, "Si Ollama est indisponible (service arrete), le controller retourne une reponse de fallback pre-generee avec le flag is_fallback: true. Cette approche garantit que l'interface reste fonctionnelle en toute circonstance.")
+H("6.3 Authentification a Deux Facteurs (2FA TOTP)", 2)
+P("Le module 2FA utilise l'algorithme TOTP (Time-based One-Time Password, RFC 6238). L'implementation suit un flux en 3 etapes pour garantir que l'utilisateur a bien configure son application avant activation :")
+NB("POST /api/two-factor/enable : le TotpService genere un secret aleatoire (base32), le chiffre avec Crypt::encryptString (AES-256-CBC via la cle app.key Laravel), et retourne un otpauth_uri compatible Google Authenticator.")
+NB("POST /api/two-factor/confirm : l'utilisateur saisit son premier code TOTP 6 chiffres. Le TotpService le verifie avec une fenetre de 30 secondes (± 1 periode de tolerance). Si valide, two_factor_confirmed_at est defini.")
+NB("8 codes de secours : generes lors de l'activation, chiffres au repos, presentables une seule fois. POST /api/two-factor/recovery-codes/regenerate en cree une nouvelle serie.")
+CODE("""// TwoFactorController.php — enable()
+$secret  = $this->totp->generateSecret();         // entropie cryptographique
+$codes   = $this->totp->generateRecoveryCodes();  // 8 codes jetables
+$issuer  = config('app.name') ?? 'PANDA';
 
-heading(doc, "10.3 Protection des Couts", 2)
-para(doc, "Tous les endpoints IA sont proteges par un rate limiter strict (throttle:20,1 — 20 requetes par minute par utilisateur). Chaque appel est logue dans ai_histories avec le nombre de tokens utilises, permettant un audit et une facturation future par usage.")
-page_break(doc)
+$u->forceFill([
+    'two_factor_secret'         => Crypt::encryptString($secret),
+    'two_factor_recovery_codes' => Crypt::encryptString(json_encode($codes)),
+    'two_factor_confirmed_at'   => null,  // pas encore confirme
+])->save();
+$this->audit->log('user.2fa.enable_requested', $u->id, $u);""")
 
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 11 — AGENCES ET TALENTS
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 11 — Agences et Gestion des Talents", 1)
-heading(doc, "11.1 Systeme d'Agences", 2)
-para(doc, "FreeNest permet a des groupes de freelancers de se regrouper sous une agence avec une marque commune. Une agence peut avoir plusieurs membres avec des roles distincts.")
-add_table(doc,
-    ["Fonctionnalite", "Description"],
+H("6.4 Reinitialisation du Mot de Passe", 2)
+P("Le flux de reinitialisation est implementee en deux etapes separees :")
+NB("POST /api/auth/forgot-password (throttle: 5/min) : genere un token signe (hash sha256 de donnees temporaires), envoie un email avec lien de reinitialisation valide 60 minutes.")
+NB("POST /api/auth/reset-password : valide le token, verifie son expiration, met a jour le mot de passe (bcrypt), invalide tous les tokens Sanctum de l'utilisateur (deconnexion de toutes les sessions).")
+
+H("6.5 Verification d'Identite KYC", 2)
+P("Le systeme KYC (Know Your Customer) est concu pour satisfaire les exigences de conformite avant de permettre le retrait de fonds :")
+B("L'utilisateur soumet ses documents via POST /api/verify-identity : passeport ou CNI (recto/verso) + selfie.")
+B("Les fichiers sont stockes exclusivement sur le disque local (Storage::disk('local')) — jamais sur un disque public. Les chemins ne sont jamais exposes directement.")
+B("L'admin accede aux fichiers via une route signee : GET /admin/kyc/file/{base64_path} qui verifie Storage::exists() avant de servir le fichier.")
+B("Les actions KYC (approbation/rejet) sont loguees dans audit_logs via AuditLogService.")
+B("L'approbation KYC met a jour is_verified=true sur l'utilisateur, debloquant les retraits.")
+
+H("6.6 Securite Globale", 2)
+T(
+    ["Mesure", "Implementation", "Protection Contre"],
     [
-        ["Creation",              "POST /api/agencies — createur devient owner automatiquement"],
-        ["Invitation",            "POST /api/agencies/{id}/invitations — email + token unique envoye"],
-        ["Acceptation",           "POST /api/agencies/invitations/{token}/accept"],
-        ["Gestion des membres",   "Roles: owner, admin, member — visualisation et retrait"],
-        ["Transfert propriete",   "POST /api/agencies/{id}/transfer-ownership"],
-        ["Page publique",         "GET /api/agencies/{id} — repertoire public des agences"],
+        ["HMAC Signature Webhooks", "Stripe::constructEvent(payload, sig, secret)", "Faux webhooks injectes"],
+        ["Tokens chiffres au repos", "Crypt::encryptString(AES-256-CBC)", "Vol de secrets 2FA en base"],
+        ["Mass Assignment Guard",   "fillable whitelist sur User (role hors liste)", "Privilege escalation via $request->all()"],
+        ["Audit Trail",             "AuditLogService sur actions sensibles",         "Non-repudiation, forensique"],
+        ["Input Validation",        "Form Requests Laravel sur 100% des endpoints",  "Injection, XSS, donnees invalides"],
+        ["ContractPolicy (Gates)",  "authorizeOrFail() dans chaque controller",      "Acces non autorise aux ressources"],
+        ["Middleware admin",        "Double verification controller + middleware",    "Acces admin depuis endpoint non admin"],
     ],
-    [4, 13]
+    [4.5, 5.5, 7.5]
+)
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 7 — MARKETPLACE
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 7 — Marketplace : Offres, Propositions et Catalogue", 1)
+
+H("7.1 Gestion des Offres d'Emploi", 2)
+P("Les offres d'emploi (job_postings) constituent le coeur de la marketplace. Chaque offre est publiee par un client avec les attributs suivants : titre, description detaillee, categorie, type (hourly/fixed), fourchette budgetaire (budget_min/budget_max), competences requises, et statut.")
+P("Le cycle de vie d'une offre suit une machine d'etat :")
+T(
+    ["Statut", "Acces Marketplace", "Transition Vers"],
+    [
+        ["draft",       "Non visible",            "open (publication client)"],
+        ["open",        "Visible, proposals OK",  "in_progress (proposition acceptee), cancelled"],
+        ["in_progress", "Non visible (en cours)", "completed (jalons termines), cancelled"],
+        ["completed",   "Archive",                "Etat terminal"],
+        ["cancelled",   "Archive",                "Etat terminal"],
+    ],
+    [3, 5, 10]
 )
 
-heading(doc, "11.2 Gestion des Talents (Clients)", 2)
-para(doc, "Les clients disposent d'outils pour organiser les freelancers qu'ils suivent :")
-bullet(doc, "Saved Freelancers : signets rapides (un clic) — GET/POST/DELETE /api/saved-freelancers")
-bullet(doc, "Talent Lists : listes nommees et curees de freelancers (type 'liste favoris React', 'designers UI')")
-bullet(doc, "Les listes permettent d'ajouter ou retirer des membres avec notes personnelles")
+H("7.2 Recherche et Filtrage", 2)
+P("La recherche utilise des index FULLTEXT MySQL sur titre, description et competences pour des performances optimales :")
+CODE("""// SearchController.php — Recherche FULLTEXT
+$results = JobPosting::whereRaw(
+    'MATCH(title, description) AGAINST(? IN BOOLEAN MODE)',
+    [$request->q . '*']
+)->where('status', 'open')
+ ->with('category')
+ ->paginate(20);""")
+P("L'autocomplete (GET /api/search/suggest, throttle 120/min) retourne des suggestions instantanees sur offres, freelancers, services et agences, aggregees en une seule reponse JSON.")
 
-heading(doc, "11.3 Centre Fiscal", 2)
-para(doc, "Le TaxCenter permet aux utilisateurs de gerer leurs documents fiscaux :")
-bullet(doc, "Soumission de formulaires W-9 (USA), W-8BEN (international), VAT (Europe)")
-bullet(doc, "Export PDF des documents fiscaux")
-bullet(doc, "Validation et approbation admin via /api/admin/tax-documents")
-page_break(doc)
+H("7.3 Systeme de Propositions", 2)
+P("Les freelancers soumettent des propositions avec : lettre de motivation, montant propose (bid_amount), decoupe en jalons (milestones JSON) et un flag is_ai_generated pour la transparence. L'acceptation d'une proposition par le client declenche automatiquement :")
+NB("Mise a statut 'accepted' de la proposition selectionnee.")
+NB("Rejet automatique de toutes les autres propositions pour cette offre.")
+NB("Creation d'un contrat (INSERT contracts) avec les donnees de la proposition.")
+NB("Creation des jalons en base depuis le JSON milestones de la proposition.")
+NB("Creation d'une conversation liee au contrat.")
+NB("Envoi de notifications aux deux parties.")
+P("Toutes ces operations sont enveloppees dans une seule DB::transaction() — atomicite garantie.")
 
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 12 — ADMINISTRATION, KYC, FINANCE
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 12 — Administration, KYC et Finance", 1)
-heading(doc, "12.1 Tableau de Bord Admin", 2)
-para(doc, "L'espace admin (protege par middleware 'admin' + double verification en controller) donne acces a :")
-bullet(doc, "Statistiques plateforme : utilisateurs, offres, revenus, contrats")
-bullet(doc, "Gestion utilisateurs : ban, verification, details")
-bullet(doc, "Analytics avancees")
-
-heading(doc, "12.2 Finance Admin", 2)
-add_table(doc,
-    ["Endpoint Admin Finance", "Action"],
+H("7.4 Catalogue de Services (Style Fiverr)", 2)
+P("En complement des offres, Panda propose un catalogue de services productises ou les freelancers peuvent vendre des prestations standardisees directement :")
+T(
+    ["Entite", "Description", "Champs Cles"],
     [
-        ["GET /admin/finance/dashboard",                  "Vue d'ensemble : GMV, commissions, retraits en attente"],
-        ["GET /admin/finance/withdrawals",                "Liste des demandes de retrait a traiter"],
-        ["POST /admin/finance/withdrawals/{id}/approve",  "Approuve un retrait (declenche virement Stripe)"],
-        ["POST /admin/finance/withdrawals/{id}/reject",   "Rejette un retrait avec motif"],
-        ["GET /admin/finance/settings",                   "Parametres plateforme (taux commission, limites)"],
-        ["PUT /admin/finance/settings",                   "Mise a jour des parametres"],
+        ["CatalogProject",  "Service cree par un freelancer", "tiers JSON (Basic/Standard/Premium avec prix et delai), status (pending/approved/rejected), slug unique"],
+        ["CatalogOrder",    "Commande d'un tier par un client", "tier ENUM, price DECIMAL, status ENUM(pending/in_progress/delivered/completed/revision)"],
+        ["CatalogReview",   "Avis post-commande",             "rating (1-5), comment, commande liee"],
+        ["Moderation",      "Validation admin avant publication", "POST /admin/catalog/{id}/approve ou /reject"],
     ],
-    [8, 9]
+    [3.5, 5.5, 8.5]
+)
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 8 — CONTRATS, JALONS, TEMPS
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 8 — Gestion des Contrats, Jalons et Suivi du Temps", 1)
+
+H("8.1 Architecture du Systeme de Contrats", 2)
+P("Le systeme de contrats est le module le plus complexe de Panda. Il implique 7 controllers dedies, 5 modeles interconnectes, un journal d'activite append-only, et une machine d'etat formelle. La logique monetaire est systematiquement deleguee au LedgerService pour garantir l'atomicite des transactions financieres.")
+
+H("8.2 Cycle de Vie d'un Contrat", 2)
+T(
+    ["Statut", "Description", "Acteur", "Prochains Etats Possibles"],
+    [
+        ["pending",   "En attente de confirmation",              "Systeme",     "active, cancelled"],
+        ["active",    "Mission en cours",                        "Systeme",     "paused, completed, cancelled, disputed"],
+        ["paused",    "Travail temporairement suspendu",         "Parties",     "active, cancelled, disputed"],
+        ["completed", "Tous jalons approuves, mission terminee","Systeme",     "Aucun (terminal)"],
+        ["disputed",  "Litige ouvert par une partie",            "Partie",      "active, completed, cancelled (admin)"],
+        ["cancelled", "Annulation mutuellement convenue",        "Parties/Admin","Aucun (terminal)"],
+    ],
+    [2.5, 4.5, 3, 7.5]
 )
 
-heading(doc, "12.3 File KYC Admin", 2)
-para(doc, "L'admin dispose d'une interface de traitement KYC :")
-bullet(doc, "GET /admin/kyc : liste des soumissions en attente")
-bullet(doc, "GET /admin/kyc/{id} : detail avec acces securise aux fichiers documents")
-bullet(doc, "POST /admin/kyc/{id}/approve : approuve, met a jour le statut utilisateur")
-bullet(doc, "POST /admin/kyc/{id}/reject : rejette avec message d'explication")
-bullet(doc, "Les fichiers sensibles sont servis via route signee avec verification Storage::exists")
-
-heading(doc, "12.4 Audit Logs", 2)
-para(doc, "Toutes les actions sensibles (approbation/rejet KYC, modifications admin, changements de mot de passe) sont tracees dans la table audit_logs avec : user_id, action, metadata JSON, ip_address, created_at. Cela garantit une piste d'audit complete pour la conformite.")
-page_break(doc)
-
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 13 — DOCKER ET CI/CD
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 13 — Deploiement Docker et CI/CD", 1)
-heading(doc, "13.1 Containerisation Docker", 2)
-para(doc, "L'application est entierement containerisee pour garantir la reproductibilite des environnements de developpement et de production.")
-add_table(doc,
-    ["Service", "Image", "Description"],
+H("8.3 Fonctionnalites Avancees des Contrats", 2)
+T(
+    ["Fonctionnalite", "Endpoint", "Details Techniques"],
     [
-        ["backend",  "Dockerfile multi-stage (PHP 8.2-FPM + Nginx)", "API Laravel 12, queues, scheduler"],
-        ["frontend", "Dockerfile Nginx (Vite build)",                "SPA React 19 servie par Nginx"],
-        ["mysql",    "mysql:8.0",                                    "Base de donnees MySQL"],
-        ["redis",    "redis:7-alpine",                               "Cache, sessions, queues Laravel"],
-        ["soketi",   "quay.io/soketi/soketi",                        "Serveur WebSocket compatible Pusher"],
-        ["ollama",   "ollama/ollama",                                "Moteur IA local Mistral 7B"],
+        ["Fichiers livres",    "POST /contracts/{id}/files",       "Versioning via parent_id chain. Colonnes : original_name, stored_path, mime_type, size_bytes, version INT, soft_delete."],
+        ["Suivi du temps",     "POST /contracts/{id}/time/start|stop", "time_logs : started_at, ended_at (null=timer actif), duration_seconds. Resume hebdomadaire via /time/weekly."],
+        ["Extensions deadline","POST /contracts/{id}/extensions",  "contract_extensions : old_deadline, new_deadline, reason, status ENUM. L'autre partie accepte ou rejette."],
+        ["Analytics",          "GET /contracts/{id}/analytics",    "Stats temps passe (sum duration_seconds), jalons par statut, montant total, montant restant."],
+        ["Journal d'activite", "GET /contracts/{id}/activity",     "contract_activities : append-only. Types : milestone.created, file.uploaded, status.changed, time.logged, extension.requested"],
+        ["Export PDF",         "GET /contracts/{id}/pdf",          "PDF signe du contrat (titre, parties, montant, jalons, conditions)."],
+        ["PDF Litige",         "GET /contracts/{id}/dispute-pdf",  "PDF du dossier de litige (motif, historique, preuves) pour arbitrage admin."],
+        ["Archive",            "POST /contracts/{id}/archive",     "Positionne archived_at (timestamp). Exclus des listes par defaut. Recuperable via ?include_archived=true."],
     ],
-    [3, 7, 7]
+    [3.5, 5, 9]
 )
 
-heading(doc, "13.2 Pipelines CI/CD GitHub Actions", 2)
-para(doc, "Deux workflows YAML automatisent le cycle de livraison :")
-bullet(doc, "backend.yml : PHP CS Fixer, PHPStan (analyse statique), PHPUnit (tests), build image Docker")
-bullet(doc, "frontend.yml : npm ci, ESLint, Vite build, Vitest (tests unitaires React)")
-para(doc, "Les pipelines se declenchent sur chaque push et pull request vers la branche main. Un echec d'un test bloque le merge automatiquement.")
-
-heading(doc, "13.3 Configuration Production", 2)
-para(doc, "Le frontend est configure avec un nginx.conf dedie qui gere :")
-bullet(doc, "Gzip compression pour les assets JS/CSS/HTML")
-bullet(doc, "Cache-Control headers (assets: 1 an, index.html: no-cache)")
-bullet(doc, "try_files pour le routing SPA React (toutes les routes -> index.html)")
-bullet(doc, "Service Worker (sw.js) pour les Push Notifications")
-page_break(doc)
-
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 14 — TESTS ET QUALITE
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 14 — Tests et Qualite", 1)
-heading(doc, "14.1 Tests Backend", 2)
-bullet(doc, "PHPUnit : tests unitaires des controllers et services critiques (paiements, escrow, KYC)")
-bullet(doc, "Laravel HTTP Tests : tests d'integration des endpoints API")
-bullet(doc, "Test de la signature Stripe Webhook : verification du rejet des requetes non signees")
-
-heading(doc, "14.2 Tests Frontend", 2)
-bullet(doc, "Vitest : tests unitaires des composants React (formulaires, logique metier)")
-bullet(doc, "ESLint + Prettier : conformite du code, style uniforme")
-bullet(doc, "React Testing Library : tests comportementaux des composants UI")
-
-heading(doc, "14.3 Qualite du Code", 2)
-add_table(doc,
-    ["Outil", "Cible", "Objectif"],
+H("8.4 Workflow Detaille des Jalons", 2)
+P("Chaque jalon suit son propre cycle de vie independant. Le LedgerService gere les mouvements financiers associes :")
+T(
+    ["Statut Jalon", "Acteur Responsable", "Operation LedgerService", "Description"],
     [
-        ["PHPStan (niveau 6)", "Backend Laravel",  "Detection d'erreurs de types statiques"],
-        ["PHP CS Fixer",       "Backend Laravel",  "Conformite PSR-12"],
-        ["ESLint",             "Frontend React",   "Linting JavaScript/JSX"],
-        ["Prettier",           "Frontend React",   "Formatage automatique"],
-        ["Docker healthcheck", "Tous services",    "Verification de sante des containers"],
+        ["pending",   "Systeme (creation)", "Aucune",                         "Cree avec le contrat depuis le JSON milestones de la proposition"],
+        ["funded",    "Client",             "fundEscrow(client, contract, amount)", "balance -= amount, escrow_balance += amount, contract.escrow_amount += amount"],
+        ["submitted", "Freelancer",         "Aucune (document + notes)",      "Freelancer soumet via POST /milestones/{id}/submit avec submission_notes et attachments"],
+        ["approved",  "Client",             "releaseMilestone(client, milestone)", "escrow -= amount, freelancer.balance += 90%, platform.balance += 10%, 2 transactions INSERT"],
+        ["rejected",  "Client",             "Aucune (retour a funded)",       "Client demande des corrections via POST /milestones/{id}/reject avec rejection_reason"],
+        ["disputed",  "Admin",              "Selon resolution",               "resolved pour freelancer: approve, resolved pour client: remboursement escrow -> balance client"],
     ],
-    [4, 4, 9]
-)
-page_break(doc)
-
-# ═══════════════════════════════════════════════════════════════
-#  CHAPITRE 15 — BILAN ET PERSPECTIVES
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Chapitre 15 — Bilan et Perspectives", 1)
-heading(doc, "15.1 Bilan Technique", 2)
-para(doc, "FreeNest est une application de niveau production integrant des technologies de pointe. Le tableau suivant resume les chiffres cles du projet :")
-add_table(doc,
-    ["Metrique", "Valeur"],
-    [
-        ["Tables de base de donnees",  "35+"],
-        ["Endpoints API REST",          "100+"],
-        ["Pages React",                 "50+"],
-        ["Composants React",            "80+"],
-        ["Evenements WebSocket",        "11"],
-        ["Fonctionnalites IA",          "5"],
-        ["Pipelines CI/CD",             "2 (backend + frontend)"],
-        ["Services Docker",             "6+"],
-        ["Taux de commission",          "10% par transaction"],
-        ["Lignes de code (total)",      "~25 000+"],
-    ],
-    [8, 9]
+    [2.5, 3.5, 5.5, 6]
 )
 
-heading(doc, "15.2 Competences Acquises", 2)
-bullet(doc, "Architecture full-stack decouplee (API REST + SPA)")
-bullet(doc, "Paiements en ligne securises (Stripe, escrow, webhooks)")
-bullet(doc, "Temps reel avec Laravel Broadcasting et Socket.IO")
-bullet(doc, "Securite avancee : 2FA TOTP, KYC, audit logs, rate limiting")
-bullet(doc, "DevOps : Docker, GitHub Actions, Nginx, CI/CD")
-bullet(doc, "Integration IA locale avec Ollama et Mistral 7B")
-bullet(doc, "Conception de base de donnees relationnelles complexes (35+ tables)")
+H("8.5 Suivi du Temps et Facturation Horaire", 2)
+P("Pour les contrats de type 'hourly', Panda implemente un systeme de time tracking :")
+B("POST /contracts/{id}/time/start : cree un TimeLog avec started_at=now(), ended_at=NULL (timer actif).")
+B("POST /contracts/{id}/time/stop : calcule duration_seconds = ended_at - started_at, ferme le TimeLog.")
+B("GET /contracts/{id}/time/weekly : retourne le resume hebdomadaire (heures, montant a facturer).")
+B("Commande Laravel schedulee (HourlyGenerateInvoicesCommand) : genere automatiquement les WeeklyInvoice chaque lundi matin, diffuse les evenements WeeklyInvoiceGenerated et WeeklyInvoicePaid via Reverb.")
+PB()
 
-heading(doc, "15.3 Perspectives d'Evolution", 2)
-para(doc, "Plusieurs axes d'amelioration peuvent enrichir FreeNest a l'avenir :")
-bullet(doc, "Application mobile React Native (iOS + Android)")
-bullet(doc, "Migration vers une architecture microservices (Auth Service, Payment Service, AI Service)")
-bullet(doc, "Integration de modeles IA multimodaux pour l'analyse de portfolios images/videos")
-bullet(doc, "Systeme de mise en relation video integre (contractuel, rencontres initiales)")
-bullet(doc, "Expansion internationale : multi-devises, traduction i18n, portails regionaux")
-bullet(doc, "Programme de certifications freelancers avec examen en ligne")
-bullet(doc, "Kubernetes pour l'orchestration des containers en production haute disponibilite")
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 9 — PAIEMENTS ESCROW ET STRIPE
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 9 — Systeme de Paiement Escrow (LedgerService + Stripe)", 1)
 
-heading(doc, "15.4 Conclusion", 2)
-para(doc, "Ce projet de fin d'etudes represente une realisation technique complete et ambitieuse. FreeNest va bien au-dela d'un simple projet academique : c'est une application de marketplace full-stack de niveau production, containerisee, testee, securisee et dotee d'une IA locale. Il demontre la maitrise de l'ensemble de la chaine de valeur logicielle : de la conception de la base de donnees aux pipelines CI/CD, en passant par l'integration de paiements et l'intelligence artificielle.")
-para(doc, "Ce projet illustre parfaitement la vision d'une marketplace freelance moderne, alternative credible aux plateformes etablies, construite avec les outils et pratiques de l'industrie 2026.")
-page_break(doc)
+H("9.1 Les 6 Garanties du LedgerService", 2)
+P("Le LedgerService constitue la piece maitresse du systeme financier de Panda. Il est concu selon 6 garanties immuables, documentees dans son en-tete de classe :")
+NB("Atomicite : chaque operation monetaire s'execute dans une DB::transaction(). En cas d'erreur, tout est annule.")
+NB("Verrouillage : les lignes wallet sont verrouilees avec SELECT ... FOR UPDATE avant mutation, eliminant les race conditions en environnement concurrent.")
+NB("Double-entree : chaque mouvement de fonds genere au minimum deux entrees en transaction (debit + credit). La plateforme a son propre compte systeme (is_platform=true) qui recoit les commissions.")
+NB("Audit immutable : chaque transaction stocke balance_after DECIMAL — permettant de reconcilier l'historique et de detecter toute alteration.")
+NB("Idempotence : la colonne idempotency_key UNIQUE sur transactions garantit que l'envoi multiple d'une meme requete (retry client) ne credite qu'une seule fois.")
+NB("Invariant verifie : a la fin de chaque operation, le service verifie SUM(transactions) == wallet.balance.")
 
-# ═══════════════════════════════════════════════════════════════
-#  ANNEXES
-# ═══════════════════════════════════════════════════════════════
-heading(doc, "Annexes", 1)
-heading(doc, "A. Liste Complete des Endpoints API", 2)
-add_table(doc,
-    ["Domaine", "Methodes", "Prefix"],
+H("9.2 Structure des Commissions", 2)
+P("Le modele de commission de Panda est configure dans la table platform_settings et est entierement administrable :")
+T(
+    ["Cle Setting", "Valeur par Defaut", "Description"],
     [
-        ["Authentification",    "register, login, logout, me, updateProfile, changePassword, forgot, reset, verifyPhone", "/api/auth/"],
-        ["2FA",                 "status, enable, confirm, disable, qrCode, recoveryCodes, regenerate",          "/api/two-factor/"],
-        ["KYC",                 "status, store, adminIndex, adminShow, approve, reject",                         "/api/verify-identity/"],
-        ["Offres",              "index, show, store, update, destroy, save, myJobs, categories",                 "/api/jobs/"],
-        ["Propositions",        "index, store, myProposals, accept, reject, withdraw",                           "/api/proposals/"],
-        ["Freelancer",          "index, show, updateProfile, onboarding, addSkills, portfolio, dashboard",       "/api/freelancer/"],
-        ["Contrats",            "index, myActive, myCompleted, myDisputed, show, complete, cancel, dispute, resolveDispute, archive, pdf", "/api/contracts/"],
-        ["Jalons",              "index, store, show, update, destroy, submit, approve, reject",                  "/api/milestones/"],
-        ["Temps",               "index, weekly, start, stop",                                                    "/api/contracts/{id}/time/"],
-        ["Extensions",          "index, store, respond",                                                         "/api/contract-extensions/"],
-        ["Fichiers Contrat",    "index, store, download, storeVersion, destroy",                                 "/api/contract-files/"],
-        ["Paiements",           "wallet, overview, deposit, fundEscrow, releaseMilestone, withdrawals, stripe", "/api/payments/"],
-        ["Facturation",         "current, checkout, swap, cancel, resume, portal, invoices, weekly",            "/api/billing/"],
-        ["Chat",                "conversations, start, messages, send, search, typing, read, delivered, edit, delete, react, attachment", "/api/chat/"],
-        ["IA",                  "generateProposal, matchFreelancers, chat, analyzeProfile, smartSearch",         "/api/ai/"],
-        ["Catalogue",           "index, show, store, update, destroy, save, orders, checkout, deliver, review", "/api/catalog/"],
-        ["Agences",             "index, show, store, update, destroy, members, invite, accept, decline, transfer", "/api/agencies/"],
-        ["Talents",             "savedFreelancers, talentLists, CRUD + members",                                 "/api/saved-freelancers/ + /talent-lists/"],
-        ["Fiscal",              "index, store, show, pdf, adminIndex, approve, reject",                          "/api/tax-documents/"],
-        ["Recherche",           "search, suggest",                                                               "/api/search/"],
-        ["Push",                "vapidKey, subscribe, unsubscribe",                                              "/api/push/"],
-        ["Avis",                "forFreelancer, store, destroy",                                                 "/api/reviews/"],
-        ["Admin",               "dashboard, users, ban, verify, analytics, finance, KYC, catalog",              "/api/admin/"],
+        ["fee.freelancer_pct",   "0.10 (10%)",    "Commission prelevee sur le paiement recu par le freelancer lors de la liberation d'un jalon"],
+        ["fee.client_pct",       "0.05 (5%)",     "Frais de service factures au client en plus du montant contractuel"],
+        ["fee.contract_init",    "$0.99",          "Frais d'initiation de contrat factures au client a la creation"],
+        ["fee.withdrawal_flat",  "$2.00",          "Frais fixes deduits de chaque demande de retrait"],
+        ["fee.deposit_pct",      "0.029 (2.9%)",  "Frais de traitement Stripe sur les depots par carte"],
+        ["fee.deposit_flat",     "$0.30",          "Frais fixes Stripe sur chaque depot"],
+        ["withdrawal.min",       "$20.00",         "Montant minimum pour une demande de retrait"],
     ],
-    [3.5, 7, 7]
+    [5, 3.5, 9]
 )
 
-heading(doc, "B. Structure des Dossiers", 2)
-code_block(doc, """backend-laravel/
-  app/
-    Http/Controllers/API/   # 30+ controllers organises par domaine
-    Models/                 # 40+ modeles Eloquent
-    Events/                 # 11 evenements WebSocket
-    Listeners/              # Handlers d'evenements
-    Http/Requests/          # Form Requests (validation)
-    Http/Middleware/        # admin, EnsurePlan, throttle
-  database/
-    migrations/             # 30+ fichiers de migration
-  routes/
-    api.php                 # 100+ endpoints REST
-    channels.php            # Canaux WebSocket
-  .github/workflows/        # CI/CD GitHub Actions
+H("9.3 Flux Complet de Paiement Escrow", 2)
+P("Illustration du flux de bout en bout pour un jalon de $300 :")
+CODE("""// Phase 1 : Depot client via Stripe Checkout
+StripeController::createDepositSession()
+  -> Stripe::checkout.session.create({amount: 30000, currency: 'usd'})
+  -> Redirect client vers checkout.stripe.com/...
+  -> Stripe webhook: checkout.session.completed
+  -> LedgerService::deposit(client, 300.00)
+     wallet.balance = 300.00 | Transaction(type:credit, amount:300, balance_after:300)
 
-frontend-react/
+// Phase 2 : Financement escrow par le client
+LedgerService::fundEscrow(client, contract, 300.00)
+  -> SELECT wallets WHERE user_id=client FOR UPDATE
+  -> wallet.balance = 0.00 | wallet.escrow_balance = 300.00
+  -> contract.escrow_amount = 300.00
+  -> Transaction(type:escrow, direction:out, amount:300, balance_after:0)
+
+// Phase 4 : Liberation par le client (apres approbation du jalon)
+LedgerService::releaseMilestone(client, milestone)
+  -> commission = 300 * 0.10 = 30.00 (fee.freelancer_pct)
+  -> net_freelancer = 300 - 30 = 270.00
+  -> wallet(client).escrow_balance = 0.00
+  -> wallet(freelancer).balance = 270.00
+  -> wallet(platform).balance += 30.00
+  -> Transaction(type:commission, amount:30, user:platform)
+  -> Transaction(type:credit,    amount:270, user:freelancer, balance_after:270)""")
+
+H("9.4 Stripe Connect et Retraits", 2)
+P("Les freelancers peuvent retirer leurs gains vers leur compte bancaire via Stripe Connect Express :")
+B("POST /payments/stripe/connect/onboard : cree une session Stripe Connect Express onboarding. L'URL est retournee pour redirection.")
+B("GET /payments/stripe/connect/status : verifie charges_enabled et payouts_enabled sur le compte Stripe Connect.")
+B("POST /payments/withdrawals : cree une demande de retrait (Withdrawal). Si withdrawal.requires_approval=1, soumis a l'admin. Sinon, declenche directement le transfert Stripe.")
+B("L'admin valide via POST /admin/finance/withdrawals/{id}/approve qui declenche un Stripe Transfer vers le compte Connect du freelancer.")
+
+H("9.5 Gestion des Webhooks Stripe", 2)
+P("Le StripeWebhookController (POST /payments/stripe/webhook) est le seul endpoint sans authentification Sanctum. Il utilise la verification de signature Stripe (HMAC-SHA256) pour garantir l'authenticite des evenements :")
+T(
+    ["Evenement Stripe", "Action dans Panda"],
+    [
+        ["checkout.session.completed", "LedgerService::deposit() — credite le wallet du client"],
+        ["account.updated",            "Met a jour stripe_connect_status de l'utilisateur freelancer"],
+        ["invoice.paid",               "Confirme le paiement d'un abonnement, active subscription"],
+        ["invoice.payment_failed",     "Marque subscription en statut past_due, notifie l'utilisateur"],
+        ["customer.subscription.deleted", "Desactive l'abonnement (ends_at = now())"],
+    ],
+    [6, 11.5]
+)
+P("Chaque evenement Stripe est stocke dans stripe_webhook_events avec stripe_event_id UNIQUE — garantissant l'idempotence meme si Stripe livre le meme evenement plusieurs fois (retry policy Stripe).")
+
+H("9.6 Abonnements et Plans", 2)
+P("Panda propose un systeme d'abonnement pour des plans premium (plus de connects, mise en avant dans la recherche, acces au catalogue IA complet) :")
+B("GET /api/plans : catalogue public des plans (retourne des fixtures ou des produits Stripe en live).")
+B("POST /api/billing/checkout : cree une session Stripe Checkout pour souscrire a un plan.")
+B("POST /api/billing/swap : change de plan (upgrade immediatement, downgrade en fin de periode).")
+B("GET /api/billing/portal : URL du portail Stripe pour gerer la carte, les factures, l'annulation.")
+B("Middleware EnsurePlan : bloque l'acces a certains endpoints si l'utilisateur n'a pas le plan requis.")
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 10 — MESSAGERIE TEMPS REEL
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 10 — Messagerie Temps Reel (Laravel Reverb + Socket.IO)", 1)
+
+H("10.1 Architecture WebSocket", 2)
+P("La messagerie temps reel de Panda repose sur Laravel Reverb 1.10, le serveur WebSocket officiel de Laravel introduit en 2024. Reverb implemente le protocole Pusher Channels, permettant d'utiliser les librairies Laravel Echo et Pusher-JS cote client.")
+P("Architecture de la connexion :")
+NB("Backend : Laravel diffuse des evenements via Event::dispatch() sur des canaux prives (PrivateChannel).")
+NB("Reverb : recoit l'evenement, verifie l'autorisation du canal (via routes/channels.php + Sanctum), puis diffu aux clients abonnes.")
+NB("Frontend : laravel-echo 2.3.4 + pusher-js 8.5.0 + socket.io-client 4.8.3 s'abonnent aux canaux prives.")
+
+H("10.2 Catalogue Complet des Evenements WebSocket", 2)
+T(
+    ["Evenement", "Canal", "Payload Diffuse", "Declencheur"],
+    [
+        ["message.sent",           "conversation.{id}",   "id, sender_id, body, type, attachments, created_at", "POST /chat/.../send"],
+        ["message.edited",         "conversation.{id}",   "id, body, edited_at",                                "PUT /chat/messages/{id}"],
+        ["message.deleted",        "conversation.{id}",   "id, deleted_at",                                     "DELETE /chat/messages/{id}"],
+        ["message.read",           "conversation.{id}",   "reader_id, conversation_id, read_at",                "POST /chat/.../read"],
+        ["message.delivered",      "conversation.{id}",   "message_id, delivered_at",                           "POST /chat/messages/{id}/delivered"],
+        ["message.reaction_toggled","conversation.{id}",  "message_id, emoji, user_id, action (add/remove)",    "POST /chat/messages/{id}/reactions"],
+        ["user.typing",            "conversation.{id}",   "user_id, name, is_typing (bool)",                    "POST /chat/.../typing"],
+        ["conversation.updated",   "conversation.{id}",   "last_message, unread_count, updated_at",             "Tout changement meta-conversation"],
+        ["notification.created",   "user.{id}",           "id, type, data JSON, created_at",                    "NotificationService::send()"],
+        ["weekly_invoice.generated","user.{id}",          "invoice_id, week_start, total",                      "HourlyGenerateInvoicesCommand"],
+        ["weekly_invoice.paid",    "user.{id}",           "invoice_id, paid_at",                                "Payment confirmation"],
+    ],
+    [4, 3.5, 5.5, 5.5]
+)
+
+H("10.3 Securite des Canaux WebSocket", 2)
+P("Tous les canaux utilises sont des PrivateChannel — jamais des canaux publics. L'autorisation est verifiee dans routes/channels.php :")
+CODE("""// routes/channels.php
+Broadcast::channel('conversation.{id}', function (User $user, int $id) {
+    // Seuls les participants de la conversation peuvent s'abonner
+    return $user->conversations()->where('id', $id)->exists();
+});
+
+Broadcast::channel('user.{id}', function (User $user, int $id) {
+    // Un utilisateur ne peut s'abonner qu'a son propre canal
+    return (int) $user->id === $id;
+});""")
+P("Avant de s'abonner, le client frontend envoie une requete POST /broadcasting/auth avec son Bearer token Sanctum. Reverb verifie l'autorisation et retourne un token de souscription signe.")
+
+H("10.4 Payload Optimise des Evenements", 2)
+P("Les payloads des evenements sont volontairement minimalistes (exemple: MessageSent) :")
+CODE("""// Events/MessageSent.php — broadcastWith()
+public function broadcastWith(): array {
+    // Payload slim — jamais le modele Eloquent complet
+    // Cela evite de leaker des champs sensibles et de casser
+    // les clients Echo si le schema change.
+    return [
+        'id'              => $m->id,
+        'conversation_id' => $m->conversation_id,
+        'sender_id'       => $m->sender_id,
+        'body'            => $m->body,
+        'type'            => $m->type,
+        'is_read'         => (bool) $m->is_read,
+        'created_at'      => optional($m->created_at)->toIso8601String(),
+    ];
+}""")
+
+H("10.5 Notifications Push Web (VAPID)", 2)
+P("En complement des notifications temps reel in-app, Panda implemente les Web Push Notifications via le standard VAPID (Voluntary Application Server Identification) :")
+B("sw.js (Service Worker) : enregistre cote navigateur, ecoute les evenements push et les affiche meme quand l'onglet est ferme.")
+B("POST /api/push/subscribe : enregistre l'endpoint push du navigateur (endpoint, public_key, auth_token) dans push_subscriptions.")
+B("GET /api/push/vapid-public-key : retourne la cle VAPID publique pour la souscription navigateur.")
+B("browserNotify.js : utilise l'API Notification du navigateur avec icone et son (sound.js) pour les notifications foreground.")
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 11 — INTELLIGENCE ARTIFICIELLE
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 11 — Intelligence Artificielle Locale (Ollama / Mistral 7B)", 1)
+
+H("11.1 Choix de l'IA Locale", 2)
+P("Contrairement aux SaaS d'IA (OpenAI GPT-4, Anthropic Claude) qui necessitent l'envoi des donnees utilisateurs vers des serveurs externes et engendrent des couts variables, Panda integre Ollama avec le modele Mistral 7B en local. Ce choix offre : confidentialite totale des donnees utilisateurs, couts d'infrastructure previsibles, disponibilite hors internet et possibilite de personalisation du modele.")
+P("Ollama expose une API REST compatible (POST /api/generate) que le AIController interroge via le client HTTP Laravel (Http::timeout(30)->post()).")
+
+H("11.2 Les 5 Fonctionnalites IA", 2)
+T(
+    ["Endpoint", "Fonctionnalite", "Entrees", "Prompt Envoye a Ollama"],
+    [
+        ["POST /ai/generate-proposal",  "Generation de proposition",    "job_id, freelancer_summary optionnel", "Construit a partir du profil freelancer + details offre (titre, description, budget, type). Demande 200-400 mots, professionnel, convaincant."],
+        ["POST /ai/match-freelancers",  "Matching de freelancers",      "job_id",                               "N'appelle pas Ollama — utilise un scoring algorithmique : intersection competences requises / freelancer competences, retourne top 10 avec match_score %."],
+        ["POST /ai/analyze-profile",    "Analyse de profil",            "Profil utilisateur actuel",            "Demande JSON structure avec : score (0-100), strengths (array), weaknesses (array), suggestions (array d'actions concretes)."],
+        ["POST /ai/chat",               "Chat assistant IA",            "message (max 2000 chars)",             "System prompt PANDA AI assistant. Repond sur la marketplace, les propositions, l'optimisation de profil, la recherche de talents."],
+        ["POST /ai/smart-search",       "Recherche intelligente",       "query (string libre)",                 "Convertit une requete langage naturel en parametres structures JSON : keywords, skills, budget_range, experience_level, job_type."],
+    ],
+    [4.5, 3.5, 4, 5.5]
+)
+
+H("11.3 Gestion de la Disponibilite et Fallback", 2)
+P("Le AIController implemente un mecanisme de fallback robuste en cas d'indisponibilite d'Ollama (service arrete, timeout, erreur reseau) :")
+CODE("""// AIController.php — callAI() avec fallback
+private function callAI(string $prompt, string $system = ''): string
+{
+    try {
+        $response = Http::timeout(30)->post("{$this->ollamaUrl}/api/generate", [
+            'model'  => $this->defaultModel, // 'mistral'
+            'prompt' => ($system ? "System: $system\n\n" : '') . "User: $prompt",
+            'stream' => false,
+        ]);
+        if ($response->successful()) {
+            return $response->json('response',
+                'AI service temporarily unavailable. Please try again.');
+        }
+    } catch (\Exception $e) {
+        // Silently fallback — ne pas exposer les details de l'erreur interne
+    }
+    return $this->getFallbackResponse($prompt);
+}""")
+
+H("11.4 Traçabilite et Audit des Appels IA", 2)
+P("Chaque appel IA (hors matching algorithmique) est logue dans ai_histories avec :")
+B("user_id : identificant de l'utilisateur demandeur.")
+B("type : enum (proposal / chat / analyze / smart_search).")
+B("input : JSON des parametres d'entree (job_id, message, etc.).")
+B("output : JSON de la reponse generee.")
+B("model : modele utilise ('mistral').")
+B("tokens_used : estimation (len(reponse) / 4) — permet un audit de consommation.")
+P("Le rate limiting (20 req/min via throttle:20,1) protege contre les abus et les couts excessifs.")
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 12 — AGENCES, TALENTS, FISCAL
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 12 — Agences, Gestion des Talents et Centre Fiscal", 1)
+
+H("12.1 Systeme d'Agences", 2)
+P("Panda permet a des groupes de freelancers de se regrouper sous une agence avec une marque commune, une page publique et une gestion des membres par roles. Ce systeme repond a la demande croissante d'equipes freelance collaboratives.")
+T(
+    ["Fonctionnalite", "Endpoint", "Details"],
+    [
+        ["Creation",              "POST /agencies",                           "Le createur devient owner. Stocke : name, slug, description, logo, website."],
+        ["Invitation",            "POST /agencies/{id}/invitations",          "Envoie email avec token unique (agency_invitations.token VARCHAR UNIQUE). Expire apres 7 jours."],
+        ["Acceptation",           "POST /agencies/invitations/{token}/accept","Verifie token, cree agency_members(role=member), supprime l'invitation."],
+        ["Refus",                 "POST /agencies/invitations/{token}/decline","Supprime l'invitation sans rejoindre l'agence."],
+        ["Gestion membres",       "GET /agencies/{id}/members",               "Liste avec roles. DELETE /agencies/{id}/members/{uid} pour retirer un membre."],
+        ["Transfert propriete",   "POST /agencies/{id}/transfer-ownership",   "Change owner_id. Nouveau proprietaire devient owner, ancien devient admin."],
+        ["Repertoire public",     "GET /agencies, GET /agencies/{id}",        "Endpoints publics — acces sans authentification."],
+    ],
+    [3.5, 5.5, 8.5]
+)
+
+H("12.2 Gestion des Talents (Clients)", 2)
+P("Les clients disposent de deux outils complementaires pour organiser leur vivier de freelancers :")
+B("Saved Freelancers : signet rapide (un clic) via POST /saved-freelancers. Accessible via GET /saved-freelancers avec verif d'existence via GET /saved-freelancers/check/{freelancer_id}.")
+B("Talent Lists : listes nommees et curees (ex: 'Designers UI React', 'Developpeurs API Senior'). CRUD complet + ajout/retrait de membres individuels.")
+
+H("12.3 Centre Fiscal International", 2)
+P("Le TaxCenter permet aux utilisateurs de gerer leurs obligations fiscales selon leur juridiction :")
+T(
+    ["Type", "Usage", "Champs du Formulaire"],
+    [
+        ["W-9",     "Travailleurs independants residant aux USA",              "Nom legal, TIN (SSN/EIN), adresse, certification"],
+        ["W-8BEN",  "Etrangers percevant des revenus de source americaine",   "Pays de residence, numero d'identification fiscal etranger"],
+        ["VAT",     "Entreprises europeennes soumises a la TVA",              "Numero de TVA intracommunautaire, pays, montant"],
+    ],
+    [2.5, 5.5, 9.5]
+)
+P("Les documents soumis peuvent etre exportes en PDF via GET /tax-documents/{id}/pdf. L'admin valide ou rejette via POST /admin/tax-documents/{id}/approve|reject avec motif.")
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 13 — ADMINISTRATION ET FINANCE ADMIN
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 13 — Administration, Finance Admin et Audit", 1)
+
+H("13.1 Double Protection de l'Espace Admin", 2)
+P("L'espace admin est protege par deux couches independantes de securite pour garantir la defense en profondeur :")
+NB("Middleware 'admin' : verifie role === 'admin' sur le User authentifie avant chaque requete. Retourne HTTP 403 si la condition n'est pas satisfaite.")
+NB("Verification dans le controller : chaque methode admin verifie independamment le role. Un contournement du middleware n'est donc pas suffisant.")
+
+H("13.2 Dashboard Administrateur", 2)
+B("Statistiques globales : nombre total d'utilisateurs (par role), offres actives, contrats en cours, GMV (Gross Merchandise Value) du mois, commissions perçues.")
+B("Gestion des utilisateurs : liste paginee, filtres par role/statut, actions ban (is_active=false) et verify (is_verified=true) avec audit log.")
+B("Analytics avancees : croissance des inscriptions, volume de transactions, taux de completion des contrats.")
+
+H("13.3 Finance Admin", 2)
+T(
+    ["Endpoint Admin Finance", "Methode", "Action"],
+    [
+        ["/admin/finance/dashboard",                  "GET",  "Vue d'ensemble : balance plateforme, commissions jour/mois/total, retraits en attente"],
+        ["/admin/finance/withdrawals",                "GET",  "File des demandes de retrait (status=pending) avec details : user, montant, methode, date"],
+        ["/admin/finance/withdrawals/{id}/approve",   "POST", "Approuve retrait -> LedgerService -> Stripe Transfer -> status=approved, audit log"],
+        ["/admin/finance/withdrawals/{id}/reject",    "POST", "Rejette avec motif -> rembourse escrow_balance -> notifie freelancer -> audit log"],
+        ["/admin/finance/settings",                   "GET",  "Lecture de tous les platform_settings (cles de commission, limites)"],
+        ["/admin/finance/settings",                   "PUT",  "Mise a jour d'un ou plusieurs platform_settings (ex: modifier fee.freelancer_pct)"],
+    ],
+    [6, 1.5, 10]
+)
+
+H("13.4 AuditLogService et Conformite", 2)
+P("Le AuditLogService est injecte dans tous les controllers qui effectuent des operations sensibles. Chaque entree dans audit_logs contient :")
+CODE("""// AuditLogService::log() — signature
+public function log(string $action, int $userId, mixed $context = null): void
+{
+    AuditLog::create([
+        'user_id'    => $userId,
+        'action'     => $action,      // ex: 'user.2fa.enable_requested', 'kyc.approved'
+        'metadata'   => json_encode($context),  // objet ou array contextuel
+        'ip_address' => request()->ip(),
+        'user_agent' => request()->userAgent(),
+    ]);
+}""")
+P("Actions auditees : connexion/deconnexion, activation 2FA, soumission KYC, approbation/rejet KYC, approbation/rejet retrait, modification des parametres plateforme, ban/unban utilisateur.")
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 14 — FRONTEND REACT 19
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 14 — Frontend React 19 — Architecture et Composants", 1)
+
+H("14.1 Structure du Projet Frontend", 2)
+CODE("""frontend-react/
   src/
-    pages/                  # 50+ pages organisees par domaine
-    components/             # 80+ composants reutilisables
-    store/                  # Zustand stores (auth, chat, theme)
-    api/                    # Axios client + index.js (toutes les fonctions API)
-    lib/                    # echo.js, browserNotify.js, sound.js, webPush.js
-    utils/                  # Utilitaires (footerLinks, etc.)
-  Dockerfile                # Build Nginx production
-  nginx.conf                # Configuration Nginx SPA
-  public/sw.js              # Service Worker Push Notifications""")
+    pages/          # 50+ pages organisees par domaine fonctionnel
+      Auth/         # Login, Register, Onboarding, ForgotPassword, ResetPassword, GoogleCallback
+      Dashboard/    # FreelancerDashboard, ClientDashboard
+      Admin/        # AdminDashboard, AdminFinance
+      Jobs/         # JobsMarketplace, JobDetail, PostJob, CategoryJobs, MyJobs, MyProposals
+      Freelancer/   # FreelancerProfile, FreelancerSettings, FreelancerMarketplace
+      Contracts/    # ContractsList, ContractDetails
+      Milestones/   # MilestoneDetails
+      Chat/         # Messages (temps reel)
+      Payments/     # Payments, Withdraw, PaymentSuccess, PaymentCancel, StripeConnectReturn
+      Billing/      # Billing (abonnements et factures)
+      Settings/     # TwoFactorSettings, IdentityVerification, TaxCenter
+      Talent/       # SavedFreelancers, TalentLists, TalentListDetails
+      Search/        # Search, GlobalSearch
+      Agencies/     # Agencies
+      AI/           # AIAssistant
+      Reports/      # Reports
+      Landing/      # Landing (globe 3D, Three.js)
+      Pricing/      # Pricing
+      Resources/    # Blog, HowItWorks, Reviews, Updates, SuccessStories, Research
+      GetOutcomes/  # GetOutcomes, BuildWebsite, ScalePaidAds, HandleSupport
+      FindTalent/   # FindTalent
+    components/     # 80+ composants reutilisables
+      layout/       # AppLayout, AuthLayout, GlobalNavbar, Sidebar
+      contracts/    # ActivityTab, AnalyticsTab, ChatTab, ContractActions, DisputeModal, ExtensionsTab, FilesTab, MilestonesTab, RatingModal, TimeTrackingTab, ContractTimeline, ContractStatusBadge
+      milestones/   # CreateMilestoneModal, MilestoneCard, MilestoneList, MilestoneStatusBadge, MilestoneTimeline, RejectWorkModal, SubmitWorkModal
+      ui/           # NavSearch, ... composants generiques
+    store/          # Zustand stores
+      authStore.js  # token, user, fetchMe(), login(), logout()
+      chatStore.js  # conversations, messages, unread counts
+      themeStore.js # theme (dark/light), applyTheme()
+    api/
+      axios.js      # Instance Axios avec interceptor Bearer token auto
+      index.js      # 200+ fonctions API (une par endpoint)
+    lib/
+      echo.js       # Configuration Laravel Echo + Reverb
+      browserNotify.js # API Notification navigateur + son
+      sound.js      # Sons de notification (new message, etc.)
+      webPush.js    # Service Worker VAPID registration
+    utils/
+      footerLinks.js # Liens de navigation footer""")
 
-# Sauvegarde
-out = r"C:\Users\Pro\Desktop\PFE O1\documentation\FreeNest_Rapport_de_Stage.docx"
+H("14.2 Gestion d'Etat avec Zustand", 2)
+P("Zustand 5.0 est utilise pour l'etat global de l'application avec trois stores independants :")
+T(
+    ["Store", "Etat Gere", "Actions Principales"],
+    [
+        ["authStore",  "token (Bearer), user (profil complet), isLoading",   "fetchMe() au demarrage si token present, login(token), logout() (efface localStorage)"],
+        ["chatStore",  "conversations [], messages {}, unreadCount",          "Mises a jour temps reel via Echo events (message.sent, message.read, etc.)"],
+        ["themeStore", "theme ('dark'|'light'), systemPreference",            "applyTheme() applique les CSS variables sur :root — TailwindCSS les lit"],
+    ],
+    [3, 5.5, 9]
+)
+
+H("14.3 Routing et Protection des Routes", 2)
+P("React Router DOM 7.15.1 gere le routing SPA avec trois types de routes :")
+B("Routes publiques : accessible sans authentification (/, /jobs, /freelancers, /pricing, etc.).")
+B("GuestRoute : redirige vers /dashboard si token present (evite les boucles de connexion).")
+B("ProtectedRoute(roles) : verifie token + role autorise — redirige vers /login si absent, /dashboard si mauvais role.")
+P("Toutes les pages sont lazy-loaded (import() dynamique) avec Suspense et un PageLoader personnalise, garantissant que le bundle initial est minimal.")
+
+H("14.4 Configuration Laravel Echo pour Reverb", 2)
+CODE("""// src/lib/echo.js — Configuration Echo + Reverb
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+window.Pusher = Pusher;
+
+const echo = new Echo({
+    broadcaster: 'reverb',       // protocole Pusher/Reverb
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    wsHost: import.meta.env.VITE_REVERB_HOST,
+    wsPort: import.meta.env.VITE_REVERB_PORT,
+    wssPort: import.meta.env.VITE_REVERB_PORT,
+    forceTLS: false,
+    enabledTransports: ['ws', 'wss'],
+    authEndpoint: '/broadcasting/auth',
+    auth: {
+        headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+    },
+});
+
+// Usage dans un composant React :
+// echo.private(`conversation.${convId}`)
+//     .listen('.message.sent', (data) => { updateMessages(data); });""")
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 15 — DEPLOIEMENT DOCKER ET CI/CD
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 15 — Deploiement Docker et Pipelines CI/CD", 1)
+
+H("15.1 Containerisation Docker", 2)
+P("L'ensemble de l'application Panda est containerisee avec Docker, garantissant la reproductibilite des environnements et l'absence de dependances systeme non declarees. Le docker-compose.yml orchestre 6 services :")
+T(
+    ["Service Docker", "Image / Dockerfile", "Ports", "Role"],
+    [
+        ["backend",   "Dockerfile multi-stage (PHP 8.2-FPM + Nginx)", "8000",  "API Laravel 12, queues, scheduler"],
+        ["frontend",  "Dockerfile Nginx (Vite build statique)",       "5173",  "SPA React 19 — nginx.conf SPA"],
+        ["mysql",     "mysql:8.0",                                    "3306",  "Base de donnees principale"],
+        ["redis",     "redis:7-alpine",                               "6379",  "Cache sessions, queues Laravel, rate limiting"],
+        ["reverb",    "Via backend (php artisan reverb:start)",       "8080",  "Serveur WebSocket Laravel Reverb"],
+        ["ollama",    "ollama/ollama",                                "11434", "LLM local Mistral 7B"],
+    ],
+    [3, 5.5, 2, 7]
+)
+
+H("15.2 Configuration Nginx Production", 2)
+P("Le nginx.conf du frontend est optimise pour une SPA React avec Service Worker :")
+CODE("""# nginx.conf — Points cles
+server {
+    listen 80;
+    root /usr/share/nginx/html;
+
+    # Compression Gzip des assets
+    gzip on;
+    gzip_types text/plain application/javascript text/css application/json;
+
+    # Cache long terme pour assets hashe (Vite les hashe automatiquement)
+    location ~* \.(js|css|woff2|png|jpg|svg)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # index.html jamais cache (reference les assets hashe)
+    location = /index.html {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+    }
+
+    # Service Worker doit etre servi sans cache
+    location = /sw.js {
+        add_header Cache-Control "no-cache";
+    }
+
+    # SPA routing — toutes les routes -> index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}""")
+
+H("15.3 Pipelines CI/CD GitHub Actions", 2)
+P("Deux workflows YAML automatisent le cycle de livraison :")
+
+P("backend.yml — declenche sur push/PR vers main :")
+NB("Checkout du code (actions/checkout@v4)")
+NB("Setup PHP 8.2 avec extensions requises (pdo_mysql, redis, gd)")
+NB("Installation des dependances (composer install --no-dev --optimize-autoloader)")
+NB("PHP CS Fixer : verification de conformite PSR-12")
+NB("PHPStan : analyse statique niveau 6 (detection d'erreurs de types)")
+NB("Tests PHPUnit : php artisan test --coverage (tests unitaires et integration)")
+NB("Build image Docker et push vers le registry")
+
+P("frontend.yml — declenche sur push/PR vers main :")
+NB("Checkout du code")
+NB("Setup Node.js 20 LTS")
+NB("Installation des dependances (npm ci)")
+NB("ESLint : lint du code JavaScript/JSX")
+NB("Vite build : npm run build — echec si erreur TS/JSX")
+NB("Vitest : tests unitaires des composants React")
+NOTE("Un echec a n'importe quelle etape des deux pipelines bloque automatiquement le merge de la Pull Request.")
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 16 — TESTS ET QUALITE
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 16 — Tests, Qualite et Securite", 1)
+
+H("16.1 Tests Backend (PHPUnit)", 2)
+B("Tests unitaires des services : LedgerService (scenarios deposit, fundEscrow, releaseMilestone, cas erreur insolvabilite), TotpService (generation/verification codes TOTP).")
+B("Tests d'integration des endpoints : HTTP tests Laravel — simulation requetes authentifiees et non-authentifiees.")
+B("Test Stripe Webhook : verification que les requetes sans signature HMAC valide retournent HTTP 400.")
+B("Test machine d'etat contrat : verification que les transitions invalides retournent HTTP 422.")
+
+H("16.2 Tests Frontend (Vitest)", 2)
+B("Tests composants : React Testing Library — rendu, interactions utilisateur (clic, saisie).")
+B("Tests stores Zustand : authStore login/logout, etat initial.")
+B("Tests fonctions API : mock Axios, verification des parametres envoyes.")
+
+H("16.3 Outils de Qualite du Code", 2)
+T(
+    ["Outil", "Cible", "Configuration", "Objectif"],
+    [
+        ["PHP CS Fixer",  "Backend PHP",    "PSR-12 strict",           "Formatage uniforme, style coherent"],
+        ["PHPStan",       "Backend PHP",    "Niveau 6 (sur 9)",        "Detection types manquants, nulls non geres"],
+        ["Laravel Pint",  "Backend PHP",    "Preset Laravel",          "Auto-formatage integre Laravel"],
+        ["ESLint 10",     "Frontend React", "Plugin react-hooks, react-refresh", "Regles hooks, imports"],
+        ["Prettier",      "Frontend",       "Via eslint-plugin",       "Formatage automatique coherent"],
+        ["Vite TypeScript","Frontend",      "@types/react 19.2.14",   "Type checking JSX/TSX"],
+    ],
+    [3, 3, 5, 7]
+)
+
+H("16.4 Vulnerabilites OWASP Couvertes", 2)
+T(
+    ["Vulnerabilite OWASP", "Mesure de Protection Implementee"],
+    [
+        ["A01 Broken Access Control",      "ContractPolicy, middleware admin, canTransitionTo(), PrivateChannel authorization"],
+        ["A02 Cryptographic Failures",     "bcrypt mots de passe, AES-256 secrets 2FA, HTTPS obligatoire, HMAC webhooks"],
+        ["A03 Injection",                  "Eloquent ORM (requetes preparees), FormRequests Laravel (validation stricte)"],
+        ["A05 Security Misconfiguration",  "is_platform user non-logable, role hors fillable, .env hors vcs"],
+        ["A07 Auth Failures",              "Throttle login, 2FA TOTP, tokens Sanctum, expiration sessions"],
+        ["A08 Data Integrity Failures",    "Idempotency keys, transactions ACID, HMAC Stripe, balance_after audit"],
+        ["A09 Logging Failures",           "AuditLogService sur toutes les actions sensibles, logs Laravel structurers"],
+    ],
+    [5.5, 12]
+)
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  CHAPITRE 17 — BILAN ET PERSPECTIVES
+# ════════════════════════════════════════════════════════════════════════════
+H("Chapitre 17 — Bilan, Difficultes et Perspectives", 1)
+
+H("17.1 Bilan Quantitatif du Projet", 2)
+T(
+    ["Metrique", "Valeur", "Commentaire"],
+    [
+        ["Tables MySQL",              "35+",       "Schema complet, normalise 3NF, FK constraints"],
+        ["Migrations Laravel",        "30+",       "Historique complet du schema, rollback possible"],
+        ["Endpoints REST API",        "100+",      "Documentes, valides, throttled"],
+        ["Controllers",               "21 modules","Organises par domaine, thin controllers"],
+        ["Services metier",           "9",         "LedgerService, TotpService, AuditLogService..."],
+        ["Modeles Eloquent",          "40+",       "Relations, casts, scopes, soft deletes"],
+        ["Evenements WebSocket",      "11",        "PrivateChannel, broadcastWith() slim"],
+        ["Pages React",               "50+",       "Lazy-loaded, protected routes, role-based"],
+        ["Composants React",          "80+",       "Reutilisables, organises par domaine"],
+        ["Fonctionnalites IA",        "5",         "Ollama/Mistral 7B, fallback, rate limit"],
+        ["Services Docker",           "6+",        "Backend, Frontend, MySQL, Redis, Reverb, Ollama"],
+        ["Pipelines CI/CD",           "2",         "backend.yml + frontend.yml GitHub Actions"],
+        ["Lignes de code (total)",    "~25 000+",  "Backend PHP + Frontend JSX + migrations + configs"],
+        ["Packages backend (prod)",   "8",         "Laravel, Sanctum, Socialite, Stripe, Reverb..."],
+        ["Packages frontend (prod)",  "14",        "React, Vite, Zustand, Framer Motion, Echo..."],
+    ],
+    [5, 2.5, 10]
+)
+
+H("17.2 Difficultes Rencontrees et Solutions", 2)
+T(
+    ["Difficulte", "Impact", "Solution Implementee"],
+    [
+        ["Race conditions sur les paiements escrow", "Critique",  "SELECT ... FOR UPDATE sur le wallet + DB::transaction() dans LedgerService. Les tests de charge confirment l'absence de doublon."],
+        ["Idempotence des webhooks Stripe",           "Critique",  "Colonne stripe_event_id UNIQUE dans stripe_webhook_events. Tout webhook deja traite est ignore silencieusement."],
+        ["Securite 2FA : secrets au repos",           "Elevee",   "Crypt::encryptString() (AES-256-CBC, cle app.key). Les secrets ne sont jamais stockes en clair."],
+        ["Autorisation canaux WebSocket",             "Elevee",   "routes/channels.php + PrivateChannel — verification membership conversation avant souscription."],
+        ["FULLTEXT search performances",              "Moyenne",  "Index FULLTEXT MySQL via migration 2026_06_08_000003. Requetes MATCH ... AGAINST avec operateurs booleens."],
+        ["Transactions atomiques multi-etapes",       "Elevee",   "Toutes les acceptations de propositions (6 operations) dans une seule DB::transaction() avec COMMIT/ROLLBACK automatique."],
+        ["Fichiers KYC sensibles",                    "Critique",  "Storage::disk('local') (non-public), acces via route signee avec verification existence avant servir."],
+    ],
+    [5, 2, 10.5]
+)
+
+H("17.3 Competences Acquises", 2)
+B("Architecture logicielle : separation des responsabilites, services, repositories, machines d'etat.")
+B("API REST production : validation, autorisation par policy, pagination, rate limiting, versionning.")
+B("Comptabilite numerique : systeme double-entree, invariants financiers, idempotence, ACID.")
+B("Securite applicative : OWASP Top 10, 2FA TOTP, KYC, audit trail, chiffrement au repos.")
+B("Temps reel : WebSockets (Reverb), canaux prives, optimisation des payloads evenements.")
+B("Infrastructure : Docker multi-service, Nginx SPA, GitHub Actions CI/CD complet.")
+B("IA appliquee : integration LLM local (Ollama), prompt engineering, gestion de disponibilite.")
+B("Paiements en ligne : Stripe Checkout, Connect, Webhooks, idempotence, commission splitting.")
+
+H("17.4 Perspectives d'Evolution", 2)
+B("Application mobile React Native : acces iOS/Android a toutes les fonctionnalites Panda.")
+B("Architecture microservices : separation Auth Service, Payment Service, AI Service, Notification Service.")
+B("IA multimodale : analyse des images de portfolio, reconnaissance de competences depuis un CV PDF.")
+B("Video consultations integrees : entretiens client-freelancer en visio depuis la plateforme.")
+B("Expansion internationale : multi-devises (EUR, MAD, GBP), traduction i18n, portails regionaux.")
+B("Kubernetes : orchestration des containers en production haute disponibilite avec auto-scaling.")
+B("Certifications freelancers : examen en ligne, badge verifie visible sur le profil.")
+B("Blockchain : contrats intelligents pour les paiements escrow ultra-transparents (exploration).")
+
+H("17.5 Conclusion", 2)
+P("Panda represente une realisation technique complete et ambitieuse, allant bien au-dela des standards d'un projet de fin d'etudes academique. C'est une application de marketplace full-stack de niveau production, integrant des technologies de pointe dans chaque couche : API REST robuste avec 100+ endpoints valides et securises, paiements en escrow avec comptabilite double-entree et garanties ACID, messagerie temps reel avec 11 evenements WebSocket sur canaux prives Reverb, intelligence artificielle locale (Ollama/Mistral 7B) sans exposition de donnees, infrastructure containerisee Docker et pipelines CI/CD GitHub Actions.")
+P("Ce projet demontre la capacite a concevoir, architechter et implementer un systeme logiciel complexe, multi-dimensionnel, en appliquant les meilleures pratiques de l'industrie 2026 : SOLID, securite defense-en-profondeur, tests automatises, deploiement reproductible. Il constitue une base solide pour une eventuelle mise en production et une alternative credible aux plateformes freelance etablies.")
+PB()
+
+# ════════════════════════════════════════════════════════════════════════════
+#  ANNEXES
+# ════════════════════════════════════════════════════════════════════════════
+H("Annexes", 1)
+
+H("A. Inventaire Complet des Endpoints API", 2)
+T(
+    ["Module", "Endpoint (Methode + URI)", "Acces"],
+    [
+        ["Auth",     "POST /auth/register | POST /auth/login | POST /auth/logout | GET /auth/me | PUT /auth/profile | PUT /auth/change-password | POST /auth/forgot-password | POST /auth/reset-password | POST /auth/verify-phone", "Public/Auth"],
+        ["2FA",      "GET /two-factor/status | POST /enable | POST /confirm | POST /disable | GET /qr-code | GET /recovery-codes | POST /recovery-codes/regenerate", "Auth"],
+        ["KYC",      "GET /verify-identity/status | POST /verify-identity | GET /admin/kyc | GET /admin/kyc/{id} | POST approve | POST reject", "Auth/Admin"],
+        ["Jobs",     "GET /jobs | GET /jobs/{id} | POST /jobs | PUT /jobs/{id} | DELETE /jobs/{id} | POST /jobs/{id}/save | GET /my/postings | GET /categories", "Public/Auth"],
+        ["Proposals","GET /jobs/{id}/proposals | POST | GET /my | POST accept | POST reject | POST withdraw", "Auth"],
+        ["Freelancer","GET /freelancers | GET /freelancers/{username} | PUT /freelancer/profile | POST /onboarding | POST /skills | POST /portfolio | DELETE /portfolio/{id} | GET /dashboard", "Public/Auth"],
+        ["Contracts","GET /contracts (filtres) | GET /{id} | GET /my/active|completed|disputed | POST complete|cancel|dispute|resolve-dispute|archive|unarchive", "Auth"],
+        ["Milestones","GET /contracts/{id}/milestones | POST | GET /milestones/{id} | PUT | DELETE | POST submit|approve|reject", "Auth"],
+        ["Files",    "GET|POST /contracts/{id}/files | GET /contract-files/{id}/download | POST version | DELETE", "Auth"],
+        ["Time",     "GET|POST start|stop /contracts/{id}/time | GET /time/weekly", "Auth"],
+        ["Extensions","GET|POST /contracts/{id}/extensions | POST /contract-extensions/{id}/respond", "Auth"],
+        ["Analytics","GET /contracts/{id}/analytics | GET /contracts/{id}/activity", "Auth"],
+        ["PDF",      "GET /contracts/{id}/pdf | /dispute-pdf", "Auth"],
+        ["Payments", "GET /wallet | GET /overview | POST /deposit | POST /contracts/{id}/fund-escrow | POST /milestones/{id}/release | GET|POST /withdrawals | POST /stripe/deposit-session | POST|GET /stripe/connect/onboard|status | POST /stripe/webhook (public HMAC)", "Auth/Public"],
+        ["Billing",  "GET /billing/subscription | POST checkout|swap|cancel|resume | GET portal|invoices | GET|GET /billing/invoices/weekly", "Auth"],
+        ["Chat",     "GET /conversations | POST /start | GET /{id}/messages | POST /{id}/send | GET /search | POST /{id}/typing|read | POST /messages/{id}/delivered|edit|delete|reactions | POST /{id}/attachment", "Auth"],
+        ["AI",       "POST /ai/generate-proposal | match-freelancers | chat | analyze-profile | smart-search (throttle 20/min)", "Auth"],
+        ["Catalog",  "GET /catalog | GET /{slug} | POST|PUT|DELETE | POST save|unsave | GET /me/saved | POST /orders/checkout | GET orders/mine | GET|POST deliver|complete|review", "Public/Auth"],
+        ["Agencies", "GET /agencies | GET /{id} | POST | PUT|DELETE | GET members | POST invitations | POST invitations/{token}/accept|decline | DELETE members/{uid} | POST transfer-ownership", "Public/Auth"],
+        ["Talent",   "GET|POST|DELETE /saved-freelancers | GET check/{id} | GET|POST|PUT|DELETE /talent-lists | POST|DELETE /{id}/members", "Auth"],
+        ["Tax",      "GET|POST /tax-documents | GET|PDF /{id} | GET|POST approve|reject /admin/tax-documents", "Auth/Admin"],
+        ["Search",   "GET /search (throttle 60/min) | GET /search/suggest (throttle 120/min)", "Public"],
+        ["Push",     "GET /push/vapid-public-key | POST /push/subscribe | DELETE /push/subscribe", "Auth"],
+        ["Notifs",   "GET /notifications | POST /read-all | POST /{id}/read", "Auth"],
+        ["Reviews",  "GET /reviews/freelancer/{id} | POST /reviews | DELETE /{id}", "Public/Auth"],
+        ["Admin",    "GET /admin/dashboard | GET /users | POST /users/{id}/ban|verify | GET /analytics | GET|PUT /finance/settings | (KYC, tax, catalog moderation)", "Admin"],
+    ],
+    [3, 8, 2.5]
+)
+
+H("B. Packages Backend (composer.json — production)", 2)
+CODE("""// backend-laravel/composer.json — require (production uniquement)
+"require": {
+    "php":                      "^8.2",
+    "laravel/framework":        "^12.0",    // Core Laravel
+    "laravel/sanctum":          "^4.3",     // Bearer token auth
+    "laravel/socialite":        "^5.27",    // OAuth2 Google
+    "laravel/reverb":           "^1.10",    // WebSocket server officiel
+    "laravel/tinker":           "^2.10.1",  // REPL interactif
+    "spatie/laravel-permission": "^6.25",   // Roles et permissions
+    "stripe/stripe-php":        "^20.2",    // Paiements Stripe
+    "intervention/image":       "^3.11",    // Traitement images
+    "tymon/jwt-auth":           "^2.3",     // JWT Auth alternatif
+    "predis/predis":            "^3.4"      // Client Redis
+}""")
+
+H("C. Packages Frontend (package.json — production)", 2)
+CODE("""// frontend-react/package.json — dependencies (production)
+"dependencies": {
+    "react":              "^19.2.6",   "react-dom":       "^19.2.6",
+    "react-router-dom":  "^7.15.1",   "axios":           "^1.16.1",
+    "zustand":           "^5.0.13",   "framer-motion":   "^12.39.0",
+    "socket.io-client":  "^4.8.3",    "laravel-echo":    "^2.3.4",
+    "pusher-js":         "^8.5.0",    "recharts":        "^3.8.1",
+    "lucide-react":      "^1.16.0",   "@headlessui/react":"^2.2.10",
+    "react-hot-toast":   "^2.6.0",    "date-fns":        "^4.2.1"
+}""")
+
+H("D. Glossaire Technique", 2)
+T(
+    ["Terme", "Definition"],
+    [
+        ["Bearer Token",      "Token d'authentification HTTP transmis dans le header Authorization: Bearer <token>. Genere par Sanctum, stateless."],
+        ["Escrow",            "Mecanisme de tiers de confiance : les fonds sont bloques dans un compte intermediaire jusqu'a validation des conditions contractuelles."],
+        ["Double-entree",     "Principe comptable : chaque transaction genere deux entrees opposees (debit + credit) pour maintenir l'equilibre du grand livre."],
+        ["TOTP",              "Time-based One-Time Password (RFC 6238) : code a 6 chiffres genere par une application (Google Authenticator) valable 30 secondes."],
+        ["VAPID",             "Voluntary Application Server Identification : protocole pour les Web Push Notifications, authentifiant le serveur aupres du navigateur."],
+        ["KYC",               "Know Your Customer : processus de verification de l'identite d'un utilisateur via des documents officiels."],
+        ["HMAC",              "Hash-based Message Authentication Code : signature cryptographique verifiee par Stripe sur chaque webhook pour garantir l'authenticite."],
+        ["Idempotency Key",   "Cle unique attachee a une operation pour que les tentatives repetees ne produisent qu'un seul effet (ex: un seul depot meme si la requete est rejoue)."],
+        ["LLM",               "Large Language Model : modele de traitement du langage naturel a grande echelle (Mistral 7B dans Panda)."],
+        ["SPA",               "Single Page Application : application web ou la navigation se fait sans rechargement complet de la page (React + React Router)."],
+        ["Reverb",            "Serveur WebSocket officiel de Laravel, remplacant Laravel Echo Server et compatible avec le protocole Pusher Channels."],
+        ["PSR-12",            "PHP Standard Recommendation 12 : standard de formatage du code PHP (espaces, accolades, imports, etc.)."],
+    ],
+    [3.5, 14]
+)
+
+# ── Sauvegarde ────────────────────────────────────────────────────────────
+out = r"C:\Users\Pro\Desktop\PFE O1\documentation\Panda_Rapport_de_Stage.docx"
 doc.save(out)
-print("OK - Rapport Word cree : " + out)
+print("OK - Rapport Word COMPLET cree : " + out)

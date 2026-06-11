@@ -1,4 +1,4 @@
-# DIAGRAMMES UML COMPLETS — FREENEST (PANDA)
+# DIAGRAMMES UML COMPLETS — PANDA (PANDA)
 ### Projet de Fin d'Études — Ayoub Elmernissi — 2025/2026
 
 > **Comment utiliser ces diagrammes :**
@@ -38,7 +38,7 @@
 ## 1. CAS D'UTILISATION — VUE GLOBALE
 
 ```plantuml
-@startuml UC01_GlobalFreeNest
+@startuml UC01_GlobalPanda
 left to right direction
 skinparam actorStyle awesome
 skinparam packageStyle rectangle
@@ -49,7 +49,7 @@ skinparam usecase {
   ArrowColor #2196F3
 }
 
-title Diagramme des Cas d'Utilisation — FreeNest (Vue Globale)
+title Diagramme des Cas d'Utilisation — Panda (Vue Globale)
 
 actor "Freelancer" as FL #LightGreen
 actor "Client"     as CL #LightBlue
@@ -59,7 +59,7 @@ actor "Google\nOAuth" as GOOGLE <<external>> #LightYellow
 actor "Ollama\nMistral" as AI <<external>> #Lavender
 actor "Stripe" as STRIPE <<external>> #Wheat
 
-rectangle "FreeNest — Marketplace Freelance" {
+rectangle "Panda — Marketplace Freelance" {
 
   package "Authentification" #F0F8FF {
     usecase "S'inscrire" as REG
@@ -211,7 +211,7 @@ title Cas d'Utilisation — Freelancer (Détail)
 
 actor "Freelancer" as FL
 
-rectangle "Espace Freelancer — FreeNest" {
+rectangle "Espace Freelancer — Panda" {
 
   package "Compte & Profil" {
     usecase "S'inscrire avec email" as REG_EMAIL
@@ -318,7 +318,7 @@ title Cas d'Utilisation — Client (Détail)
 
 actor "Client" as CL
 
-rectangle "Espace Client — FreeNest" {
+rectangle "Espace Client — Panda" {
 
   package "Compte" {
     usecase "S'inscrire" as REG
@@ -422,7 +422,7 @@ title Cas d'Utilisation — Administrateur
 
 actor "Admin" as ADM
 
-rectangle "Panneau d'Administration — FreeNest" {
+rectangle "Panneau d'Administration — Panda" {
 
   package "Dashboard" {
     usecase "Voir le tableau de bord\nglobal" as DASH
@@ -500,7 +500,7 @@ skinparam class {
   HeaderFontColor white
 }
 
-title Diagramme de Classes — FreeNest
+title Diagramme de Classes — Panda
 
 ' ────────────── UTILISATEURS ──────────────
 class User {
@@ -870,7 +870,7 @@ Message "N" o-- "0..1" Message : répond à >
 ## 6. DIAGRAMME ENTITÉ-RELATION (ERD)
 
 ```plantuml
-@startuml ERD06_FreeNest
+@startuml ERD06_Panda
 !define TABLE(name, desc) class name as "desc" << (T,#FFAAAA) >>
 !define PK(x) <u>x</u>
 !define FK(x) <i>x</i>
@@ -882,7 +882,7 @@ skinparam class {
   ArrowColor #E67E22
 }
 
-title Diagramme Entité-Relation — FreeNest
+title Diagramme Entité-Relation — Panda
 
 entity users {
   * PK(id): INT
@@ -1219,7 +1219,7 @@ FC -> DB : UPDATE freelancer_profiles\nSET category, specialties, experience,\n 
 DB --> FC : Succès
 FC -> FC : Déplace la photo vers storage/
 FC --> FE : HTTP 200\n{message: "Onboarding complété", profile: {...}}
-FE --> FL : Redirection vers /dashboard/freelancer\n🎉 "Bienvenue sur FreeNest !"
+FE --> FL : Redirection vers /dashboard/freelancer\n🎉 "Bienvenue sur Panda !"
 
 @enduml
 ```
@@ -1245,7 +1245,7 @@ FE -> AUTH : GET /auth/google/redirect
 AUTH -> AUTH : Socialite::driver('google')\n.redirect()
 AUTH --> USR : Redirection HTTP 302\nhttps://accounts.google.com/oauth/...
 
-USR -> GOOGLE : Affiche page de consentement\n"FreeNest souhaite accéder à..."
+USR -> GOOGLE : Affiche page de consentement\n"Panda souhaite accéder à..."
 USR -> GOOGLE : Autorise et sélectionne son compte
 
 GOOGLE -> AUTH : Callback\nGET /auth/google/callback\n?code=4/0AXXX&state=yyy
@@ -1616,7 +1616,7 @@ skinparam activity {
   StartColor #2196F3
   EndColor #1565C0
 }
-title Diagramme d'Activité — Cycle de Vie d'une Mission FreeNest
+title Diagramme d'Activité — Cycle de Vie d'une Mission Panda
 
 |#LightBlue|Client|
 |#LightGreen|Freelancer|
@@ -2014,7 +2014,7 @@ skinparam database {
   BackgroundColor #FFF9E6
   BorderColor #E67E22
 }
-title Diagramme de Déploiement — FreeNest (Environnement Développement)
+title Diagramme de Déploiement — Panda (Environnement Développement)
 
 node "Poste Développeur\n(Windows 11)" {
 
@@ -2029,7 +2029,7 @@ node "Poste Développeur\n(Windows 11)" {
   }
 
   node "Serveur Base de Données\nMySQL 8.0" {
-    database "freenest_db\n(19 tables)" as DB
+    database "panda_db\n(19 tables)" as DB
   }
 
   node "Serveur IA\nOllama" {
@@ -2084,7 +2084,7 @@ skinparam component {
   BorderColor #2196F3
   ArrowColor #1565C0
 }
-title Diagramme de Composants — FreeNest
+title Diagramme de Composants — Panda
 
 package "Frontend React" {
   package "Pages" {

@@ -1,0 +1,384 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 1.8
+skinparam sequenceArrowColor #003466
+skinparam sequenceLifeLineBorderColor #003466
+skinparam sequenceLifeLineBackgroundColor #EBF5FB
+skinparam participantBackgroundColor #003466
+skinparam participantFontColor #FFFFFF
+skinparam participantBorderColor #003466
+skinparam participantFontSize 12
+skinparam noteFontSize 10
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #F9A825
+skinparam sequenceGroupBodyBackgroundColor #F8F9FA
+skinparam sequenceGroupBorderColor #0078D4
+skinparam sequenceGroupFontColor #003466
+skinparam defaultFontSize 11
+
+title Panda -- Diagramme de Sequence Complet (Tous les Modules)
+
+actor "Freelancer" as FL
+actor "Client" as CL
+actor "Admin" as AD
+participant "React 19" as FE
+participant "Laravel 12 API" as API
+participant "LedgerService" as LS
+participant "Stripe" as ST
+participant "Reverb WS" as WS
+participant "Ollama AI" as AI
+database "MySQL 8" as DB
+
+== MODULE 1 : Inscription Email + 2FA ==
+
+CL -> FE : POST /register { name, email, password }
+FE -> API : POST /api/auth/register
+API -> DB : INSERT users (role=client, bcrypt)
+API -> DB : INSERT wallets (balance=0, escrow=0)
+API -> FE : 200 { token: Bearer xxxxx }
+FE -> FE : localStorage.setItem('token')
+
+CL -> FE : Activer 2FA
+FE -> API : POST /api/two-factor/enable
+API -> API : TotpService::generateSecret()
+API -> API : Crypt::encryptString(secret) AES-256
+API -> DB : UPDATE users SET two_factor_secret=encrypted
+API -> FE : { otpauth_uri, qr_code }
+CL -> FE : Saisir code TOTP (30s window)
+FE -> API : POST /api/two-factor/confirm { code }
+API -> API : TotpService::verify() OK
+API -> DB : SET two_factor_confirmed_at=now()
+API -> API : AuditLogService::log('2fa.enabled')
+API -> FE : { recovery_codes[8] }
+
+== MODULE 2 : Google OAuth 2.0 ==
+
+FL -> FE : Cliquer "Connexion Google"
+FE -> FE : window.location = /auth/google/redirect
+FE -> API : GET /api/auth/google/redirect
+API -> API : Socialite::driver('google')->redirect()
+API -> FE : 302 -> accounts.google.com/o/oauth2/auth
+FL -> FL : Autoriser Panda sur Google
+FL -> FE : Redirection callback /auth/google/callback
+FE -> API : GET /api/auth/google/callback?code=xxx
+API -> API : Socialite::driver('google')->user()
+API -> DB : SELECT users WHERE google_id=X OR email=Y
+note right of API
+  Si compte existant -> liaison
+  Si nouveau -> creation auto
+  role=freelancer par defaut OAuth
+end note
+API -> DB : INSERT ou UPDATE users (google_id, avatar)
+API -> DB : INSERT wallets si nouveau
+API -> FE : 200 { token: Bearer }
+
+== MODULE 3 : KYC Verification ==
+
+FL -> FE : Soumettre passeport + selfie
+FE -> API : POST /api/verify-identity (multipart)
+API -> API : Storage::disk('local') -- hors webroot
+API -> DB : INSERT identity_verifications (status=pending)
+API -> FE : 200 submitted
+
+AD -> FE : Consulter file KYC admin
+FE -> API : GET /admin/kyc
+API -> DB : SELECT identity_verifications (status=pending)
+API -> FE : { verifications[] }
+AD -> FE : Acceder au fichier
+FE -> API : GET /admin/kyc/file/{b64_path} [route signee]
+API -> API : Storage::exists() check
+API -> FE : File stream (jamais chemin direct)
+
+AD -> FE : Approuver KYC
+FE -> API : POST /admin/kyc/{id}/approve
+API -> DB : UPDATE users SET is_verified=true
+API -> API : AuditLogService::log('kyc.approved')
+API -> WS : Event KycApproved (canal user.{id})
+WS -> FL : Notification : compte verifie
+
+== MODULE 4 : Offres, Propositions et IA ==
+
+CL -> FE : Creer une offre
+FE -> API : POST /api/jobs { title, budget, skills, type }
+API -> DB : INSERT job_postings (status=open, FULLTEXT)
+API -> FE : 201 { job }
+
+FL -> FE : Recherche full-text
+FE -> API : GET /api/jobs?q=react&type=fixed&budget_min=500
+API -> DB : MATCH(title,description) AGAINST ('react*' BOOLEAN)
+API -> FE : { jobs[], total, pages }
+
+FL -> FE : Generer proposition par IA
+FE -> API : POST /api/ai/generate-proposal { job_id }
+API -> DB : SELECT job + freelancer_profile
+API -> AI : POST /api/generate { model:mistral, prompt: profil+offre, stream:false }
+AI -> API : { response: "Dear Client, I am..." }
+API -> DB : INSERT ai_histories (type=proposal, tokens_used)
+API -> FE : { proposal_text, is_ai_generated:true }
+
+FL -> FE : Matcher freelancers (client)
+FE -> API : POST /api/ai/match-freelancers { job_id }
+API -> API : Scoring algo: intersection(skills_job, skills_fl)
+API -> DB : SELECT top 10 freelancers par score
+API -> FE : { freelancers[], match_score[] }
+
+FL -> FE : Soumettre proposition
+FE -> API : POST /api/jobs/{id}/proposals { bid, milestones:[] }
+API -> DB : INSERT proposals (is_ai_generated=true)
+API -> WS : Event ProposalReceived (canal user.{client_id})
+WS -> CL : Notification nouvelle proposition
+
+== MODULE 5 : Contrat, Jalons et Temps ==
+
+CL -> FE : Accepter la proposition
+FE -> API : POST /api/proposals/{id}/accept
+API -> DB : BEGIN TRANSACTION
+API -> DB : UPDATE proposals SET status=accepted
+API -> DB : UPDATE autres SET status=rejected
+API -> DB : INSERT contracts (pending -> active)
+API -> DB : INSERT milestones (depuis JSON)
+API -> DB : INSERT conversations (liee contrat)
+API -> DB : INSERT contract_activities (milestone.created)
+API -> DB : COMMIT
+API -> WS : Event ContractCreated (user.{fl_id})
+WS -> FL : Notification contrat cree
+API -> FE : 201 { contract, milestones[] }
+
+FL -> FE : Demarrer timer
+FE -> API : POST /api/contracts/{id}/time/start
+API -> DB : INSERT time_logs (started_at=now(), ended_at=NULL)
+
+FL -> FE : Uploader fichier livre
+FE -> API : POST /api/contracts/{id}/files (multipart)
+API -> DB : INSERT contract_files (version=1, parent_id=NULL)
+API -> DB : INSERT contract_activities (file.uploaded)
+API -> FE : 201 { file }
+
+FL -> FE : Demander extension deadline
+FE -> API : POST /api/contracts/{id}/extensions { new_deadline, reason }
+API -> DB : INSERT contract_extensions (status=pending)
+API -> WS : Event ExtensionRequested (user.{client_id})
+CL -> FE : Accepter extension
+FE -> API : POST /api/contract-extensions/{id}/respond { accept:true }
+API -> DB : UPDATE contract_extensions SET status=accepted
+API -> DB : UPDATE contracts SET deadline=new_deadline
+API -> DB : INSERT contract_activities (extension.accepted)
+
+FL -> FE : Soumettre jalon
+FE -> API : POST /api/milestones/{id}/submit { notes, attachments:[] }
+API -> DB : UPDATE milestones SET status=submitted, attachments=JSON
+API -> DB : INSERT contract_activities (milestone.submitted)
+API -> WS : Event MilestoneSubmitted (user.{client_id})
+
+CL -> FE : Approuver jalon ($500)
+FE -> API : POST /api/milestones/{id}/approve
+API -> LS : releaseMilestone(client, milestone, 500)
+LS -> DB : SELECT wallet(client+freelancer+platform) FOR UPDATE
+LS -> DB : UPDATE wallet(client) escrow -= 500
+LS -> DB : UPDATE wallet(freelancer) balance += 450 [x0.90]
+LS -> DB : UPDATE wallet(platform) balance += 50 [x0.10]
+LS -> DB : INSERT transactions x2 (commission + credit)
+LS -> LS : VERIFY SUM(tx) == wallet.balance
+API -> WS : Event MilestoneApproved (user.{fl_id})
+WS -> FL : +$450 disponibles
+
+CL -> FE : Ouvrir litige
+FE -> API : POST /api/contracts/{id}/dispute { reason }
+API -> DB : UPDATE contracts SET status=disputed, dispute_opened_by=client
+API -> DB : INSERT contract_activities (dispute.opened)
+AD -> FE : Resoudre litige en faveur freelancer
+FE -> API : POST /api/contracts/{id}/resolve-dispute { winner:freelancer }
+API -> LS : releaseMilestone(admin, milestone)
+API -> DB : UPDATE contracts SET status=active
+
+== MODULE 6 : Paiement Escrow et Stripe ==
+
+CL -> FE : Deposer fonds (Stripe Checkout)
+FE -> API : POST /api/payments/stripe/deposit-session { amount:1500 }
+API -> ST : Stripe::checkout.session.create { amount_cents:150000 }
+ST -> API : { id, url: checkout.stripe.com/... }
+API -> FE : { checkout_url }
+CL -> ST : Paiement carte (3D Secure)
+ST -> API : Webhook checkout.session.completed [HMAC verifie]
+API -> DB : SELECT stripe_webhook_events WHERE stripe_event_id=X
+note right of API
+  Idempotence : si event deja traite
+  -> ignore silencieusement
+end note
+API -> LS : deposit(client, 1500.00)
+LS -> DB : SELECT wallet FOR UPDATE
+LS -> DB : UPDATE wallet SET balance=1500
+LS -> DB : INSERT transactions (idempotency_key UNIQUE)
+API -> DB : INSERT stripe_webhook_events (processed_at=now())
+
+CL -> FE : Financer jalon escrow
+FE -> API : POST /api/contracts/{id}/fund-escrow { amount:500 }
+API -> LS : fundEscrow(client, contract, 500)
+LS -> DB : SELECT wallet FOR UPDATE
+LS -> DB : UPDATE wallet SET balance=1000, escrow_balance=500
+LS -> DB : UPDATE contracts SET escrow_amount=500
+LS -> DB : INSERT transactions (type=escrow, direction=out)
+
+FL -> FE : Retirer ses gains
+FE -> API : POST /api/payments/withdrawals { amount:400, method:stripe }
+API -> LS : verif balance >= 402 (400+fee 2)
+API -> DB : INSERT withdrawals (status=pending, net=398)
+
+AD -> FE : Approuver retrait
+FE -> API : POST /admin/finance/withdrawals/{id}/approve
+API -> ST : Stripe::Transfer::create (amount:39800, destination:acct_...)
+ST -> API : { transfer_id }
+API -> LS : withdrawal(freelancer, net=398)
+LS -> DB : UPDATE wallet SET balance -= 400
+LS -> DB : INSERT transactions (type=withdrawal, fee=2)
+API -> DB : UPDATE withdrawals SET status=approved
+API -> API : AuditLogService::log('withdrawal.approved')
+
+== MODULE 7 : Abonnements Stripe ==
+
+FL -> FE : Souscrire plan Premium
+FE -> API : POST /api/billing/checkout { plan_slug:premium }
+API -> ST : Stripe::checkout.session.create (mode=subscription)
+ST -> API : { checkout_url }
+FL -> ST : Paiement carte abonnement
+ST -> API : Webhook invoice.paid
+API -> DB : INSERT subscriptions (plan_slug=premium, status=active)
+API -> WS : Event SubscriptionActivated (user.{fl_id})
+
+FL -> FE : Annuler abonnement
+FE -> API : POST /api/billing/cancel
+API -> ST : Stripe::Subscription::cancel()
+API -> DB : UPDATE subscriptions SET ends_at=period_end
+ST -> API : Webhook customer.subscription.deleted
+API -> DB : UPDATE subscriptions SET stripe_status=canceled
+
+== MODULE 8 : Catalogue de Services ==
+
+FL -> FE : Creer service catalogue
+FE -> API : POST /api/catalog { title, tiers:{basic,standard,premium} }
+API -> DB : INSERT catalog_projects (status=pending)
+AD -> FE : Approuver le service
+FE -> API : POST /admin/catalog/{id}/approve
+API -> DB : UPDATE catalog_projects SET status=approved
+
+CL -> FE : Commander service (tier Standard $150)
+FE -> API : POST /api/orders/checkout { catalog_id, tier:standard }
+API -> API : CatalogCheckoutService::checkout()
+API -> LS : deduct(client, 150) depuis wallet
+LS -> DB : UPDATE wallet(client) balance -= 150
+LS -> DB : INSERT transactions (type=debit)
+API -> DB : INSERT catalog_orders (status=in_progress)
+API -> WS : Event OrderCreated (user.{fl_id})
+
+FL -> FE : Livrer le service
+FE -> API : POST /api/orders/{id}/deliver { deliverable, notes }
+API -> DB : UPDATE catalog_orders SET status=delivered
+API -> WS : Event OrderDelivered (user.{cl_id})
+
+CL -> FE : Valider la livraison
+FE -> API : POST /api/orders/{id}/complete
+API -> LS : releaseCatalogPayment(freelancer, 150)
+LS -> DB : UPDATE wallet(freelancer) balance += 135 [x0.90]
+LS -> DB : UPDATE wallet(platform) balance += 15 [x0.10]
+API -> DB : UPDATE catalog_orders SET status=completed
+
+CL -> FE : Laisser un avis
+FE -> API : POST /api/orders/{id}/review { rating:5, comment }
+API -> DB : INSERT catalog_reviews
+API -> DB : UPDATE catalog_projects SET avg_rating
+
+== MODULE 9 : Agences ==
+
+FL -> FE : Creer une agence
+FE -> API : POST /api/agencies { name, slug, description }
+API -> DB : INSERT agencies (owner_id=FL)
+API -> DB : INSERT agency_members (role=owner)
+API -> FE : 201 { agency }
+
+FL -> FE : Inviter un membre
+FE -> API : POST /api/agencies/{id}/invitations { email }
+API -> DB : INSERT agency_invitations (token=UNIQUE, expires=+7j)
+API -> API : Mail::send invitation avec lien token
+
+FL -> FE : Accepter invitation (nouveau membre)
+FE -> API : POST /api/agencies/invitations/{token}/accept
+API -> DB : SELECT agency_invitations WHERE token=X AND expires>now()
+API -> DB : INSERT agency_members (role=member)
+API -> DB : DELETE agency_invitations
+API -> FE : 200 { agency }
+
+== MODULE 10 : Messagerie Temps Reel ==
+
+FL -> FE : Envoyer message
+FE -> API : POST /api/conversations/{id}/send { body }
+API -> DB : INSERT messages (sender_id, body, type=text)
+API -> WS : Event MessageSent (PrivateChannel conversation.{id})
+note over WS
+  broadcastWith() slim payload :
+  id, sender_id, body, created_at
+  Jamais le modele Eloquent complet
+end note
+WS -> WS : Auth canal Sanctum Bearer
+WS -> CL : message.sent temps reel
+
+FL -> FE : Reagir a un message (emoji)
+FE -> API : POST /api/messages/{id}/reactions { emoji: heart }
+API -> DB : INSERT ou DELETE message_reactions (toggle)
+API -> WS : Event ReactionToggled (conversation.{id})
+WS -> CL : reaction mise a jour temps reel
+
+CL -> FE : Indiquer frappe
+FE -> API : POST /api/conversations/{id}/typing { is_typing:true }
+API -> WS : Event UserTyping (conversation.{id})
+WS -> FL : indicateur de frappe visible
+
+FE -> API : POST /api/conversations/{id}/read
+API -> DB : UPDATE conversation_participants SET last_read_at=now()
+API -> WS : Event MessageRead (conversation.{id})
+WS -> FL : double coche lue
+
+== MODULE 11 : Notifications Push Web ==
+
+FL -> FE : Autoriser les notifications
+FE -> FE : navigator.serviceWorker.register('sw.js')
+FE -> FE : PushManager.subscribe({ vapidPublicKey })
+FE -> API : GET /api/push/vapid-public-key
+API -> FE : { public_key: VAPID_PUBLIC }
+FE -> API : POST /api/push/subscribe { endpoint, keys }
+API -> DB : INSERT push_subscriptions
+
+API -> FL : Envoyer notification push (hors session)
+API -> API : WebPush::sendNotification(subscription, payload)
+FL -> FL : Service Worker recoit push event
+FL -> FL : self.registration.showNotification('Panda')
+note right of FL
+  Notification visible meme
+  si onglet ferme (VAPID)
+end note
+
+== MODULE 12 : IA Analyse et Smart Search ==
+
+FL -> FE : Analyser mon profil
+FE -> API : POST /api/ai/analyze-profile
+API -> DB : SELECT freelancer_profile + skills + reviews
+API -> AI : POST /api/generate { prompt: "Analyse ce profil JSON..." }
+AI -> API : { score:78, strengths:[], weaknesses:[], suggestions:[] }
+API -> DB : INSERT ai_histories (type=analyze)
+API -> FE : { analysis JSON }
+
+CL -> FE : Recherche intelligente
+FE -> API : POST /api/ai/smart-search { query:"dev React senior Paris 3 ans" }
+API -> AI : POST /api/generate { prompt: "Convertir en JSON params..." }
+AI -> API : { keywords:[], skills:[], budget_range, experience_level }
+API -> DB : SELECT freelancers MATCH criteres
+API -> FE : { freelancers[], params_used }
+
+FL -> FE : Chat assistant IA
+FE -> API : POST /api/ai/chat { message:"Comment optimiser mon profil?" }
+API -> AI : POST /api/generate { system:"PANDA AI assistant", prompt:message }
+AI -> API : { response: "Voici mes conseils..." }
+API -> DB : INSERT ai_histories (type=chat)
+API -> FE : { reply }
+
+@enduml

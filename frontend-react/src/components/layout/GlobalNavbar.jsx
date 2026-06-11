@@ -347,7 +347,7 @@ export default function GlobalNavbar() {
         { label: 'Find Talent', href: '/freelancers' },
         { label: 'Find Work',   href: '/jobs' },
         { label: 'Pricing',     href: '/pricing' },
-        { label: 'Enterprise',  href: '/' },
+        { label: 'Enterprise',  href: '/enterprise' },
         { label: 'How it works', href: '/how-it-works' },
         { label: 'Blog',        href: '/blog' },
       ]
@@ -470,7 +470,7 @@ export default function GlobalNavbar() {
               <WhyPandaMenu onGo={go} />
             </Trigger>
 
-            {[['Pricing', '/pricing'], ['Enterprise', '/']].map(([lbl, href]) => (
+            {[['Pricing', '/pricing'], ['Enterprise', '/enterprise']].map(([lbl, href]) => (
               <Link key={lbl} to={href} className="px-3 py-2 text-[13px] font-medium text-dark-400 hover:text-dark-100 hover:bg-dark-800/70 rounded-lg transition-all">
                 {lbl}
               </Link>
@@ -734,24 +734,18 @@ export default function GlobalNavbar() {
 
               {/* Nav links — big tap targets, plain text, chevron on right */}
               <nav className="flex-1 py-2 pb-24">
-                {mobileNavItems.map((item) => {
-                  const isExternal = item.label === 'Enterprise';
-                  return (
-                    <Link
-                      key={item.href + item.label}
-                      to={item.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-between px-5 py-4 text-base font-medium hover:bg-zinc-50 transition-colors"
-                      style={{ color: '#18181b' }}
-                    >
-                      <span>{item.label}</span>
-                      {isExternal
-                        ? <ArrowRight className="w-4 h-4" style={{ color: '#71717a' }} strokeWidth={2} />
-                        : <ChevronDown className="w-4 h-4 -rotate-90" style={{ color: '#71717a' }} strokeWidth={2} />
-                      }
-                    </Link>
-                  );
-                })}
+                {mobileNavItems.map((item) => (
+                  <Link
+                    key={item.href + item.label}
+                    to={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-between px-5 py-4 text-base font-medium hover:bg-zinc-50 transition-colors"
+                    style={{ color: '#18181b' }}
+                  >
+                    <span>{item.label}</span>
+                    <ChevronDown className="w-4 h-4 -rotate-90" style={{ color: '#71717a' }} strokeWidth={2} />
+                  </Link>
+                ))}
 
                 {/* Sign-out link (logged-in only) — styled as a normal row */}
                 {token && (

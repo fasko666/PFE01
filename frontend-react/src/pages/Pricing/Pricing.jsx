@@ -304,7 +304,7 @@ function ComparisonGroup({ group, rows }) {
 /* ─── Main page ─────────────────────────────────────────────── */
 export default function Pricing() {
   return (
-    <div className="min-h-screen bg-dark-950" style={{ paddingTop: 64 }}>
+    <div className="min-h-screen bg-dark-950" style={{ paddingTop: 60 }}>
 
       {/* ── Hero ── */}
       <section className="pt-12 sm:pt-20 pb-10 sm:pb-16 px-4 relative overflow-hidden">

@@ -80,6 +80,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout',                [AuthController::class, 'logout']);
         Route::get('/me',                     [AuthController::class, 'me']);
         Route::put('/profile',                [AuthController::class, 'updateProfile']);
+        Route::post('/avatar',               [AuthController::class, 'updateAvatar']);
         Route::put('/change-password',        [AuthController::class, 'changePassword']);
         Route::post('/resend-verification',   [AuthController::class, 'resendVerification']);
         Route::post('/verify-phone',          [AuthController::class, 'verifyPhone']);
