@@ -447,8 +447,8 @@ export default function GlobalNavbar() {
 
         {/* ── Logo ── */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0 mr-3 group">
-          <div className="w-7 h-7 bg-dark-800 border border-dark-700/80 rounded-lg flex items-center justify-center transition-colors group-hover:border-dark-600">
-            <PandaLogo className="w-[18px] h-[18px]" invert />
+          <div style={{ width: 37, height: 37 }} className="flex items-center justify-center">
+            <PandaLogo className="object-contain" style={{ width: 37, height: 37 }} invert />
           </div>
           <span className="font-black font-display text-dark-100 text-sm tracking-widest uppercase hidden sm:block">
             PANDA
