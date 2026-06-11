@@ -22,7 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, MoreHorizontal, MessageSquare, Send, ArrowRight, ArrowLeft,
   Edit2, Trash2, Smile, CornerUpLeft, Check, CheckCheck, Clock, X,
-  Wifi, WifiOff, Loader2,
+  Wifi, WifiOff, Loader2, Paperclip, Phone, Video,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api';
@@ -527,23 +527,46 @@ export default function Messages() {
       {active ? (
         <div className="flex-1 flex flex-col min-w-0">
           {/* header */}
-          <div className="h-14 px-3 sm:px-5 flex items-center gap-3 border-b border-dark-800 shrink-0 bg-dark-950">
+          <div className="h-16 px-3 sm:px-5 flex items-center gap-3 border-b border-dark-800 shrink-0 bg-dark-950/95 backdrop-blur-sm">
             <button onClick={() => setActive(null)} aria-label="Back" className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-dark-300 hover:bg-dark-800 hover:text-dark-100 transition-colors shrink-0">
               <ArrowLeft className="w-4 h-4" strokeWidth={2} />
             </button>
-            <div className="relative">
-              <UserAvatar user={otherUser(active)} size={32} ring={false} />
+            <div className="relative shrink-0">
+              <UserAvatar user={otherUser(active)} size={36} ring={false} />
               {(isOnline(otherUser(active).id) || otherUser(active).is_online) && (
-                <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 rounded-full border border-dark-950" />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-dark-950" />
               )}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-white leading-tight truncate">{otherUser(active).name || 'User'}</p>
-              <p className="text-2xs text-dark-500">
-                {typingUserId === otherUser(active).id
-                  ? <span className="text-primary-400">typing…</span>
-                  : (isOnline(otherUser(active).id) || otherUser(active).is_online) ? 'Online now' : 'Offline'}
+              <p className="text-xs text-dark-500 flex items-center gap-1 mt-0.5">
+                {typingUserId === otherUser(active).id ? (
+                  <span className="text-primary-400 flex items-center gap-1">
+                    <span className="flex gap-0.5">
+                      <span className="w-1 h-1 rounded-full bg-primary-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1 h-1 rounded-full bg-primary-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1 h-1 rounded-full bg-primary-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </span>
+                    typing
+                  </span>
+                ) : (isOnline(otherUser(active).id) || otherUser(active).is_online) ? (
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" /> Active now
+                  </span>
+                ) : 'Offline'}
               </p>
+            </div>
+            {/* Header actions */}
+            <div className="flex items-center gap-1 shrink-0">
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg text-dark-400 hover:text-dark-100 hover:bg-dark-800 transition-all" title="Voice call">
+                <Phone className="w-3.5 h-3.5" strokeWidth={2} />
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg text-dark-400 hover:text-dark-100 hover:bg-dark-800 transition-all" title="Video call">
+                <Video className="w-3.5 h-3.5" strokeWidth={2} />
+              </button>
+              <button className="w-8 h-8 flex items-center justify-center rounded-lg text-dark-400 hover:text-dark-100 hover:bg-dark-800 transition-all" title="More options">
+                <MoreHorizontal className="w-3.5 h-3.5" strokeWidth={2} />
+              </button>
             </div>
           </div>
 
@@ -646,23 +669,93 @@ export default function Messages() {
           </div>
 
           {/* reply banner */}
-          {replyTo && (
-            <div className="px-4 py-2 border-t border-dark-800 bg-dark-900/60 flex items-center gap-2 text-2xs">
-              <CornerUpLeft className="w-3 h-3 text-primary-400" />
-              <span className="text-dark-400 truncate flex-1">
-                Replying to <span className="text-dark-200 font-semibold">{Number(replyTo.sender_id) === Number(myId) ? 'yourself' : otherUser(active).name}</span>: {replyTo.body || replyTo.content}
-              </span>
-              <button onClick={() => setReplyTo(null)} className="text-dark-500 hover:text-white"><X className="w-3 h-3" /></button>
-            </div>
-          )}
+          <AnimatePresence>
+            {replyTo && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="px-4 py-2.5 border-t border-dark-800 bg-dark-900/80 flex items-center gap-2.5 overflow-hidden"
+              >
+                <div className="w-0.5 h-8 rounded-full bg-primary-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-2xs font-semibold text-primary-400 mb-0.5">
+                    Replying to {Number(replyTo.sender_id) === Number(myId) ? 'yourself' : otherUser(active).name}
+                  </p>
+                  <p className="text-2xs text-dark-400 truncate">{replyTo.body || replyTo.content}</p>
+                </div>
+                <button onClick={() => setReplyTo(null)} className="w-6 h-6 rounded-full flex items-center justify-center text-dark-500 hover:text-white hover:bg-dark-700 transition-all shrink-0">
+                  <X className="w-3 h-3" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* input */}
-          <form onSubmit={sendMessage} className="px-4 py-3 border-t border-dark-800 flex gap-2.5 bg-dark-950 shrink-0">
-            <input ref={inputRef} value={input} onChange={onInputChange} className="input flex-1 text-sm py-2.5" placeholder="Type a message…" disabled={sending} />
-            <motion.button whileTap={{ scale: 0.93 }} type="submit" disabled={sending || !input.trim()} className="w-10 h-10 flex items-center justify-center bg-primary-500 hover:bg-primary-600 rounded-xl text-white transition-colors disabled:opacity-40 shrink-0">
-              <Send className="w-4 h-4" strokeWidth={2} />
-            </motion.button>
-          </form>
+          {/* ── Professional message input ── */}
+          <div className="px-4 py-3 border-t border-dark-800 bg-dark-950/95 backdrop-blur-sm shrink-0">
+            <form onSubmit={sendMessage}>
+              <div className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 ${
+                input.trim()
+                  ? 'border-primary-500/50 bg-dark-900 shadow-sm shadow-primary-500/10'
+                  : 'border-dark-700 bg-dark-900 hover:border-dark-600'
+              }`}>
+
+                {/* Attachment button */}
+                <button
+                  type="button"
+                  className="w-9 h-9 flex items-center justify-center text-dark-500 hover:text-dark-200 transition-colors shrink-0 mb-0.5 ml-1"
+                  title="Attach file"
+                >
+                  <Paperclip className="w-4 h-4" strokeWidth={2} />
+                </button>
+
+                {/* Text input */}
+                <input
+                  ref={inputRef}
+                  value={input}
+                  onChange={onInputChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(e); }
+                  }}
+                  className="flex-1 bg-transparent text-sm text-dark-100 placeholder:text-dark-600 outline-none py-2.5 min-w-0"
+                  placeholder="Write a message…"
+                  disabled={sending}
+                />
+
+                {/* Emoji button */}
+                <button
+                  type="button"
+                  className="w-9 h-9 flex items-center justify-center text-dark-500 hover:text-dark-200 transition-colors shrink-0 mb-0.5"
+                  title="Emoji"
+                >
+                  <Smile className="w-4 h-4" strokeWidth={2} />
+                </button>
+
+                {/* Send button */}
+                <motion.button
+                  whileTap={{ scale: 0.90 }}
+                  type="submit"
+                  disabled={sending || !input.trim()}
+                  className={`w-9 h-9 flex items-center justify-center rounded-xl mr-1 mb-1 transition-all shrink-0 ${
+                    input.trim() && !sending
+                      ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-sm shadow-primary-500/40'
+                      : 'bg-dark-800 text-dark-600 cursor-not-allowed'
+                  }`}
+                  title="Send message"
+                >
+                  {sending
+                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    : <Send className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  }
+                </motion.button>
+              </div>
+
+              {/* Hint */}
+              <p className="text-2xs text-dark-700 mt-1.5 px-1">
+                Press <kbd className="px-1 py-0.5 rounded bg-dark-800 text-dark-500 font-mono text-2xs">Enter</kbd> to send
+              </p>
+            </form>
+          </div>
         </div>
       ) : (
         <div className="hidden md:flex flex-1 items-center justify-center bg-dark-950">
